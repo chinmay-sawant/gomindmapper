@@ -28,12 +28,13 @@ func FindFunctionBody(lines []string, funcLine int) (int, int) {
 	start := -1
 	for j := funcLine; j < len(lines); j++ {
 		for _, char := range lines[j] {
-			if char == '{' {
+			switch char {
+			case '{':
 				braceCount++
 				if start == -1 {
 					start = j
 				}
-			} else if char == '}' {
+			case '}':
 				braceCount--
 				if braceCount == 0 {
 					return start, j

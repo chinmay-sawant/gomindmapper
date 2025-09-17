@@ -1,13 +1,13 @@
 [
   {
     "name": "analyzer.CreateJsonFile",
-    "line": 9,
+    "line": 10,
     "filePath": "cmd\\analyzer\\fileops.go",
     "called": null
   },
   {
     "name": "analyzer.FindCalls",
-    "line": 47,
+    "line": 48,
     "filePath": "cmd\\analyzer\\utils.go",
     "called": null
   },
@@ -25,7 +25,7 @@
   },
   {
     "name": "analyzer.contains",
-    "line": 173,
+    "line": 174,
     "filePath": "cmd\\analyzer\\utils.go",
     "called": null
   },
@@ -104,16 +104,7 @@
         "Name": "pdf.FillPDFWithXFDF",
         "Line": 718,
         "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-        "Calls": [
-          "widthsBuf.WriteString",
-          "widthsBuf.String",
-          "zlib.NewWriterLevel",
-          "zw.Write",
-          "zw.Close",
-          "compBuf.Bytes",
-          "xrefBuf.WriteString",
-          "xrefBuf.Bytes"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -126,16 +117,7 @@
         "Name": "pdf.GenerateTemplatePDF",
         "Line": 15,
         "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
-        "Calls": [
-          "pdfBuffer.WriteString",
-          "pdfBuffer.Len",
-          "contentStream.Len",
-          "pdfBuffer.Write",
-          "contentStream.Bytes",
-          "c.Header",
-          "c.Data",
-          "pdfBuffer.Bytes"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -154,12 +136,7 @@
         "Name": "pdf.MergePDFs",
         "Line": 13,
         "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
-        "Calls": [
-          "out.Write",
-          "out.Len",
-          "out.WriteString",
-          "out.Bytes"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -216,40 +193,13 @@
         "Name": "gochromedp.ConvertURLToImage",
         "Line": 268,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "chromedp.Evaluate",
-          "Math.max",
-          "emulation.SetDeviceMetricsOverride",
-          "page.CaptureScreenshot"
-        ]
+        "Calls": null
       },
       {
         "Name": "gochromedp.ConvertHTMLToImage",
         "Line": 201,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "base64.StdEncoding.EncodeToString",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "chromedp.Evaluate",
-          "Math.max",
-          "emulation.SetDeviceMetricsOverride",
-          "page.CaptureScreenshot"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -262,34 +212,13 @@
         "Name": "gochromedp.ConvertURLToPDF",
         "Line": 128,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "printParams.Do"
-        ]
+        "Calls": null
       },
       {
         "Name": "gochromedp.ConvertHTMLToPDF",
         "Line": 52,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "base64.StdEncoding.EncodeToString",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "printParams.Do"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -306,7 +235,7 @@
       },
       {
         "Name": "analyzer.FindCalls",
-        "Line": 47,
+        "Line": 48,
         "FilePath": "cmd\\analyzer\\utils.go",
         "Calls": null
       }
@@ -333,13 +262,7 @@
         "Name": "handlers.RegisterRoutes",
         "Line": 77,
         "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-        "Calls": [
-          "router.Static",
-          "router.Group",
-          "v1.POST",
-          "v1.GET",
-          "router.NoRoute"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -356,7 +279,7 @@
       },
       {
         "Name": "analyzer.CreateJsonFile",
-        "Line": 9,
+        "Line": 10,
         "FilePath": "cmd\\analyzer\\fileops.go",
         "Calls": null
       }
@@ -378,16 +301,9 @@
         "Line": 10,
         "FilePath": "EmployeeApp\\internal\\routes\\routes.go",
         "Calls": [
-          "gin.Default",
-          "router.Use",
           "middleware.CORS",
           "middleware.Logger",
-          "handlers.NewEmployeeHandler",
-          "router.Group",
-          "api.Group",
-          "employees.GET",
-          "router.GET",
-          "c.JSON"
+          "handlers.NewEmployeeHandler"
         ]
       }
     ]
@@ -413,40 +329,13 @@
         "Name": "gochromedp.ConvertHTMLToImage",
         "Line": 201,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "base64.StdEncoding.EncodeToString",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "chromedp.Evaluate",
-          "Math.max",
-          "emulation.SetDeviceMetricsOverride",
-          "page.CaptureScreenshot"
-        ]
+        "Calls": null
       },
       {
         "Name": "gochromedp.ConvertURLToImage",
         "Line": 268,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "chromedp.Evaluate",
-          "Math.max",
-          "emulation.SetDeviceMetricsOverride",
-          "page.CaptureScreenshot"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -459,34 +348,13 @@
         "Name": "gochromedp.ConvertHTMLToPDF",
         "Line": 52,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "base64.StdEncoding.EncodeToString",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "printParams.Do"
-        ]
+        "Calls": null
       },
       {
         "Name": "gochromedp.ConvertURLToPDF",
         "Line": 128,
         "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-        "Calls": [
-          "chromedp.Flag",
-          "chromedp.NewExecAllocator",
-          "chromedp.NewContext",
-          "chromedp.WithLogf",
-          "chromedp.Run",
-          "chromedp.Navigate",
-          "chromedp.WaitReady",
-          "chromedp.ActionFunc",
-          "printParams.Do"
-        ]
+        "Calls": null
       }
     ]
   },
@@ -781,24 +649,13 @@
         "Name": "middleware.CORS",
         "Line": 5,
         "FilePath": "EmployeeApp\\internal\\middleware\\cors.go",
-        "Calls": [
-          "c.Header",
-          "c.AbortWithStatus",
-          "c.Next"
-        ]
+        "Calls": null
       },
       {
         "Name": "middleware.Logger",
         "Line": 10,
         "FilePath": "EmployeeApp\\internal\\middleware\\logger.go",
-        "Calls": [
-          "c.Next",
-          "c.Writer.Status",
-          "c.ClientIP",
-          "c.Request.UserAgent",
-          "c.Errors.ByType",
-          "start.Format"
-        ]
+        "Calls": null
       },
       {
         "Name": "handlers.NewEmployeeHandler",

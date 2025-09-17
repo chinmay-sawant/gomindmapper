@@ -1,4 +1,9 @@
-[
+import React, { useState, useEffect } from 'react';
+import MindMap from './components/MindMap';
+import './App.css';
+
+// Sample function map data (in a real app, this would be loaded from your functionmap.json)
+const sampleData = [
   {
     "name": "handlers.handleFillPDF",
     "line": 168,
@@ -212,4 +217,52 @@
       }
     ]
   }
-]
+];
+
+function App() {
+  const [functionData, setFunctionData] = useState([]);
+  const [selectedNode, setSelectedNode] = useState(null);
+
+  useEffect(() => {
+    // In a real app, you would fetch this from your functionmap.json
+    setFunctionData(sampleData);
+  }, []);
+
+  return (
+    <div className="App">
+      <header className="app-header">
+        <h1>Function Mind Map</h1>
+        <p>Visualize your Go application's function call hierarchy</p>
+      </header>
+      
+      <main className="app-main">
+        <MindMap 
+          data={functionData} 
+          selectedNode={selectedNode}
+          onNodeSelect={setSelectedNode}
+        />
+      </main>
+      
+      {selectedNode && (
+        <div className="node-details">
+          <h3>Function Details</h3>
+          <p><strong>Name:</strong> {selectedNode.name}</p>
+          <p><strong>Line:</strong> {selectedNode.line}</p>
+          <p><strong>File:</strong> {selectedNode.filePath}</p>
+          {selectedNode.called && selectedNode.called.length > 0 && (
+            <div>
+              <strong>Calls:</strong>
+              <ul>
+                {selectedNode.called.map((fn, index) => (
+                  <li key={index}>{fn.name} (line {fn.line})</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

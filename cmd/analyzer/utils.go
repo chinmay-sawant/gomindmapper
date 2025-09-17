@@ -47,10 +47,121 @@ func FindFunctionBody(lines []string, funcLine int) (int, int) {
 func FindCalls(bodyLines []string) []string {
 	var calls []string
 	reCalls := regexp.MustCompile(`(\w+(?:\.\w+)*)\(`)
+
+	// Standard library packages to ignore
+	standardPackages := map[string]bool{
+		"fmt":      true,
+		"os":       true,
+		"strings":  true,
+		"regexp":   true,
+		"encoding": true,
+		"bytes":    true,
+		"strconv":  true,
+		"time":     true,
+		"context":  true,
+		"sync":     true,
+		"runtime":  true,
+		"sort":     true,
+		"json":     true,
+		"xml":      true,
+		"filepath": true,
+		"bufio":    true,
+		"io":       true,
+		"ioutil":   true,
+		"log":      true,
+		"errors":   true,
+		"flag":     true,
+		"math":     true,
+		"unicode":  true,
+		"reflect":  true,
+		"syscall":  true,
+		"unsafe":   true,
+		"archive":  true,
+		"compress": true,
+		"crypto":   true,
+		"database": true,
+		"debug":    true,
+		"expvar":   true,
+		"hash":     true,
+		"html":     true,
+		"image":    true,
+		"index":    true,
+		"internal": true,
+		"mime":     true,
+		"net":      true,
+		"path":     true,
+		"plugin":   true,
+		"testing":  true,
+		"text":     true,
+	}
+
+	// Regex function patterns to exclude
+	regexFunctions := map[string]bool{
+		"FindAllSubmatch":       true,
+		"FindSubmatch":          true,
+		"FindAllStringSubmatch": true,
+		"FindStringSubmatch":    true,
+		"FindAllIndex":          true,
+		"FindIndex":             true,
+		"FindAllString":         true,
+		"FindString":            true,
+		"FindAll":               true,
+		"Find":                  true,
+		"Match":                 true,
+		"MatchString":           true,
+		"ReplaceAll":            true,
+		"ReplaceAllString":      true,
+		"ReplaceAllFunc":        true,
+		"Split":                 true,
+		"FindSubmatchIndex":     true,
+		"FindAllSubmatchIndex":  true,
+	}
+
+	// Error handling patterns to exclude
+	errorFunctions := map[string]bool{
+		"Error":  true,
+		"Errorf": true,
+		"Errors": true,
+		"err":    true,
+	}
+
+	// Wait group functions to exclude
+	waitGroupFunctions := map[string]bool{
+		"Add":  true,
+		"Done": true,
+		"Wait": true,
+	}
+
 	for _, line := range bodyLines {
 		matches := reCalls.FindAllStringSubmatch(line, -1)
 		for _, match := range matches {
 			call := match[1]
+			// Skip if it's a builtin function (no dot)
+			if !strings.Contains(call, ".") {
+				continue
+			}
+			// Skip if it's a standard library call
+			parts := strings.Split(call, ".")
+			if len(parts) > 0 && standardPackages[parts[0]] {
+				continue
+			}
+
+			// Skip regex functions
+			if len(parts) > 1 {
+				functionName := parts[len(parts)-1]
+				if regexFunctions[functionName] {
+					continue
+				}
+				// Skip error functions
+				if errorFunctions[functionName] {
+					continue
+				}
+				// Skip wait group functions (wg.Add, wg.Done, wg.Wait)
+				if len(parts) >= 2 && strings.HasPrefix(parts[0], "wg") && waitGroupFunctions[functionName] {
+					continue
+				}
+			}
+
 			if !contains(calls, call) {
 				calls = append(calls, call)
 			}

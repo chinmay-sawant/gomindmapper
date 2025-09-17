@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/chinmay-sawant/gomindmapper/cmd/analyzer"
 )
@@ -53,6 +56,7 @@ func main() {
 	})
 
 	analyzer.CreateJsonFile(functions)
+	buildFunctionMap(functions)
 }
 
 func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, error) {
@@ -95,4 +99,100 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 		}
 	}
 	return funcs, nil
+}
+
+func buildFunctionMap(functions []analyzer.FunctionInfo) {
+	// Create a map for quick lookup
+	funcMap := make(map[string]analyzer.FunctionInfo)
+	for _, fn := range functions {
+		funcMap[fn.Name] = fn
+	}
+
+	// Collect user-defined package prefixes
+	userPrefixes := make(map[string]bool)
+	for _, fn := range functions {
+		if dotIndex := strings.Index(fn.Name, "."); dotIndex != -1 {
+			userPrefixes[fn.Name[:dotIndex]] = true
+		}
+	}
+
+	// Number of CPUs
+	numCPU := runtime.NumCPU()
+	chunkSize := (len(functions) + numCPU - 1) / numCPU // Ceiling division
+
+	// Channel to collect results
+	results := make(chan []analyzer.FunctionRelation, numCPU)
+	var wg sync.WaitGroup
+
+	// Process in parallel
+	for i := 0; i < numCPU; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(functions) {
+			end = len(functions)
+		}
+		if start >= end {
+			break
+		}
+
+		wg.Add(1)
+		go func(start, end int) {
+			defer wg.Done()
+			var relations []analyzer.FunctionRelation
+			for j := start; j < end; j++ {
+				fn := functions[j]
+				var called []analyzer.FunctionInfo
+				for _, call := range fn.Calls {
+					if calledFn, exists := funcMap[call]; exists {
+						// Check if it's a user-defined call
+						if dotIndex := strings.Index(call, "."); dotIndex != -1 {
+							if userPrefixes[call[:dotIndex]] {
+								called = append(called, calledFn)
+							}
+						}
+					}
+				}
+				relation := analyzer.FunctionRelation{
+					Name:     fn.Name,
+					Line:     fn.Line,
+					FilePath: fn.FilePath,
+					Called:   called,
+				}
+				relations = append(relations, relation)
+			}
+			results <- relations
+		}(start, end)
+	}
+
+	// Close channel after all goroutines finish
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Collect all relations
+	var allRelations []analyzer.FunctionRelation
+	for relations := range results {
+		allRelations = append(allRelations, relations...)
+	}
+
+	// Sort by name
+	sort.Slice(allRelations, func(i, j int) bool {
+		return allRelations[i].Name < allRelations[j].Name
+	})
+
+	// Write to JSON
+	data, err := json.MarshalIndent(allRelations, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	err = os.WriteFile("functionmap.json", data, 0644)
+	if err != nil {
+		fmt.Println("Error writing file:", err)
+		return
+	}
+
+	fmt.Println("functionmap.json created successfully")
 }

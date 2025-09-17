@@ -181,8 +181,38 @@ func buildFunctionMap(functions []analyzer.FunctionInfo) {
 		return allRelations[i].Name < allRelations[j].Name
 	})
 
+	// Prepare simplified output structure that omits empty "called" and excludes the "Calls" field
+	type outCalled struct {
+		Name     string `json:"name"`
+		Line     int    `json:"line"`
+		FilePath string `json:"filePath"`
+	}
+	type outRel struct {
+		Name     string      `json:"name"`
+		Line     int         `json:"line"`
+		FilePath string      `json:"filePath"`
+		Called   []outCalled `json:"called,omitempty"`
+	}
+
+	out := make([]outRel, 0, len(allRelations))
+	for _, r := range allRelations {
+		if len(r.Called) == 0 {
+			// skip functions with no called entries
+			continue
+		}
+		o := outRel{
+			Name:     r.Name,
+			Line:     r.Line,
+			FilePath: r.FilePath,
+		}
+		for _, c := range r.Called {
+			o.Called = append(o.Called, outCalled{Name: c.Name, Line: c.Line, FilePath: c.FilePath})
+		}
+		out = append(out, o)
+	}
+
 	// Write to JSON
-	data, err := json.MarshalIndent(allRelations, "", "  ")
+	data, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return

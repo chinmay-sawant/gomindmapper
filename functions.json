@@ -1,0 +1,1216 @@
+[
+  {
+    "Name": "analyzer.CreateJsonFile",
+    "Line": 9,
+    "FilePath": "cmd\\analyzer\\fileops.go",
+    "Calls": [
+      "json.MarshalIndent",
+      "fmt.Println",
+      "os.WriteFile"
+    ]
+  },
+  {
+    "Name": "analyzer.FindCalls",
+    "Line": 47,
+    "FilePath": "cmd\\analyzer\\utils.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "reCalls.FindAllStringSubmatch",
+      "contains",
+      "append"
+    ]
+  },
+  {
+    "Name": "analyzer.FindFunctionBody",
+    "Line": 26,
+    "FilePath": "cmd\\analyzer\\utils.go",
+    "Calls": [
+      "len"
+    ]
+  },
+  {
+    "Name": "analyzer.GetModule",
+    "Line": 11,
+    "FilePath": "cmd\\analyzer\\utils.go",
+    "Calls": [
+      "filepath.Join",
+      "os.ReadFile",
+      "strings.Split",
+      "string",
+      "strings.HasPrefix",
+      "strings.TrimSpace",
+      "strings.TrimPrefix",
+      "fmt.Errorf"
+    ]
+  },
+  {
+    "Name": "analyzer.contains",
+    "Line": 62,
+    "FilePath": "cmd\\analyzer\\utils.go",
+    "Calls": null
+  },
+  {
+    "Name": "config.Load",
+    "Line": 9,
+    "FilePath": "EmployeeApp\\internal\\config\\config.go",
+    "Calls": [
+      "os.Getenv"
+    ]
+  },
+  {
+    "Name": "gochromedp.ConvertHTMLToImage",
+    "Line": 201,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "DefaultConvertOptions",
+      "context.WithTimeout",
+      "context.Background",
+      "cancel",
+      "append",
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "cancelAlloc",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "cancelTask",
+      "base64.StdEncoding.EncodeToString",
+      "byte",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "func",
+      "chromedp.Evaluate",
+      "Math.max",
+      "Do",
+      "fmt.Errorf",
+      "int64",
+      "float64",
+      "emulation.SetDeviceMetricsOverride",
+      "page.CaptureScreenshot"
+    ]
+  },
+  {
+    "Name": "gochromedp.ConvertHTMLToPDF",
+    "Line": 52,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "DefaultConvertOptions",
+      "context.WithTimeout",
+      "context.Background",
+      "cancel",
+      "append",
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "cancelAlloc",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "cancelTask",
+      "base64.StdEncoding.EncodeToString",
+      "byte",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "func",
+      "strings.ToLower",
+      "getPageDimensions",
+      "parseMarginValue",
+      "printParams.Do",
+      "fmt.Errorf"
+    ]
+  },
+  {
+    "Name": "gochromedp.ConvertURLToImage",
+    "Line": 268,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "DefaultConvertOptions",
+      "context.WithTimeout",
+      "context.Background",
+      "cancel",
+      "append",
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "cancelAlloc",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "cancelTask",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "func",
+      "chromedp.Evaluate",
+      "Math.max",
+      "Do",
+      "fmt.Errorf",
+      "int64",
+      "float64",
+      "emulation.SetDeviceMetricsOverride",
+      "page.CaptureScreenshot"
+    ]
+  },
+  {
+    "Name": "gochromedp.ConvertURLToPDF",
+    "Line": 128,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "DefaultConvertOptions",
+      "context.WithTimeout",
+      "context.Background",
+      "cancel",
+      "append",
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "cancelAlloc",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "cancelTask",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "func",
+      "strings.ToLower",
+      "getPageDimensions",
+      "parseMarginValue",
+      "printParams.Do",
+      "fmt.Errorf"
+    ]
+  },
+  {
+    "Name": "gochromedp.DefaultConvertOptions",
+    "Line": 34,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": null
+  },
+  {
+    "Name": "gochromedp.getPageDimensions",
+    "Line": 333,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "strings.ToLower"
+    ]
+  },
+  {
+    "Name": "gochromedp.parseMarginValue",
+    "Line": 354,
+    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
+    "Calls": [
+      "strings.HasSuffix",
+      "strconv.ParseFloat",
+      "strings.TrimSuffix"
+    ]
+  },
+  {
+    "Name": "handlers.NewEmployeeHandler",
+    "Line": 12,
+    "FilePath": "EmployeeApp\\internal\\handlers\\employee.go",
+    "Calls": null
+  },
+  {
+    "Name": "handlers.RegisterRoutes",
+    "Line": 77,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "getProjectRoot",
+      "router.Static",
+      "filepath.Join",
+      "router.Group",
+      "v1.POST",
+      "v1.GET",
+      "router.NoRoute"
+    ]
+  },
+  {
+    "Name": "handlers.getProjectRoot",
+    "Line": 22,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "os.Getenv",
+      "func",
+      "string",
+      "os.Stat",
+      "filepath.Join",
+      "info.IsDir",
+      "filepath.Dir",
+      "os.Getwd",
+      "searchUp",
+      "os.Executable",
+      "filepath.Clean"
+    ]
+  },
+  {
+    "Name": "handlers.handleFillPDF",
+    "Line": 168,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.Request.FormFile",
+      "pdfFile.Close",
+      "make",
+      "pdfFile.Read",
+      "xfdfFile.Close",
+      "xfdfFile.Read",
+      "len",
+      "c.PostForm",
+      "byte",
+      "c.JSON",
+      "pdf.FillPDFWithXFDF",
+      "err.Error",
+      "c.Header",
+      "c.Data"
+    ]
+  },
+  {
+    "Name": "handlers.handleGenerateTemplatePDF",
+    "Line": 157,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "err.Error",
+      "pdf.GenerateTemplatePDF"
+    ]
+  },
+  {
+    "Name": "handlers.handleGetTemplateData",
+    "Line": 119,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.Query",
+      "c.JSON",
+      "filepath.Ext",
+      "filepath.Base",
+      "filepath.Join",
+      "getProjectRoot",
+      "os.ReadFile",
+      "json.Unmarshal",
+      "err.Error",
+      "c.Header",
+      "c.Data"
+    ]
+  },
+  {
+    "Name": "handlers.handleMergePDFs",
+    "Line": 222,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.MultipartForm",
+      "c.JSON",
+      "err.Error",
+      "len",
+      "fmt.Printf",
+      "fh.Open",
+      "io.ReadAll",
+      "f.Close",
+      "append",
+      "pdf.MergePDFs",
+      "c.Header",
+      "c.Data"
+    ]
+  },
+  {
+    "Name": "handlers.handleSPA",
+    "Line": 103,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "getProjectRoot",
+      "filepath.Join",
+      "os.Stat",
+      "os.IsNotExist",
+      "c.JSON",
+      "c.File"
+    ]
+  },
+  {
+    "Name": "handlers.handlehtmlToImage",
+    "Line": 308,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "err.Error",
+      "pdf.ConvertHTMLToImage",
+      "c.Header",
+      "fmt.Sprintf",
+      "c.Data"
+    ]
+  },
+  {
+    "Name": "handlers.handlehtmlToPDF",
+    "Line": 266,
+    "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "Calls": [
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "err.Error",
+      "pdf.ConvertHTMLToPDF",
+      "c.Header",
+      "c.Data"
+    ]
+  },
+  {
+    "Name": "main.convertToImage",
+    "Line": 140,
+    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
+    "Calls": [
+      "strings.HasPrefix",
+      "gochromedp.ConvertURLToImage",
+      "os.ReadFile",
+      "fmt.Errorf",
+      "gochromedp.ConvertHTMLToImage",
+      "string",
+      "os.WriteFile"
+    ]
+  },
+  {
+    "Name": "main.convertToPDF",
+    "Line": 108,
+    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
+    "Calls": [
+      "strings.HasPrefix",
+      "gochromedp.ConvertURLToPDF",
+      "os.ReadFile",
+      "fmt.Errorf",
+      "gochromedp.ConvertHTMLToPDF",
+      "string",
+      "os.WriteFile"
+    ]
+  },
+  {
+    "Name": "main.findFunctions",
+    "Line": 58,
+    "FilePath": "cmd\\main.go",
+    "Calls": [
+      "os.ReadFile",
+      "strings.Split",
+      "string",
+      "regexp.MustCompile",
+      "filepath.Rel",
+      "strings.HasPrefix",
+      "strings.TrimSpace",
+      "strings.TrimPrefix",
+      "re.FindStringSubmatch",
+      "analyzer.FindFunctionBody",
+      "analyzer.FindCalls",
+      "append"
+    ]
+  },
+  {
+    "Name": "main.init",
+    "Line": 84,
+    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
+    "Calls": [
+      "rootCmd.PersistentFlags",
+      "StringVar",
+      "pdfCmd.Flags",
+      "Bool",
+      "imageCmd.Flags",
+      "IntVar",
+      "rootCmd.AddCommand"
+    ]
+  },
+  {
+    "Name": "main.main",
+    "Line": 8,
+    "FilePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
+    "Calls": [
+      "gin.Default",
+      "handlers.RegisterRoutes",
+      "router.Run"
+    ]
+  },
+  {
+    "Name": "main.main",
+    "Line": 170,
+    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
+    "Calls": [
+      "rootCmd.Execute",
+      "fmt.Fprintln",
+      "os.Exit"
+    ]
+  },
+  {
+    "Name": "main.main",
+    "Line": 15,
+    "FilePath": "cmd\\main.go",
+    "Calls": [
+      "flag.StringVar",
+      "flag.Parse",
+      "filepath.Abs",
+      "fmt.Println",
+      "analyzer.GetModule",
+      "filepath.Walk",
+      "func",
+      "info.IsDir",
+      "strings.HasSuffix",
+      "findFunctions",
+      "append",
+      "sort.Slice",
+      "analyzer.CreateJsonFile"
+    ]
+  },
+  {
+    "Name": "main.main",
+    "Line": 9,
+    "FilePath": "EmployeeApp\\main.go",
+    "Calls": [
+      "config.Load",
+      "routes.SetupRouter",
+      "log.Printf",
+      "router.Run",
+      "log.Fatal"
+    ]
+  },
+  {
+    "Name": "middleware.CORS",
+    "Line": 5,
+    "FilePath": "EmployeeApp\\internal\\middleware\\cors.go",
+    "Calls": [
+      "func",
+      "c.Header",
+      "c.AbortWithStatus",
+      "c.Next"
+    ]
+  },
+  {
+    "Name": "middleware.Logger",
+    "Line": 10,
+    "FilePath": "EmployeeApp\\internal\\middleware\\logger.go",
+    "Calls": [
+      "func",
+      "time.Now",
+      "c.Next",
+      "time.Since",
+      "c.Writer.Status",
+      "c.ClientIP",
+      "c.Request.UserAgent",
+      "c.Errors.ByType",
+      "String",
+      "fmt.Printf",
+      "start.Format"
+    ]
+  },
+  {
+    "Name": "pdf.ConvertHTMLToImage",
+    "Line": 59,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
+    "Calls": [
+      "gochromedp.ConvertHTMLToImage",
+      "gochromedp.ConvertURLToImage",
+      "fmt.Errorf"
+    ]
+  },
+  {
+    "Name": "pdf.ConvertHTMLToPDF",
+    "Line": 21,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
+    "Calls": [
+      "gochromedp.ConvertHTMLToPDF",
+      "gochromedp.ConvertURLToPDF",
+      "fmt.Errorf"
+    ]
+  },
+  {
+    "Name": "pdf.DetectFormFields",
+    "Line": 654,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "DetectFormFieldsAdvanced",
+      "append"
+    ]
+  },
+  {
+    "Name": "pdf.DetectFormFieldsAdvanced",
+    "Line": 449,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "len",
+      "errors.New",
+      "trailerHasEncrypt",
+      "detectFormFieldsNaive",
+      "regexp.MustCompile",
+      "obj",
+      "objRe.FindAllSubmatch",
+      "make",
+      "string",
+      "bytesIndex",
+      "byte",
+      "n",
+      "streamRe.FindSubmatch",
+      "tryZlibDecompress",
+      "tryFlateDecompress",
+      "firstRe.FindSubmatch",
+      "fmt.Sscanf",
+      "strings.TrimSpace",
+      "strings.Fields",
+      "append",
+      "fmt.Sprintf",
+      "decompressStreams",
+      "parseXRefStreams",
+      "findRootRef",
+      "getAcroFormRef",
+      "fieldsRe.FindSubmatch",
+      "refRe.FindAllSubmatch",
+      "traverseField",
+      "singleFields.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.FillPDFWithXFDF",
+    "Line": 718,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "len",
+      "errors.New",
+      "ParseXFDF",
+      "make",
+      "copy",
+      "regexp.MustCompile",
+      "widgetRe.FindAllIndex",
+      "nameRe.FindSubmatch",
+      "string",
+      "bytes.Contains",
+      "byte",
+      "apDictRe.FindSubmatch",
+      "rectRe.FindSubmatch",
+      "strings.Fields",
+      "strconv.ParseFloat",
+      "qRe.FindSubmatch",
+      "strconv.Atoi",
+      "daRe.FindSubmatch",
+      "tfRe.FindStringSubmatch",
+      "append",
+      "sort.Slice",
+      "func",
+      "fmt.Sprintf",
+      "regexp.QuoteMeta",
+      "re.FindIndex",
+      "vRe.Match",
+      "vRe.ReplaceAll",
+      "bytes.Replace",
+      "escapePDFString",
+      "apRe.ReplaceAll",
+      "strings.ToLower",
+      "asRe.Match",
+      "asRe.ReplaceAll",
+      "objRe.FindAllSubmatchIndex",
+      "bytes.LastIndex",
+      "needAppRe.Match",
+      "needAppRe.ReplaceAll",
+      "acroFormRe.FindIndex",
+      "float64",
+      "n",
+      "widthsBuf.WriteString",
+      "strconv.Itoa",
+      "widthsBuf.String",
+      "zlib.NewWriterLevel",
+      "zw.Write",
+      "zw.Close",
+      "compBuf.Bytes",
+      "xrefBuf.WriteString",
+      "rootRe.FindSubmatch",
+      "xrefBuf.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.FillPDFWithXFDFAdvanced",
+    "Line": 669,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "len",
+      "errors.New",
+      "ParseXFDF",
+      "DetectFormFieldsAdvanced",
+      "make",
+      "buildXFDF",
+      "FillPDFWithXFDF"
+    ]
+  },
+  {
+    "Name": "pdf.FlattenPDFBytes",
+    "Line": 1044,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "scripts.FlattenPDFBytes"
+    ]
+  },
+  {
+    "Name": "pdf.GenerateTemplatePDF",
+    "Line": 15,
+    "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
+    "Calls": [
+      "make",
+      "getPageDimensions",
+      "NewPageManager",
+      "pdfBuffer.WriteString",
+      "pdfBuffer.Len",
+      "generateAllContent",
+      "fmt.Sprintf",
+      "formatPageKids",
+      "len",
+      "contentStream.Len",
+      "pdfBuffer.Write",
+      "contentStream.Bytes",
+      "strconv.Itoa",
+      "time.Now",
+      "Unix",
+      "c.Header",
+      "c.Data",
+      "pdfBuffer.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.IsFormFieldObject",
+    "Line": 363,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "byte",
+      "bytesIndex"
+    ]
+  },
+  {
+    "Name": "pdf.MergePDFs",
+    "Line": 13,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "byte",
+      "out.Write",
+      "make",
+      "regexp.MustCompile",
+      "obj",
+      "trailerHasEncrypt",
+      "fmt.Errorf",
+      "objRe.FindAllSubmatch",
+      "len",
+      "strconv.Atoi",
+      "string",
+      "parseXRefStreams",
+      "fmt.Sscanf",
+      "findRootRef",
+      "pagesRe.FindSubmatch",
+      "kidsRe.FindSubmatch",
+      "refReLocal.FindAllSubmatch",
+      "append",
+      "extractFormFieldsFromFile",
+      "replaceRefsOutsideStreams",
+      "bytesIndex",
+      "out.Len",
+      "fmt.Sprintf",
+      "out.WriteString",
+      "bytes.Join",
+      "byteSlice",
+      "addParentRef",
+      "parentRe.ReplaceAll",
+      "out.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.NewPageManager",
+    "Line": 15,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pagemanager.go",
+    "Calls": [
+      "make"
+    ]
+  },
+  {
+    "Name": "pdf.ParseXFDF",
+    "Line": 42,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "xml.Unmarshal",
+      "make",
+      "strings.TrimSpace"
+    ]
+  },
+  {
+    "Name": "pdf.addParentRef",
+    "Line": 287,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "bytes.Index",
+      "byte",
+      "result.Write",
+      "result.WriteString",
+      "fmt.Sprintf",
+      "result.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.buildXFDF",
+    "Line": 698,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "make",
+      "len",
+      "append",
+      "xml.Marshal"
+    ]
+  },
+  {
+    "Name": "pdf.byteSlice",
+    "Line": 238,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "make",
+      "len",
+      "byte"
+    ]
+  },
+  {
+    "Name": "pdf.bytesIndex",
+    "Line": 64,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "strings.Index",
+      "string"
+    ]
+  },
+  {
+    "Name": "pdf.decodeHexString",
+    "Line": 69,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "strings.ReplaceAll",
+      "len",
+      "hex.DecodeString",
+      "string"
+    ]
+  },
+  {
+    "Name": "pdf.decompressStreams",
+    "Line": 616,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "n",
+      "streamRe.FindAllSubmatchIndex",
+      "tryZlibDecompress",
+      "tryFlateDecompress",
+      "buf.Write",
+      "buf.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.detectFormFieldsNaive",
+    "Line": 578,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "tRe.FindAllSubmatchIndex",
+      "make",
+      "string",
+      "decodeHexString",
+      "strings.TrimSpace",
+      "extractTokenGroups"
+    ]
+  },
+  {
+    "Name": "pdf.drawFooter",
+    "Line": 226,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "parseProps",
+      "contentStream.WriteString",
+      "getFontReference",
+      "strconv.Itoa",
+      "float64",
+      "fmt.Sprintf"
+    ]
+  },
+  {
+    "Name": "pdf.drawPageBorder",
+    "Line": 49,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "parseBorders",
+      "contentStream.WriteString",
+      "fmt.Sprintf",
+      "float64"
+    ]
+  },
+  {
+    "Name": "pdf.drawPageNumber",
+    "Line": 245,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "fmt.Sprintf",
+      "contentStream.WriteString",
+      "float64",
+      "len"
+    ]
+  },
+  {
+    "Name": "pdf.drawTable",
+    "Line": 105,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "float64",
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage",
+      "initializePage",
+      "pageManager.GetCurrentContentStream",
+      "parseProps",
+      "contentStream.WriteString",
+      "fmt.Sprintf",
+      "getFontReference",
+      "strconv.Itoa",
+      "len"
+    ]
+  },
+  {
+    "Name": "pdf.drawTitle",
+    "Line": 78,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "contentStream.WriteString",
+      "getFontReference",
+      "strconv.Itoa",
+      "float64",
+      "fmt.Sprintf"
+    ]
+  },
+  {
+    "Name": "pdf.drawWatermark",
+    "Line": 13,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "strings.TrimSpace",
+      "int",
+      "contentStream.WriteString",
+      "fmt.Sprintf",
+      "escapeText"
+    ]
+  },
+  {
+    "Name": "pdf.escapePDFString",
+    "Line": 105,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": [
+      "sb.WriteRune",
+      "sb.String"
+    ]
+  },
+  {
+    "Name": "pdf.escapeText",
+    "Line": 78,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": [
+      "escapePDFString"
+    ]
+  },
+  {
+    "Name": "pdf.extractFormFieldsFromFile",
+    "Line": 304,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "make",
+      "findRootRef",
+      "fmt.Sscanf",
+      "regexp.MustCompile",
+      "acroFormRe.FindSubmatch",
+      "strconv.Atoi",
+      "string",
+      "fieldsRe.FindSubmatch",
+      "refRe.FindAllSubmatch",
+      "append",
+      "bytesIndex",
+      "byte",
+      "annotsRe.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.extractStringFromBytes",
+    "Line": 196,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "parenRe.FindSubmatch",
+      "string",
+      "hexRe.FindSubmatch",
+      "decodeHexString",
+      "nameRe.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.extractTokenGroups",
+    "Line": 109,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "len",
+      "regexp.MustCompile",
+      "valueRe.FindSubmatch",
+      "string",
+      "decodeHexString",
+      "asRe.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.findRootRef",
+    "Line": 175,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "rootRe.FindSubmatch",
+      "string"
+    ]
+  },
+  {
+    "Name": "pdf.findWidgetAnnotationsForName",
+    "Line": 320,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "byte",
+      "bytesIndex",
+      "regexp.MustCompile",
+      "asRe.FindSubmatch",
+      "len",
+      "string",
+      "decodeHexString",
+      "apRe.FindSubmatch",
+      "nRe.FindSubmatch",
+      "keyRe.FindSubmatch",
+      "nNameRe.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.formatPageKids",
+    "Line": 96,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": [
+      "append",
+      "strconv.Itoa",
+      "strings.Join"
+    ]
+  },
+  {
+    "Name": "pdf.generateAllContent",
+    "Line": 107,
+    "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
+    "Calls": [
+      "initializePage",
+      "pageManager.GetCurrentContentStream",
+      "parseProps",
+      "float64",
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage",
+      "drawTitle",
+      "drawTable",
+      "len",
+      "drawFooter",
+      "drawPageNumber"
+    ]
+  },
+  {
+    "Name": "pdf.getAcroFormRef",
+    "Line": 184,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "afRe.FindSubmatch",
+      "string"
+    ]
+  },
+  {
+    "Name": "pdf.getFontReference",
+    "Line": 84,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": null
+  },
+  {
+    "Name": "pdf.getPageDimensions",
+    "Line": 23,
+    "FilePath": "gopdfsuit\\internal\\pdf\\types.go",
+    "Calls": [
+      "strings.ToUpper"
+    ]
+  },
+  {
+    "Name": "pdf.initializePage",
+    "Line": 41,
+    "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "Calls": [
+      "drawPageBorder",
+      "drawWatermark"
+    ]
+  },
+  {
+    "Name": "pdf.parseArrayInts",
+    "Line": 145,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "re.FindSubmatch",
+      "strings.TrimSpace",
+      "string",
+      "strings.Fields",
+      "make",
+      "len",
+      "fmt.Sscanf",
+      "append"
+    ]
+  },
+  {
+    "Name": "pdf.parseBorders",
+    "Line": 66,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": [
+      "strings.Split",
+      "strconv.Atoi"
+    ]
+  },
+  {
+    "Name": "pdf.parseProps",
+    "Line": 10,
+    "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "Calls": [
+      "strings.Split",
+      "len",
+      "strconv.Atoi"
+    ]
+  },
+  {
+    "Name": "pdf.parseXRefStreams",
+    "Line": 375,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "obj",
+      "objStreamRe.FindAllSubmatch",
+      "bytesIndex",
+      "byte",
+      "n",
+      "streamRe.FindSubmatch",
+      "tryZlibDecompress",
+      "tryFlateDecompress",
+      "parseArrayInts",
+      "len",
+      "int",
+      "readUint",
+      "reObj.FindSubmatch",
+      "string",
+      "fmt.Sprintf"
+    ]
+  },
+  {
+    "Name": "pdf.readUint",
+    "Line": 166,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "uint64",
+      "byte"
+    ]
+  },
+  {
+    "Name": "pdf.replaceRefsOutsideStreams",
+    "Line": 248,
+    "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "n",
+      "streamRe.FindAllIndex",
+      "refRe.ReplaceAllFunc",
+      "func",
+      "refRe.FindSubmatch",
+      "len",
+      "strconv.Atoi",
+      "string",
+      "byte",
+      "fmt.Sprintf",
+      "out.Write",
+      "out.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.resolveValueRef",
+    "Line": 275,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "func",
+      "extractTokenGroups",
+      "extractStringFromBytes",
+      "regexp.MustCompile",
+      "refRe.FindSubmatch",
+      "string",
+      "n",
+      "streamRe.FindSubmatch",
+      "tryZlibDecompress",
+      "tryFlateDecompress",
+      "resolve"
+    ]
+  },
+  {
+    "Name": "pdf.trailerHasEncrypt",
+    "Line": 363,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "trailer",
+      "trRe.FindAllSubmatch",
+      "bytesIndex",
+      "byte"
+    ]
+  },
+  {
+    "Name": "pdf.traverseField",
+    "Line": 213,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "regexp.MustCompile",
+      "tReLocal.FindSubmatchIndex",
+      "string",
+      "decodeHexString",
+      "strings.TrimSpace",
+      "extractTokenGroups",
+      "resolveValueRef",
+      "findWidgetAnnotationsForName",
+      "kidsRe.FindSubmatch",
+      "refRe.FindAllSubmatch",
+      "traverseField",
+      "singleKidsRe.FindSubmatch"
+    ]
+  },
+  {
+    "Name": "pdf.tryFlateDecompress",
+    "Line": 98,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "flate.NewReader",
+      "bytes.NewReader",
+      "r.Close",
+      "io.Copy",
+      "out.Bytes"
+    ]
+  },
+  {
+    "Name": "pdf.tryZlibDecompress",
+    "Line": 84,
+    "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "Calls": [
+      "zlib.NewReader",
+      "bytes.NewReader",
+      "r.Close",
+      "io.Copy",
+      "out.Bytes"
+    ]
+  },
+  {
+    "Name": "routes.SetupRouter",
+    "Line": 10,
+    "FilePath": "EmployeeApp\\internal\\routes\\routes.go",
+    "Calls": [
+      "gin.Default",
+      "router.Use",
+      "middleware.CORS",
+      "middleware.Logger",
+      "handlers.NewEmployeeHandler",
+      "router.Group",
+      "api.Group",
+      "employees.GET",
+      "router.GET",
+      "func",
+      "c.JSON"
+    ]
+  }
+]

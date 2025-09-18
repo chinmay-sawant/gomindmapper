@@ -101,7 +101,7 @@
   z-index: 100;
 }
 
-.zoom-btn, .reset-btn {
+.zoom-btn, .reset-btn, .collapse-btn {
   width: 40px;
   height: 40px;
   border: 1px solid #404040;
@@ -117,20 +117,30 @@
   justify-content: center;
 }
 
-.reset-btn {
+.reset-btn, .collapse-btn {
   width: auto;
   padding: 0 12px;
   font-size: 12px;
 }
 
-.zoom-btn:hover, .reset-btn:hover {
+.zoom-btn:hover, .reset-btn:hover, .collapse-btn:hover {
   background-color: #404040;
   border-color: #555;
   transform: translateY(-1px);
 }
 
-.zoom-btn:active, .reset-btn:active {
+.zoom-btn:active, .reset-btn:active, .collapse-btn:active {
   transform: translateY(0);
+}
+
+.collapse-btn {
+  background-color: #dc2626;
+  border-color: #ef4444;
+}
+
+.collapse-btn:hover {
+  background-color: #b91c1c;
+  border-color: #dc2626;
 }
 
 /* Function type specific styles */

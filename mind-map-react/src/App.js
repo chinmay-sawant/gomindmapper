@@ -1,149 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MindMap from './components/MindMap';
 import './App.css';
 
-// Sample function map data (in a real app, this would be loaded from your functionmap.json)
-const sampleData = [
-  {
-    "name": "handlers.handleFillPDF",
-    "line": 168,
-    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "called": [
-      {
-        "name": "pdf.FillPDFWithXFDF",
-        "line": 718,
-        "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
-      }
-    ]
-  },
-  {
-    "name": "handlers.handleGenerateTemplatePDF",
-    "line": 157,
-    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "called": [
-      {
-        "name": "pdf.GenerateTemplatePDF",
-        "line": 15,
-        "filePath": "gopdfsuit\\internal\\pdf\\generator.go"
-      }
-    ]
-  },
-  {
-    "name": "handlers.handleMergePDFs",
-    "line": 222,
-    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "called": [
-      {
-        "name": "pdf.MergePDFs",
-        "line": 13,
-        "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
-      }
-    ]
-  },
-  {
-    "name": "handlers.handlehtmlToImage",
-    "line": 308,
-    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "called": [
-      {
-        "name": "pdf.ConvertHTMLToImage",
-        "line": 59,
-        "filePath": "gopdfsuit\\internal\\pdf\\pdf.go"
-      }
-    ]
-  },
-  {
-    "name": "handlers.handlehtmlToPDF",
-    "line": 266,
-    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "called": [
-      {
-        "name": "pdf.ConvertHTMLToPDF",
-        "line": 21,
-        "filePath": "gopdfsuit\\internal\\pdf\\pdf.go"
-      }
-    ]
-  },
-  {
-    "name": "main.convertToImage",
-    "line": 140,
-    "filePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertURLToImage",
-        "line": 268,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertHTMLToImage",
-        "line": 201,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "main.convertToPDF",
-    "line": 108,
-    "filePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertURLToPDF",
-        "line": 128,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertHTMLToPDF",
-        "line": 52,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "main.findFunctions",
-    "line": 62,
-    "filePath": "cmd\\main.go",
-    "called": [
-      {
-        "name": "analyzer.FindFunctionBody",
-        "line": 26,
-        "filePath": "cmd\\analyzer\\utils.go"
-      },
-      {
-        "name": "analyzer.FindCalls",
-        "line": 48,
-        "filePath": "cmd\\analyzer\\utils.go"
-      }
-    ]
-  },
-  {
-    "name": "main.main",
-    "line": 8,
-    "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
-    "called": [
-      {
-        "name": "handlers.RegisterRoutes",
-        "line": 77,
-        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
-      }
-    ]
-  },
-  {
-    "name": "main.main",
-    "line": 18,
-    "filePath": "cmd\\main.go",
-    "called": [
-      {
-        "name": "analyzer.GetModule",
-        "line": 11,
-        "filePath": "cmd\\analyzer\\utils.go"
-      },
-      {
-        "name": "analyzer.CreateJsonFile",
-        "line": 10,
-        "filePath": "cmd\\analyzer\\fileops.go"
-      }
-    ]
-  },
+// Default EmployeeApp data to show by default
+const defaultEmployeeAppData = [
   {
     "name": "main.main",
     "line": 9,
@@ -158,40 +18,6 @@ const sampleData = [
         "name": "routes.SetupRouter",
         "line": 10,
         "filePath": "EmployeeApp\\internal\\routes\\routes.go"
-      }
-    ]
-  },
-  {
-    "name": "pdf.ConvertHTMLToImage",
-    "line": 59,
-    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertHTMLToImage",
-        "line": 201,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertURLToImage",
-        "line": 268,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "pdf.ConvertHTMLToPDF",
-    "line": 21,
-    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertHTMLToPDF",
-        "line": 52,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertURLToPDF",
-        "line": 128,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
       }
     ]
   },
@@ -220,20 +46,117 @@ const sampleData = [
 ];
 
 function App() {
-  const [functionData, setFunctionData] = useState([]);
+  const [functionData, setFunctionData] = useState(defaultEmployeeAppData);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [fileName, setFileName] = useState('EmployeeApp (Default)');
+  const [dragActive, setDragActive] = useState(false);
+  const appRef = useRef(null);
 
-  useEffect(() => {
-    // In a real app, you would fetch this from your functionmap.json
-    setFunctionData(sampleData);
+  const handleFileUpload = useCallback((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonData = JSON.parse(e.target.result);
+        setFunctionData(jsonData);
+        setFileName(file.name);
+        setSelectedNode(null); // Clear selection when new data loads
+      } catch (error) {
+        alert('Error parsing JSON file: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
   }, []);
 
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = [...e.dataTransfer.files];
+    if (files && files[0]) {
+      const file = files[0];
+      if (file.type === 'application/json' || file.name.endsWith('.json')) {
+        handleFileUpload(file);
+      } else {
+        alert('Please upload a JSON file');
+      }
+    }
+  }, [handleFileUpload]);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  }, []);
+
+  const handleFileSelect = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  }, [handleFileUpload]);
+
+  // Set up drag event listeners with non-passive option to allow preventDefault
+  useEffect(() => {
+    const appElement = appRef.current;
+    if (!appElement) return;
+
+    const handleDropNonPassive = (e) => handleDrop(e);
+    const handleDragOverNonPassive = (e) => handleDragOver(e);
+    const handleDragLeaveNonPassive = (e) => handleDragLeave(e);
+
+    // Add event listeners with passive: false to allow preventDefault
+    appElement.addEventListener('drop', handleDropNonPassive, { passive: false });
+    appElement.addEventListener('dragover', handleDragOverNonPassive, { passive: false });
+    appElement.addEventListener('dragleave', handleDragLeaveNonPassive, { passive: false });
+
+    // Cleanup function
+    return () => {
+      appElement.removeEventListener('drop', handleDropNonPassive);
+      appElement.removeEventListener('dragover', handleDragOverNonPassive);
+      appElement.removeEventListener('dragleave', handleDragLeaveNonPassive);
+    };
+  }, [handleDrop, handleDragOver, handleDragLeave]);
+
   return (
-    <div className="App">
+    <div 
+      className="App"
+      ref={appRef}
+    >
       <header className="app-header">
         <h1>Function Mind Map</h1>
-        <p>Visualize your Go application's function call hierarchy</p>
+        <div className="header-content">
+          <p>Visualize your Go application's function call hierarchy</p>
+          <div className="file-input-section">
+            <span className="current-file">Current: {fileName}</span>
+            <label htmlFor="file-input" className="file-input-label">
+              Choose JSON File
+            </label>
+            <input
+              id="file-input"
+              type="file"
+              accept=".json,application/json"
+              onChange={handleFileSelect}
+              className="file-input"
+            />
+          </div>
+        </div>
       </header>
+      
+      {dragActive && (
+        <div className="drag-overlay">
+          <div className="drag-message">
+            <h2>Drop JSON file here</h2>
+            <p>Release to load function map data</p>
+          </div>
+        </div>
+      )}
       
       <main className="app-main">
         <MindMap 

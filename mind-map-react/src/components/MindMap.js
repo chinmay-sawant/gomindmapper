@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Node from './Node';
 import './MindMap.css';
 
@@ -8,6 +8,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePosition, setLastMousePosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
 
   // Add global mouse event listeners for better dragging
   useEffect(() => {
@@ -114,6 +115,13 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     });
   }, []);
 
+  const collapseAll = useCallback(() => {
+    setExpandedNodes(new Set());
+    // Also reset view to show all root nodes clearly
+    setPan({ x: 200, y: 300 });
+    setZoom(0.7);
+  }, []);
+
   const handleMouseDown = useCallback((e) => {
     // Allow dragging on container or SVG background, but not on nodes
     if (e.target.classList.contains('mind-map-container') || 
@@ -163,6 +171,22 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       setPan({ x: newPanX, y: newPanY });
     }
   }, [zoom, pan]);
+
+  // Set up wheel event listener with non-passive option to allow preventDefault
+  useEffect(() => {
+    const containerElement = containerRef.current;
+    if (!containerElement) return;
+
+    const handleWheelNonPassive = (e) => handleWheel(e);
+
+    // Add wheel event listener with passive: false to allow preventDefault
+    containerElement.addEventListener('wheel', handleWheelNonPassive, { passive: false });
+
+    // Cleanup function
+    return () => {
+      containerElement.removeEventListener('wheel', handleWheelNonPassive);
+    };
+  }, [handleWheel]);
 
   const calculateSubtreeHeight = (nodes, level) => {
     if (!nodes || nodes.length === 0) return 0;
@@ -242,12 +266,12 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
 
   return (
     <div 
+      ref={containerRef}
       className={`mind-map-container ${isDragging ? 'dragging' : ''}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onWheel={handleWheel}
     >
       <svg
         className="mind-map-svg"
@@ -275,13 +299,16 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       </svg>
       
       <div className="controls">
-        <button onClick={() => setZoom(prev => Math.min(3, prev * 1.2))} className="zoom-btn">
+        <button onClick={() => setZoom(prev => Math.min(5, prev * 1.2))} className="zoom-btn">
           +
         </button>
-        <button onClick={() => setZoom(prev => Math.max(0.3, prev * 0.8))} className="zoom-btn">
+        <button onClick={() => setZoom(prev => Math.max(0.1, prev * 0.8))} className="zoom-btn">
           -
         </button>
-        <button onClick={() => { setPan({ x: 200, y: 300 }); setZoom(0.8); }} className="reset-btn">
+        <button onClick={collapseAll} className="collapse-btn">
+          Collapse All
+        </button>
+        <button onClick={() => { setPan({ x: 200, y: 300 }); setZoom(0.7); }} className="reset-btn">
           Reset
         </button>
       </div>

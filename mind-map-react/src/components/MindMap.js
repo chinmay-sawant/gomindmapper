@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Node from './Node';
 import './MindMap.css';
 
@@ -8,6 +8,37 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePosition, setLastMousePosition] = useState({ x: 0, y: 0 });
+
+  // Add global mouse event listeners for better dragging
+  useEffect(() => {
+    const handleGlobalMouseMove = (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - lastMousePosition.x;
+        const deltaY = e.clientY - lastMousePosition.y;
+        
+        setPan(prev => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY
+        }));
+        
+        setLastMousePosition({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, lastMousePosition]);
 
   // Build the tree structure from flat function data
   const treeData = useMemo(() => {
@@ -46,6 +77,15 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     return buildTree(data);
   }, [data]);
 
+  // Initialize with better default position
+  useEffect(() => {
+    if (treeData.length > 0 && pan.x === 0 && pan.y === 0) {
+      // Set initial pan to center the content better
+      setPan({ x: 200, y: 300 });
+      setZoom(0.7);
+    }
+  }, [treeData, pan.x, pan.y]);
+
   const toggleNode = useCallback((nodeName) => {
     setExpandedNodes(prev => {
       const newExpanded = new Set(prev);
@@ -59,25 +99,22 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
   }, []);
 
   const handleMouseDown = useCallback((e) => {
-    if (e.target.classList.contains('mind-map-container')) {
+    // Allow dragging on container or SVG background, but not on nodes
+    if (e.target.classList.contains('mind-map-container') || 
+        e.target.classList.contains('mind-map-svg') ||
+        e.target.tagName === 'svg') {
+      e.preventDefault();
       setIsDragging(true);
       setLastMousePosition({ x: e.clientX, y: e.clientY });
     }
   }, []);
 
   const handleMouseMove = useCallback((e) => {
+    // Prevent default to avoid text selection while dragging
     if (isDragging) {
-      const deltaX = e.clientX - lastMousePosition.x;
-      const deltaY = e.clientY - lastMousePosition.y;
-      
-      setPan(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY
-      }));
-      
-      setLastMousePosition({ x: e.clientX, y: e.clientY });
+      e.preventDefault();
     }
-  }, [isDragging, lastMousePosition]);
+  }, [isDragging]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -85,35 +122,62 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
 
   const handleWheel = useCallback((e) => {
     e.preventDefault();
+    
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    
+    // Mouse position relative to the container
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Zoom factor
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.max(0.3, Math.min(3, prev * zoomFactor)));
-  }, []);
+    const newZoom = Math.max(0.1, Math.min(5, zoom * zoomFactor));
+    
+    if (newZoom !== zoom) {
+      // Calculate the point to zoom into
+      const zoomPointX = (mouseX - pan.x) / zoom;
+      const zoomPointY = (mouseY - pan.y) / zoom;
+      
+      // Calculate new pan to keep the zoom point under the cursor
+      const newPanX = mouseX - zoomPointX * newZoom;
+      const newPanY = mouseY - zoomPointY * newZoom;
+      
+      setZoom(newZoom);
+      setPan({ x: newPanX, y: newPanY });
+    }
+  }, [zoom, pan]);
 
   const calculateSubtreeHeight = (nodes, level) => {
-    let height = 0;
+    if (!nodes || nodes.length === 0) return 0;
+    
+    let totalHeight = 0;
     nodes.forEach(node => {
-      height += 60; // Child node spacing
+      totalHeight += 100; // Increased base spacing for each node
       if (expandedNodes.has(node.name) && node.children && node.children.length > 0) {
-        height += calculateSubtreeHeight(node.children, level + 1);
+        totalHeight += calculateSubtreeHeight(node.children, level + 1);
       }
     });
-    return height;
+    
+    // Add extra spacing for deeper levels to prevent overlap
+    return totalHeight + (level * 20);
   };
 
   const renderTree = (nodes, level = 0, parentX = 0, parentY = 0, startY = 0) => {
     let currentY = startY;
     
     return nodes.map((node, index) => {
-      const nodeWidth = 200 + (node.name.length * 8); // Dynamic width based on text
-      const x = level === 0 ? 50 : parentX + 320;
+      const nodeWidth = Math.max(280, 200 + (node.name.length * 6)); // Better width calculation
+      const x = level === 0 ? 50 : parentX + nodeWidth + 180; // More horizontal spacing
       const y = currentY;
       const isExpanded = expandedNodes.has(node.name);
       const hasChildren = node.children && node.children.length > 0;
       
-      // Calculate spacing for next node
-      let nextY = y + 80; // Base spacing
+      // Calculate proper spacing for next node
+      let nextY = y + 100; // Increased base spacing
       if (isExpanded && hasChildren) {
-        nextY = y + calculateSubtreeHeight(node.children, level + 1) + 60;
+        const subtreeHeight = calculateSubtreeHeight(node.children, level + 1);
+        nextY = y + Math.max(120, subtreeHeight + 40);
       }
       
       const result = (
@@ -122,12 +186,12 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
           {level > 0 && (
             <path
               className="connection-line"
-              d={`M ${parentX + 140} ${parentY}
-                 C ${parentX + 200} ${parentY},
-                   ${x - 60} ${y},
-                   ${x - 18} ${y}`}
+              d={`M ${parentX + nodeWidth} ${parentY}
+                 C ${parentX + nodeWidth + 75} ${parentY},
+                   ${x - 75} ${y},
+                   ${x} ${y}`}
               fill="none"
-              stroke="#404040"
+              stroke="#6b7280"
               strokeWidth="2"
             />
           )}
@@ -148,7 +212,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
           
           {/* Render children if expanded */}
           {isExpanded && hasChildren && 
-            renderTree(node.children, level + 1, x, y, y - ((node.children.length - 1) * 30))
+            renderTree(node.children, level + 1, x, y, y - ((node.children.length - 1) * 50))
           }
         </g>
       );
@@ -160,7 +224,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
 
   return (
     <div 
-      className="mind-map-container"
+      className={`mind-map-container ${isDragging ? 'dragging' : ''}`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -169,8 +233,14 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     >
       <svg
         className="mind-map-svg"
+        width="100%"
+        height="100%"
+        viewBox="-2000 -2000 8000 8000"
+        preserveAspectRatio="xMidYMid meet"
+        onMouseDown={handleMouseDown}
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: '0 0'
         }}
       >
         <defs>
@@ -183,7 +253,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
           </filter>
         </defs>
         
-        {treeData.length > 0 && renderTree(treeData, 0, 0, 0, 100)}
+        {treeData.length > 0 && renderTree(treeData, 0, 0, 0, 0)}
       </svg>
       
       <div className="controls">
@@ -193,7 +263,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
         <button onClick={() => setZoom(prev => Math.max(0.3, prev * 0.8))} className="zoom-btn">
           -
         </button>
-        <button onClick={() => { setPan({ x: 0, y: 0 }); setZoom(1); }} className="reset-btn">
+        <button onClick={() => { setPan({ x: 200, y: 300 }); setZoom(0.8); }} className="reset-btn">
           Reset
         </button>
       </div>

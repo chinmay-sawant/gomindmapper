@@ -48,7 +48,7 @@ const Node = ({
     >
       {/* Node background */}
       <rect
-        x={-18}
+        x={0}
         y={-20}
         width={width}
         height={40}
@@ -62,7 +62,7 @@ const Node = ({
       
       {/* Function type indicator */}
       <circle
-        cx={-8}
+        cx={12}
         cy={0}
         r={4}
         fill={nodeColor}
@@ -71,7 +71,7 @@ const Node = ({
       
       {/* Node text */}
       <text
-        x={10}
+        x={25}
         y={6}
         textAnchor="start"
         className="node-text"

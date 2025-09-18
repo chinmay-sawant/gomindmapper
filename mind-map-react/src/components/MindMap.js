@@ -89,23 +89,46 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     setZoom(prev => Math.max(0.3, Math.min(3, prev * zoomFactor)));
   }, []);
 
-  const renderTree = (nodes, level = 0, parentX = 400, parentY = 100) => {
+  const calculateSubtreeHeight = (nodes, level) => {
+    let height = 0;
+    nodes.forEach(node => {
+      height += 60; // Child node spacing
+      if (expandedNodes.has(node.name) && node.children && node.children.length > 0) {
+        height += calculateSubtreeHeight(node.children, level + 1);
+      }
+    });
+    return height;
+  };
+
+  const renderTree = (nodes, level = 0, parentX = 0, parentY = 0, startY = 0) => {
+    let currentY = startY;
+    
     return nodes.map((node, index) => {
-      const x = level === 0 ? parentX : parentX + 300;
-      const y = level === 0 ? parentY + (index * 120) : parentY + (index * 80) - ((nodes.length - 1) * 40);
+      const nodeWidth = 200 + (node.name.length * 8); // Dynamic width based on text
+      const x = level === 0 ? 50 : parentX + 320;
+      const y = currentY;
       const isExpanded = expandedNodes.has(node.name);
       const hasChildren = node.children && node.children.length > 0;
       
-      return (
+      // Calculate spacing for next node
+      let nextY = y + 80; // Base spacing
+      if (isExpanded && hasChildren) {
+        nextY = y + calculateSubtreeHeight(node.children, level + 1) + 60;
+      }
+      
+      const result = (
         <g key={`${node.name}-${level}-${index}`}>
-          {/* Connection line to parent */}
+          {/* Curved connection to parent */}
           {level > 0 && (
-            <line
-              x1={parentX + 140}
-              y1={parentY}
-              x2={x - 10}
-              y2={y}
+            <path
               className="connection-line"
+              d={`M ${parentX + 140} ${parentY}
+                 C ${parentX + 200} ${parentY},
+                   ${x - 60} ${y},
+                   ${x - 18} ${y}`}
+              fill="none"
+              stroke="#404040"
+              strokeWidth="2"
             />
           )}
           
@@ -114,6 +137,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
             node={node}
             x={x}
             y={y}
+            width={nodeWidth}
             isExpanded={isExpanded}
             hasChildren={hasChildren}
             isSelected={selectedNode && selectedNode.name === node.name}
@@ -124,10 +148,13 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
           
           {/* Render children if expanded */}
           {isExpanded && hasChildren && 
-            renderTree(node.children, level + 1, x, y)
+            renderTree(node.children, level + 1, x, y, y - ((node.children.length - 1) * 30))
           }
         </g>
       );
+      
+      currentY = nextY;
+      return result;
     });
   };
 
@@ -156,7 +183,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
           </filter>
         </defs>
         
-        {treeData.length > 0 && renderTree(treeData)}
+        {treeData.length > 0 && renderTree(treeData, 0, 0, 0, 100)}
       </svg>
       
       <div className="controls">

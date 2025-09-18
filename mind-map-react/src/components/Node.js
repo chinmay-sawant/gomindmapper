@@ -4,6 +4,7 @@ const Node = ({
   node, 
   x, 
   y, 
+  width = 200,
   isExpanded, 
   hasChildren, 
   isSelected, 
@@ -47,9 +48,9 @@ const Node = ({
     >
       {/* Node background */}
       <rect
-        x={-70}
+        x={-18}
         y={-20}
-        width={140}
+        width={width}
         height={40}
         rx={8}
         className="node-bg"
@@ -61,7 +62,7 @@ const Node = ({
       
       {/* Function type indicator */}
       <circle
-        cx={-55}
+        cx={-8}
         cy={0}
         r={4}
         fill={nodeColor}
@@ -70,15 +71,15 @@ const Node = ({
       
       {/* Node text */}
       <text
-        x={0}
+        x={10}
         y={6}
-        textAnchor="middle"
+        textAnchor="start"
         className="node-text"
         fill={isSelected ? '#ffffff' : '#e5e5e5'}
-        fontSize="12"
+        fontSize="14"
         fontWeight={isSelected ? '600' : '500'}
       >
-        {displayName.length > 16 ? `${displayName.substring(0, 13)}...` : displayName}
+        {displayName}
       </text>
       
       {/* Expand/collapse button */}
@@ -91,24 +92,24 @@ const Node = ({
           }}
         >
           <circle
-            cx={55}
+            cx={width + 12}
             cy={0}
-            r={8}
+            r={12}
             fill={nodeColor}
             stroke="#ffffff"
             strokeWidth={1}
             className="expand-circle"
           />
           <text
-            x={55}
+            x={width + 12}
             y={4}
             textAnchor="middle"
             fill="#ffffff"
-            fontSize="10"
+            fontSize="14"
             fontWeight="bold"
             className="expand-icon"
           >
-            {isExpanded ? '−' : '+'}
+            {isExpanded ? '<' : '>'}
           </text>
         </g>
       )}
@@ -116,7 +117,7 @@ const Node = ({
       {/* Children count indicator */}
       {hasChildren && (
         <text
-          x={0}
+          x={width / 2}
           y={-28}
           textAnchor="middle"
           className="children-count"

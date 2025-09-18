@@ -18,10 +18,16 @@
 }
 
 .connection-line {
-  stroke: #404040;
+  stroke: #6b7280;
   stroke-width: 2;
   fill: none;
   opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.connection-line:hover {
+  stroke: #9ca3af;
+  opacity: 1;
 }
 
 .node {

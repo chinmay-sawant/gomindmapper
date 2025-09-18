@@ -50,6 +50,7 @@ function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [fileName, setFileName] = useState('EmployeeApp (Default)');
   const [dragActive, setDragActive] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
   const appRef = useRef(null);
 
   const handleFileUpload = useCallback((file) => {
@@ -71,6 +72,7 @@ function App() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
+    setDragCounter(0);
     
     const files = [...e.dataTransfer.files];
     if (files && files[0]) {
@@ -83,16 +85,34 @@ function App() {
     }
   }, [handleFileUpload]);
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(true);
-  }, []);
+    setDragCounter(prev => prev + 1);
+    if (!dragActive) {
+      setDragActive(true);
+    }
+  }, [dragActive]);
 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(false);
+    setDragCounter(prev => {
+      const newCounter = prev - 1;
+      // Only hide overlay when counter reaches 0 (actually left the container)
+      if (newCounter === 0) {
+        // Add a small delay to prevent flickering
+        setTimeout(() => {
+          setDragActive(false);
+        }, 100);
+      }
+      return newCounter;
+    });
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
   }, []);
 
   const handleFileSelect = useCallback((e) => {
@@ -108,21 +128,24 @@ function App() {
     if (!appElement) return;
 
     const handleDropNonPassive = (e) => handleDrop(e);
-    const handleDragOverNonPassive = (e) => handleDragOver(e);
+    const handleDragEnterNonPassive = (e) => handleDragEnter(e);
     const handleDragLeaveNonPassive = (e) => handleDragLeave(e);
+    const handleDragOverNonPassive = (e) => handleDragOver(e);
 
     // Add event listeners with passive: false to allow preventDefault
     appElement.addEventListener('drop', handleDropNonPassive, { passive: false });
-    appElement.addEventListener('dragover', handleDragOverNonPassive, { passive: false });
+    appElement.addEventListener('dragenter', handleDragEnterNonPassive, { passive: false });
     appElement.addEventListener('dragleave', handleDragLeaveNonPassive, { passive: false });
+    appElement.addEventListener('dragover', handleDragOverNonPassive, { passive: false });
 
     // Cleanup function
     return () => {
       appElement.removeEventListener('drop', handleDropNonPassive);
-      appElement.removeEventListener('dragover', handleDragOverNonPassive);
+      appElement.removeEventListener('dragenter', handleDragEnterNonPassive);
       appElement.removeEventListener('dragleave', handleDragLeaveNonPassive);
+      appElement.removeEventListener('dragover', handleDragOverNonPassive);
     };
-  }, [handleDrop, handleDragOver, handleDragLeave]);
+  }, [handleDrop, handleDragEnter, handleDragLeave, handleDragOver]);
 
   return (
     <div 

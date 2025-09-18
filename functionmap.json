@@ -140,23 +140,6 @@
     ]
   },
   {
-    "name": "main.main",
-    "line": 9,
-    "filePath": "EmployeeApp\\main.go",
-    "called": [
-      {
-        "name": "config.Load",
-        "line": 9,
-        "filePath": "EmployeeApp\\internal\\config\\config.go"
-      },
-      {
-        "name": "routes.SetupRouter",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\routes\\routes.go"
-      }
-    ]
-  },
-  {
     "name": "pdf.ConvertHTMLToImage",
     "line": 59,
     "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
@@ -187,28 +170,6 @@
         "name": "gochromedp.ConvertURLToPDF",
         "line": 128,
         "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "routes.SetupRouter",
-    "line": 10,
-    "filePath": "EmployeeApp\\internal\\routes\\routes.go",
-    "called": [
-      {
-        "name": "middleware.CORS",
-        "line": 5,
-        "filePath": "EmployeeApp\\internal\\middleware\\cors.go"
-      },
-      {
-        "name": "middleware.Logger",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\middleware\\logger.go"
-      },
-      {
-        "name": "handlers.NewEmployeeHandler",
-        "line": 12,
-        "filePath": "EmployeeApp\\internal\\handlers\\employee.go"
       }
     ]
   }

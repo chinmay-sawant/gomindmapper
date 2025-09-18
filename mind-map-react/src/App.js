@@ -1,151 +1,38 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MindMap from './components/MindMap';
+import SearchComponent from './components/SearchComponent';
 import './App.css';
 
-// Default EmployeeApp data to show by default
-const defaultEmployeeAppData = [
-  {
-    "name": "main.main",
-    "line": 9,
-    "filePath": "EmployeeApp\\main.go",
-    "called": [
-      {
-        "name": "config.Load",
-        "line": 9,
-        "filePath": "EmployeeApp\\internal\\config\\config.go"
-      },
-      {
-        "name": "routes.SetupRouter",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\routes\\routes.go"
-      }
-    ]
-  },
-  {
-    "name": "routes.SetupRouter",
-    "line": 10,
-    "filePath": "EmployeeApp\\internal\\routes\\routes.go",
-    "called": [
-      {
-        "name": "middleware.CORS",
-        "line": 5,
-        "filePath": "EmployeeApp\\internal\\middleware\\cors.go"
-      },
-      {
-        "name": "middleware.Logger",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\middleware\\logger.go"
-      },
-      {
-        "name": "handlers.NewEmployeeHandler",
-        "line": 12,
-        "filePath": "EmployeeApp\\internal\\handlers\\employee.go"
-      }
-    ]
-  }
-];
-
 function App() {
-  const [functionData, setFunctionData] = useState(defaultEmployeeAppData);
+  const [functionData, setFunctionData] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [fileName, setFileName] = useState('EmployeeApp (Default)');
-  const [dragActive, setDragActive] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
+  const [isServerConnected, setIsServerConnected] = useState(false);
   const appRef = useRef(null);
 
-  const handleFileUpload = useCallback((file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-        setFunctionData(jsonData);
-        setFileName(file.name);
-        setSelectedNode(null); // Clear selection when new data loads
-      } catch (error) {
-        alert('Error parsing JSON file: ' + error.message);
-      }
-    };
-    reader.readAsText(file);
-  }, []);
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    setDragCounter(0);
-    
-    const files = [...e.dataTransfer.files];
-    if (files && files[0]) {
-      const file = files[0];
-      if (file.type === 'application/json' || file.name.endsWith('.json')) {
-        handleFileUpload(file);
-      } else {
-        alert('Please upload a JSON file');
-      }
-    }
-  }, [handleFileUpload]);
-
-  const handleDragEnter = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragCounter(prev => prev + 1);
-    if (!dragActive) {
-      setDragActive(true);
-    }
-  }, [dragActive]);
-
-  const handleDragLeave = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragCounter(prev => {
-      const newCounter = prev - 1;
-      // Only hide overlay when counter reaches 0 (actually left the container)
-      if (newCounter === 0) {
-        // Add a small delay to prevent flickering
-        setTimeout(() => {
-          setDragActive(false);
-        }, 100);
-      }
-      return newCounter;
-    });
-  }, []);
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleFileSelect = useCallback((e) => {
-    const file = e.target.files[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-  }, [handleFileUpload]);
-
-  // Set up drag event listeners with non-passive option to allow preventDefault
+  // Check server connection on component mount
   useEffect(() => {
-    const appElement = appRef.current;
-    if (!appElement) return;
-
-    const handleDropNonPassive = (e) => handleDrop(e);
-    const handleDragEnterNonPassive = (e) => handleDragEnter(e);
-    const handleDragLeaveNonPassive = (e) => handleDragLeave(e);
-    const handleDragOverNonPassive = (e) => handleDragOver(e);
-
-    // Add event listeners with passive: false to allow preventDefault
-    appElement.addEventListener('drop', handleDropNonPassive, { passive: false });
-    appElement.addEventListener('dragenter', handleDragEnterNonPassive, { passive: false });
-    appElement.addEventListener('dragleave', handleDragLeaveNonPassive, { passive: false });
-    appElement.addEventListener('dragover', handleDragOverNonPassive, { passive: false });
-
-    // Cleanup function
-    return () => {
-      appElement.removeEventListener('drop', handleDropNonPassive);
-      appElement.removeEventListener('dragenter', handleDragEnterNonPassive);
-      appElement.removeEventListener('dragleave', handleDragLeaveNonPassive);
-      appElement.removeEventListener('dragover', handleDragOverNonPassive);
+    const checkServerConnection = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/functions?page=1&pageSize=1');
+        setIsServerConnected(response.ok);
+      } catch (error) {
+        console.error('Server connection failed:', error);
+        setIsServerConnected(false);
+      }
     };
-  }, [handleDrop, handleDragEnter, handleDragLeave, handleDragOver]);
+
+    checkServerConnection();
+  }, []);
+
+  const handleFunctionSelect = useCallback((functionDataArray) => {
+    setFunctionData(functionDataArray);
+    setSelectedNode(null);
+  }, []);
+
+  const handleClearCanvas = useCallback(() => {
+    setFunctionData([]);
+    setSelectedNode(null);
+  }, []);
 
   return (
     <div 
@@ -156,37 +43,33 @@ function App() {
         <h1>Function Mind Map</h1>
         <div className="header-content">
           <p>Visualize your Go application's function call hierarchy</p>
-          <div className="file-input-section">
-            <span className="current-file">Current: {fileName}</span>
-            <label htmlFor="file-input" className="file-input-label">
-              Choose JSON File
-            </label>
-            <input
-              id="file-input"
-              type="file"
-              accept=".json,application/json"
-              onChange={handleFileSelect}
-              className="file-input"
-            />
-          </div>
+          
+          {!isServerConnected && (
+            <div className="server-warning">
+              ⚠️ Server not connected. Please ensure the Go server is running on localhost:8080
+            </div>
+          )}
+          
+          <SearchComponent 
+            onFunctionSelect={handleFunctionSelect}
+            onClearCanvas={handleClearCanvas}
+          />
         </div>
       </header>
       
-      {dragActive && (
-        <div className="drag-overlay">
-          <div className="drag-message">
-            <h2>Drop JSON file here</h2>
-            <p>Release to load function map data</p>
-          </div>
-        </div>
-      )}
-      
       <main className="app-main">
-        <MindMap 
-          data={functionData} 
-          selectedNode={selectedNode}
-          onNodeSelect={setSelectedNode}
-        />
+        {functionData.length === 0 ? (
+          <div className="welcome-message">
+            <h2>Welcome to Function Mind Map</h2>
+            <p>Search for a function above to start exploring your codebase</p>
+          </div>
+        ) : (
+          <MindMap 
+            data={functionData} 
+            selectedNode={selectedNode}
+            onNodeSelect={setSelectedNode}
+          />
+        )}
       </main>
       
       {selectedNode && (

@@ -30,12 +30,6 @@
     "Calls": null
   },
   {
-    "Name": "config.Load",
-    "Line": 9,
-    "FilePath": "EmployeeApp\\internal\\config\\config.go",
-    "Calls": null
-  },
-  {
     "Name": "gochromedp.ConvertHTMLToImage",
     "Line": 201,
     "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
@@ -75,12 +69,6 @@
     "Name": "gochromedp.parseMarginValue",
     "Line": 354,
     "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "handlers.NewEmployeeHandler",
-    "Line": 12,
-    "FilePath": "EmployeeApp\\internal\\handlers\\employee.go",
     "Calls": null
   },
   {
@@ -148,6 +136,12 @@
     ]
   },
   {
+    "Name": "main.NewServer",
+    "Line": 42,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
+  },
+  {
     "Name": "main.buildFunctionMap",
     "Line": 104,
     "FilePath": "cmd\\main.go",
@@ -202,33 +196,18 @@
   },
   {
     "Name": "main.main",
+    "Line": 410,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
+  },
+  {
+    "Name": "main.main",
     "Line": 18,
     "FilePath": "cmd\\main.go",
     "Calls": [
       "analyzer.GetModule",
       "analyzer.CreateJsonFile"
     ]
-  },
-  {
-    "Name": "main.main",
-    "Line": 9,
-    "FilePath": "EmployeeApp\\main.go",
-    "Calls": [
-      "config.Load",
-      "routes.SetupRouter"
-    ]
-  },
-  {
-    "Name": "middleware.CORS",
-    "Line": 5,
-    "FilePath": "EmployeeApp\\internal\\middleware\\cors.go",
-    "Calls": null
-  },
-  {
-    "Name": "middleware.Logger",
-    "Line": 10,
-    "FilePath": "EmployeeApp\\internal\\middleware\\logger.go",
-    "Calls": null
   },
   {
     "Name": "pdf.ConvertHTMLToImage",
@@ -529,15 +508,5 @@
     "Line": 84,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
     "Calls": null
-  },
-  {
-    "Name": "routes.SetupRouter",
-    "Line": 10,
-    "FilePath": "EmployeeApp\\internal\\routes\\routes.go",
-    "Calls": [
-      "middleware.CORS",
-      "middleware.Logger",
-      "handlers.NewEmployeeHandler"
-    ]
   }
 ]

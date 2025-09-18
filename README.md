@@ -25,6 +25,7 @@ Optional: analyze a specific subpath
 
 ```cmd
 go run cmd/main.go -path ./EmployeeApp
+go run cmd/main.go -path ./kubernetes
 ```
 
 Outputs

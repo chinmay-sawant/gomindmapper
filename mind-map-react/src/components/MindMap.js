@@ -46,28 +46,44 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       const functionMap = new Map();
       const rootNodes = [];
       
-      // Create a map of all functions
+      // Create unique key for each function based on name and file path
+      const getUniqueKey = (fn) => `${fn.name}@${fn.filePath}`;
+      
+      // Create a map of all functions with unique keys
       functions.forEach(fn => {
-        functionMap.set(fn.name, { ...fn, children: [] });
+        const uniqueKey = getUniqueKey(fn);
+        functionMap.set(uniqueKey, { ...fn, uniqueKey, children: [] });
       });
       
       // Build the tree structure
       functions.forEach(fn => {
-        const node = functionMap.get(fn.name);
+        const parentKey = getUniqueKey(fn);
+        const parentNode = functionMap.get(parentKey);
+        
         if (fn.called) {
           fn.called.forEach(calledFn => {
-            const childNode = functionMap.get(calledFn.name) || { ...calledFn, children: [] };
-            node.children.push(childNode);
+            const childKey = getUniqueKey(calledFn);
+            let childNode = functionMap.get(childKey);
+            
+            // If child node doesn't exist in main functions, create it as a leaf
+            if (!childNode) {
+              childNode = { ...calledFn, uniqueKey: childKey, children: [] };
+            }
+            
+            parentNode.children.push(childNode);
           });
         }
-        
-        // Check if this is a root node (not called by others)
+      });
+      
+      // Find root nodes (functions that are not called by others)
+      functions.forEach(fn => {
+        const fnKey = getUniqueKey(fn);
         const isRoot = !functions.some(f => 
-          f.called && f.called.some(c => c.name === fn.name)
+          f.called && f.called.some(c => getUniqueKey(c) === fnKey)
         );
         
         if (isRoot) {
-          rootNodes.push(node);
+          rootNodes.push(functionMap.get(fnKey));
         }
       });
       
@@ -86,13 +102,13 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     }
   }, [treeData, pan.x, pan.y]);
 
-  const toggleNode = useCallback((nodeName) => {
+  const toggleNode = useCallback((nodeKey) => {
     setExpandedNodes(prev => {
       const newExpanded = new Set(prev);
-      if (newExpanded.has(nodeName)) {
-        newExpanded.delete(nodeName);
+      if (newExpanded.has(nodeKey)) {
+        newExpanded.delete(nodeKey);
       } else {
-        newExpanded.add(nodeName);
+        newExpanded.add(nodeKey);
       }
       return newExpanded;
     });
@@ -154,7 +170,8 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     let totalHeight = 0;
     nodes.forEach(node => {
       totalHeight += 100; // Increased base spacing for each node
-      if (expandedNodes.has(node.name) && node.children && node.children.length > 0) {
+      const nodeKey = node.uniqueKey || `${node.name}@${node.filePath}`;
+      if (expandedNodes.has(nodeKey) && node.children && node.children.length > 0) {
         totalHeight += calculateSubtreeHeight(node.children, level + 1);
       }
     });
@@ -170,7 +187,8 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       const nodeWidth = Math.max(280, 200 + (node.name.length * 6)); // Better width calculation
       const x = level === 0 ? 50 : parentX + nodeWidth + 180; // More horizontal spacing
       const y = currentY;
-      const isExpanded = expandedNodes.has(node.name);
+      const nodeKey = node.uniqueKey || `${node.name}@${node.filePath}`;
+      const isExpanded = expandedNodes.has(nodeKey);
       const hasChildren = node.children && node.children.length > 0;
       
       // Calculate proper spacing for next node
@@ -181,7 +199,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       }
       
       const result = (
-        <g key={`${node.name}-${level}-${index}`}>
+        <g key={nodeKey}>
           {/* Curved connection to parent */}
           {level > 0 && (
             <path
@@ -204,8 +222,8 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
             width={nodeWidth}
             isExpanded={isExpanded}
             hasChildren={hasChildren}
-            isSelected={selectedNode && selectedNode.name === node.name}
-            onToggle={() => toggleNode(node.name)}
+            isSelected={selectedNode && selectedNode.uniqueKey === nodeKey}
+            onToggle={() => toggleNode(nodeKey)}
             onSelect={() => onNodeSelect(node)}
             level={level}
           />

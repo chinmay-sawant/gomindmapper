@@ -35,7 +35,24 @@ const Node = ({
 
   const functionType = getFunctionType(node.name);
   const nodeColor = getNodeColor(level);
-  const displayName = node.name.split('.').pop(); // Show only the function name part
+  
+  // Create a more descriptive display name
+  const getDisplayName = (node) => {
+    const funcName = node.name.split('.').pop();
+    
+    // For main functions, add file context to distinguish them
+    if (node.name === 'main.main' && node.filePath) {
+      const pathParts = node.filePath.split('\\');
+      const projectName = pathParts.find(part => 
+        part && !part.includes('.go') && part !== 'cmd' && part !== 'main.go'
+      ) || pathParts[0];
+      return `${funcName} (${projectName})`;
+    }
+    
+    return funcName;
+  };
+  
+  const displayName = getDisplayName(node);
   
   return (
     <g

@@ -105,7 +105,7 @@
       },
       {
         "name": "analyzer.FindCalls",
-        "line": 48,
+        "line": 55,
         "filePath": "cmd\\analyzer\\utils.go"
       }
     ]

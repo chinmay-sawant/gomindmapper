@@ -7,7 +7,7 @@
   },
   {
     "Name": "analyzer.FindCalls",
-    "Line": 48,
+    "Line": 55,
     "FilePath": "cmd\\analyzer\\utils.go",
     "Calls": null
   },
@@ -25,7 +25,7 @@
   },
   {
     "Name": "analyzer.contains",
-    "Line": 174,
+    "Line": 181,
     "FilePath": "cmd\\analyzer\\utils.go",
     "Calls": null
   },

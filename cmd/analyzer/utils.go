@@ -26,8 +26,11 @@ func GetModule(absPath string) (string, error) {
 func FindFunctionBody(lines []string, funcLine int) (int, int) {
 	braceCount := 0
 	start := -1
+
+	// Skip the function declaration line and find the opening brace
 	for j := funcLine; j < len(lines); j++ {
-		for _, char := range lines[j] {
+		line := lines[j]
+		for _, char := range line {
 			switch char {
 			case '{':
 				braceCount++
@@ -36,10 +39,14 @@ func FindFunctionBody(lines []string, funcLine int) (int, int) {
 				}
 			case '}':
 				braceCount--
-				if braceCount == 0 {
+				if braceCount == 0 && start != -1 {
 					return start, j
 				}
 			}
+		}
+		// If we found the opening brace, we can start looking for the closing one
+		if start != -1 && braceCount == 0 {
+			break
 		}
 	}
 	return -1, -1

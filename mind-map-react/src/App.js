@@ -50,6 +50,7 @@ function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [fileName, setFileName] = useState('EmployeeApp (Default)');
   const [dragActive, setDragActive] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [dragCounter, setDragCounter] = useState(0);
   const appRef = useRef(null);
 

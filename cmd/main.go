@@ -91,7 +91,7 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 			}
 			// Find function body
 			start, end := analyzer.FindFunctionBody(lines, i)
-			if start != -1 && end != -1 {
+			if start != -1 && end != -1 && start+1 < end && end < len(lines) {
 				calls := analyzer.FindCalls(lines[start+1 : end])
 				funcInfo.Calls = calls
 			}

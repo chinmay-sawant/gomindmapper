@@ -1,5 +1,118 @@
 {
   "removedPerFunction": {
+    "gochromedp.ConvertHTMLToImage": [
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "base64.StdEncoding.EncodeToString",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "chromedp.Evaluate",
+      "Math.max",
+      "emulation.SetDeviceMetricsOverride",
+      "page.CaptureScreenshot"
+    ],
+    "gochromedp.ConvertHTMLToPDF": [
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "base64.StdEncoding.EncodeToString",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "printParams.Do"
+    ],
+    "gochromedp.ConvertURLToImage": [
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "chromedp.Evaluate",
+      "Math.max",
+      "emulation.SetDeviceMetricsOverride",
+      "page.CaptureScreenshot"
+    ],
+    "gochromedp.ConvertURLToPDF": [
+      "chromedp.Flag",
+      "chromedp.NewExecAllocator",
+      "chromedp.NewContext",
+      "chromedp.WithLogf",
+      "chromedp.Run",
+      "chromedp.Navigate",
+      "chromedp.WaitReady",
+      "chromedp.ActionFunc",
+      "printParams.Do"
+    ],
+    "handlers.RegisterRoutes": [
+      "router.Static",
+      "router.Group",
+      "v1.POST",
+      "v1.GET",
+      "router.NoRoute"
+    ],
+    "handlers.getProjectRoot": [
+      "info.IsDir"
+    ],
+    "handlers.handleFillPDF": [
+      "c.Request.FormFile",
+      "pdfFile.Close",
+      "pdfFile.Read",
+      "xfdfFile.Close",
+      "xfdfFile.Read",
+      "c.PostForm",
+      "c.JSON",
+      "c.Header",
+      "c.Data"
+    ],
+    "handlers.handleGenerateTemplatePDF": [
+      "c.ShouldBindJSON",
+      "c.JSON"
+    ],
+    "handlers.handleGetTemplateData": [
+      "c.Query",
+      "c.JSON",
+      "c.Header",
+      "c.Data"
+    ],
+    "handlers.handleMergePDFs": [
+      "c.MultipartForm",
+      "c.JSON",
+      "fh.Open",
+      "f.Close",
+      "c.Header",
+      "c.Data"
+    ],
+    "handlers.handleSPA": [
+      "c.JSON",
+      "c.File"
+    ],
+    "handlers.handlehtmlToImage": [
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "c.Header",
+      "c.Data"
+    ],
+    "handlers.handlehtmlToPDF": [
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "c.Header",
+      "c.Data"
+    ],
+    "main.init": [
+      "rootCmd.PersistentFlags",
+      "pdfCmd.Flags",
+      "imageCmd.Flags",
+      "rootCmd.AddCommand"
+    ],
     "main.main": [
       "router.Run"
     ],
@@ -16,6 +129,91 @@
       "c.Errors.ByType",
       "start.Format"
     ],
+    "pdf.FillPDFWithXFDF": [
+      "widthsBuf.WriteString",
+      "widthsBuf.String",
+      "zlib.NewWriterLevel",
+      "zw.Write",
+      "zw.Close",
+      "compBuf.Bytes",
+      "xrefBuf.WriteString",
+      "xrefBuf.Bytes"
+    ],
+    "pdf.FlattenPDFBytes": [
+      "scripts.FlattenPDFBytes"
+    ],
+    "pdf.GenerateTemplatePDF": [
+      "pdfBuffer.WriteString",
+      "pdfBuffer.Len",
+      "contentStream.Len",
+      "pdfBuffer.Write",
+      "contentStream.Bytes",
+      "c.Header",
+      "c.Data",
+      "pdfBuffer.Bytes"
+    ],
+    "pdf.MergePDFs": [
+      "out.Write",
+      "out.Len",
+      "out.WriteString",
+      "out.Bytes"
+    ],
+    "pdf.addParentRef": [
+      "result.Write",
+      "result.WriteString",
+      "result.Bytes"
+    ],
+    "pdf.decodeHexString": [
+      "hex.DecodeString"
+    ],
+    "pdf.decompressStreams": [
+      "buf.Write",
+      "buf.Bytes"
+    ],
+    "pdf.drawFooter": [
+      "contentStream.WriteString"
+    ],
+    "pdf.drawPageBorder": [
+      "contentStream.WriteString"
+    ],
+    "pdf.drawPageNumber": [
+      "contentStream.WriteString"
+    ],
+    "pdf.drawTable": [
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage",
+      "pageManager.GetCurrentContentStream",
+      "contentStream.WriteString"
+    ],
+    "pdf.drawTitle": [
+      "contentStream.WriteString"
+    ],
+    "pdf.drawWatermark": [
+      "contentStream.WriteString"
+    ],
+    "pdf.escapePDFString": [
+      "sb.WriteRune",
+      "sb.String"
+    ],
+    "pdf.generateAllContent": [
+      "pageManager.GetCurrentContentStream",
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage"
+    ],
+    "pdf.replaceRefsOutsideStreams": [
+      "out.Write",
+      "out.Bytes"
+    ],
+    "pdf.tryFlateDecompress": [
+      "flate.NewReader",
+      "r.Close",
+      "out.Bytes"
+    ],
+    "pdf.tryZlibDecompress": [
+      "zlib.NewReader",
+      "r.Close",
+      "out.Bytes"
+    ],
     "routes.SetupRouter": [
       "gin.Default",
       "router.Use",
@@ -27,21 +225,92 @@
     ]
   },
   "uniqueRemovedCalls": [
-    "c.Next",
-    "c.Writer.Status",
-    "c.Request.UserAgent",
-    "router.GET",
+    "c.Header",
+    "xrefBuf.WriteString",
+    "pdfBuffer.WriteString",
+    "v1.GET",
+    "xfdfFile.Close",
+    "xfdfFile.Read",
+    "rootCmd.AddCommand",
+    "pageManager.AddNewPage",
+    "router.NoRoute",
+    "xrefBuf.Bytes",
     "c.JSON",
-    "c.AbortWithStatus",
-    "api.Group",
-    "router.Use",
-    "c.ClientIP",
-    "start.Format",
-    "gin.Default",
+    "compBuf.Bytes",
+    "pageManager.GetCurrentContentStream",
+    "emulation.SetDeviceMetricsOverride",
     "router.Group",
-    "router.Run",
-    "c.Errors.ByType",
+    "gin.Default",
+    "contentStream.Bytes",
+    "r.Close",
+    "api.Group",
+    "v1.POST",
+    "c.Data",
+    "c.Next",
+    "scripts.FlattenPDFBytes",
+    "out.Bytes",
+    "zlib.NewReader",
+    "flate.NewReader",
+    "info.IsDir",
+    "c.Request.FormFile",
+    "pdfFile.Read",
+    "c.PostForm",
+    "fh.Open",
+    "rootCmd.PersistentFlags",
+    "pdfFile.Close",
+    "f.Close",
+    "sb.WriteRune",
     "employees.GET",
-    "c.Header"
+    "c.File",
+    "start.Format",
+    "widthsBuf.String",
+    "zw.Write",
+    "contentStream.Len",
+    "result.Bytes",
+    "hex.DecodeString",
+    "buf.Write",
+    "chromedp.Run",
+    "c.Query",
+    "pdfCmd.Flags",
+    "imageCmd.Flags",
+    "c.Writer.Status",
+    "widthsBuf.WriteString",
+    "printParams.Do",
+    "router.Static",
+    "zlib.NewWriterLevel",
+    "pdfBuffer.Bytes",
+    "sb.String",
+    "chromedp.NewExecAllocator",
+    "chromedp.NewContext",
+    "chromedp.ActionFunc",
+    "router.Run",
+    "pdfBuffer.Len",
+    "router.Use",
+    "c.Errors.ByType",
+    "out.Write",
+    "chromedp.WithLogf",
+    "page.CaptureScreenshot",
+    "c.MultipartForm",
+    "c.AbortWithStatus",
+    "c.ClientIP",
+    "c.Request.UserAgent",
+    "out.WriteString",
+    "buf.Bytes",
+    "chromedp.Flag",
+    "Math.max",
+    "rootCmd.Execute",
+    "result.Write",
+    "result.WriteString",
+    "chromedp.Navigate",
+    "chromedp.Evaluate",
+    "contentStream.WriteString",
+    "pageManager.CheckPageBreak",
+    "router.GET",
+    "base64.StdEncoding.EncodeToString",
+    "chromedp.WaitReady",
+    "c.ShouldBindJSON",
+    "zw.Close",
+    "pdfBuffer.Write",
+    "out.Len"
   ]
 }

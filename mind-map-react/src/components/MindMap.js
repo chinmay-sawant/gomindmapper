@@ -156,7 +156,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
     
     // Zoom factor
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.1, Math.min(5, zoom * zoomFactor));
+    const newZoom = zoom * zoomFactor;
     
     if (newZoom !== zoom) {
       // Calculate the point to zoom into
@@ -299,10 +299,10 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       </svg>
       
       <div className="controls">
-        <button onClick={() => setZoom(prev => Math.min(5, prev * 1.2))} className="zoom-btn">
+        <button onClick={() => setZoom(prev => prev * 1.2)} className="zoom-btn">
           +
         </button>
-        <button onClick={() => setZoom(prev => Math.max(0.1, prev * 0.8))} className="zoom-btn">
+        <button onClick={() => setZoom(prev => prev * 0.8)} className="zoom-btn">
           -
         </button>
         <button onClick={collapseAll} className="collapse-btn">

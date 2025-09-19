@@ -52,7 +52,44 @@ function App() {
   const [dragActive, setDragActive] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [dragCounter, setDragCounter] = useState(0);
+  // Pagination state when using backend
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [totalRoots, setTotalRoots] = useState(0);
+  const [useServer, setUseServer] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
   const appRef = useRef(null);
+
+  // Fetch paginated data from backend server
+  const fetchPage = useCallback(async (p = page, ps = pageSize) => {
+    if (!useServer) return;
+    setLoading(true);
+    setServerError('');
+    try {
+      const res = await fetch(`http://localhost:8080/api/relations?page=${p}&pageSize=${ps}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      // json.data is the closure; we use it directly for mind map
+      setFunctionData(json.data || []);
+      setTotalRoots(json.totalRoots || 0);
+      setPage(json.page || p);
+      setPageSize(json.pageSize || ps);
+      setFileName(`Server Roots Page ${json.page}`);
+      setSelectedNode(null);
+    } catch (e) {
+      setServerError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [useServer, page, pageSize]);
+
+  // Auto fetch when toggling useServer or page changes
+  useEffect(() => {
+    if (useServer) {
+      fetchPage(page, pageSize);
+    }
+  }, [useServer, page, pageSize, fetchPage]);
 
   const handleFileUpload = useCallback((file) => {
     const reader = new FileReader();
@@ -169,6 +206,32 @@ function App() {
               onChange={handleFileSelect}
               className="file-input"
             />
+            <label className="server-toggle">
+              <input
+                type="checkbox"
+                checked={useServer}
+                onChange={(e) => {
+                  setUseServer(e.target.checked);
+                  if (!e.target.checked) {
+                    // revert to default data
+                    setFunctionData(defaultEmployeeAppData);
+                    setFileName('EmployeeApp (Default)');
+                    setSelectedNode(null);
+                  }
+                }}
+              /> Use Live Server
+            </label>
+            {useServer && (
+              <div className="pagination-bar">
+                <button className="pg-btn" disabled={loading || page<=1} onClick={() => setPage(p => Math.max(1, p-1))}>&lt;</button>
+                <div className="pg-status">Page {page} / {Math.max(1, Math.ceil(totalRoots / pageSize) || 1)}</div>
+                <button className="pg-btn" disabled={loading || page >= Math.ceil(totalRoots / pageSize)} onClick={() => setPage(p => p+1)}>&gt;</button>
+                <select className="pg-select" disabled={loading} value={pageSize} onChange={(e)=> { setPageSize(parseInt(e.target.value,10)); setPage(1); }}>
+                  {[5,10,15,20,50].map(n => <option key={n} value={n}>{n}/page</option>)}
+                </select>
+                <button className="pg-refresh" disabled={loading} onClick={() => fetchPage(page, pageSize)}>{loading ? '...' : 'Refresh'}</button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -183,6 +246,8 @@ function App() {
       )}
       
       <main className="app-main">
+        {useServer && loading && <div className="loading-indicator">Loading...</div>}
+        {useServer && serverError && <div className="error-indicator">Error: {serverError}</div>}
         <MindMap 
           data={functionData} 
           selectedNode={selectedNode}

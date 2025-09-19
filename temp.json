@@ -1,0 +1,72 @@
+{
+  "data": [
+    {
+      "name": "main.main",
+      "line": 16,
+      "filePath": "cmd\\main.go",
+      "called": [
+        {
+          "name": "analyzer.GetModule",
+          "line": 11,
+          "filePath": "cmd\\analyzer\\utils.go"
+        },
+        {
+          "name": "analyzer.CreateJsonFile",
+          "line": 10,
+          "filePath": "cmd\\analyzer\\fileops.go"
+        },
+        {
+          "name": "analyzer.BuildRelations",
+          "line": 21,
+          "filePath": "cmd\\analyzer\\relations.go"
+        }
+      ]
+    }
+  ],
+  "includeInternals": false,
+  "loadedAt": "2025-09-19T20:59:40.6011041+05:30",
+  "page": 1,
+  "pageSize": 50,
+  "roots": [
+    {
+      "name": "main.main",
+      "line": 9,
+      "filePath": "EmployeeApp\\main.go",
+      "called": [
+        {
+          "name": "config.Load",
+          "line": 9,
+          "filePath": "EmployeeApp\\internal\\config\\config.go"
+        },
+        {
+          "name": "routes.SetupRouter",
+          "line": 10,
+          "filePath": "EmployeeApp\\internal\\routes\\routes.go"
+        }
+      ]
+    },
+    {
+      "name": "main.main",
+      "line": 16,
+      "filePath": "cmd\\main.go",
+      "called": [
+        {
+          "name": "analyzer.GetModule",
+          "line": 11,
+          "filePath": "cmd\\analyzer\\utils.go"
+        },
+        {
+          "name": "analyzer.CreateJsonFile",
+          "line": 10,
+          "filePath": "cmd\\analyzer\\fileops.go"
+        },
+        {
+          "name": "analyzer.BuildRelations",
+          "line": 21,
+          "filePath": "cmd\\analyzer\\relations.go"
+        }
+      ]
+    }
+  ],
+  "totalRoots": 2
+}

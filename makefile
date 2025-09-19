@@ -1,2 +1,8 @@
 run:
 	go run cmd/main.go
+
+server:
+	go run cmd/server/main.go -path . -addr :8080
+
+ui:
+	cd /d "D:\Chinmay_Personal_Projects\GoMindMapper\mind-map-react" && npm install && npm start

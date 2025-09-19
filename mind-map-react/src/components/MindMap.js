@@ -51,8 +51,14 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       const getUniqueKey = (fn) => `${fn.name}@${fn.filePath}`;
       
       // Create a map of all functions with unique keys
-      functions.forEach(fn => {
-        const uniqueKey = getUniqueKey(fn);
+      const seen = new Set();
+      functions.forEach((fn, idx) => {
+        let uniqueKey = getUniqueKey(fn);
+        // defensive: if duplicate key appears (same name+file) add suffix to keep them separate
+        if (seen.has(uniqueKey)) {
+          uniqueKey = uniqueKey + '#'+idx;
+        }
+        seen.add(uniqueKey);
         functionMap.set(uniqueKey, { ...fn, uniqueKey, children: [] });
       });
       

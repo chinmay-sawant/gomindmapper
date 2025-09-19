@@ -7,10 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/chinmay-sawant/gomindmapper/cmd/analyzer"
 )
@@ -55,8 +53,21 @@ func main() {
 		return functions[i].Name < functions[j].Name
 	})
 
+	// Persist raw filtered functions (existing behaviour)
 	analyzer.CreateJsonFile(functions)
-	buildFunctionMap(functions)
+
+	// Build relations and write functionmap.json (replaces buildFunctionMap)
+	relations := analyzer.BuildRelations(functions)
+	data, err := json.MarshalIndent(relations, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshaling relations:", err)
+		return
+	}
+	if err := os.WriteFile("functionmap.json", data, 0644); err != nil {
+		fmt.Println("Error writing functionmap.json:", err)
+		return
+	}
+	fmt.Println("functionmap.json created successfully")
 }
 
 func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, error) {
@@ -101,128 +112,4 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 	return funcs, nil
 }
 
-func buildFunctionMap(functions []analyzer.FunctionInfo) {
-	// Create a map for quick lookup
-	funcMap := make(map[string]analyzer.FunctionInfo)
-	for _, fn := range functions {
-		funcMap[fn.Name] = fn
-	}
-
-	// Collect user-defined package prefixes
-	userPrefixes := make(map[string]bool)
-	for _, fn := range functions {
-		if dotIndex := strings.Index(fn.Name, "."); dotIndex != -1 {
-			userPrefixes[fn.Name[:dotIndex]] = true
-		}
-	}
-
-	// Number of CPUs
-	numCPU := runtime.NumCPU()
-	chunkSize := (len(functions) + numCPU - 1) / numCPU // Ceiling division
-
-	// Channel to collect results
-	results := make(chan []analyzer.FunctionRelation, numCPU)
-	var wg sync.WaitGroup
-
-	// Process in parallel
-	for i := 0; i < numCPU; i++ {
-		start := i * chunkSize
-		end := start + chunkSize
-		if end > len(functions) {
-			end = len(functions)
-		}
-		if start >= end {
-			break
-		}
-
-		wg.Add(1)
-		go func(start, end int) {
-			defer wg.Done()
-			var relations []analyzer.FunctionRelation
-			for j := start; j < end; j++ {
-				fn := functions[j]
-				var called []analyzer.FunctionInfo
-				for _, call := range fn.Calls {
-					if calledFn, exists := funcMap[call]; exists {
-						// Check if it's a user-defined call
-						if dotIndex := strings.Index(call, "."); dotIndex != -1 {
-							if userPrefixes[call[:dotIndex]] {
-								called = append(called, calledFn)
-							}
-						}
-					}
-				}
-				relation := analyzer.FunctionRelation{
-					Name:     fn.Name,
-					Line:     fn.Line,
-					FilePath: fn.FilePath,
-					Called:   called,
-				}
-				relations = append(relations, relation)
-			}
-			results <- relations
-		}(start, end)
-	}
-
-	// Close channel after all goroutines finish
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	// Collect all relations
-	var allRelations []analyzer.FunctionRelation
-	for relations := range results {
-		allRelations = append(allRelations, relations...)
-	}
-
-	// Sort by name
-	sort.Slice(allRelations, func(i, j int) bool {
-		return allRelations[i].Name < allRelations[j].Name
-	})
-
-	// Prepare simplified output structure that omits empty "called" and excludes the "Calls" field
-	type outCalled struct {
-		Name     string `json:"name"`
-		Line     int    `json:"line"`
-		FilePath string `json:"filePath"`
-	}
-	type outRel struct {
-		Name     string      `json:"name"`
-		Line     int         `json:"line"`
-		FilePath string      `json:"filePath"`
-		Called   []outCalled `json:"called,omitempty"`
-	}
-
-	out := make([]outRel, 0, len(allRelations))
-	for _, r := range allRelations {
-		if len(r.Called) == 0 {
-			// skip functions with no called entries
-			continue
-		}
-		o := outRel{
-			Name:     r.Name,
-			Line:     r.Line,
-			FilePath: r.FilePath,
-		}
-		for _, c := range r.Called {
-			o.Called = append(o.Called, outCalled{Name: c.Name, Line: c.Line, FilePath: c.FilePath})
-		}
-		out = append(out, o)
-	}
-
-	// Write to JSON
-	data, err := json.MarshalIndent(out, "", "  ")
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-
-	err = os.WriteFile("functionmap.json", data, 0644)
-	if err != nil {
-		fmt.Println("Error writing file:", err)
-		return
-	}
-
-	fmt.Println("functionmap.json created successfully")
-}
+// legacy buildFunctionMap removed: functionality now in analyzer.BuildRelations

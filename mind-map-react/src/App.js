@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import Navbar from './components/Navbar';
+import './components/Navbar.css';
 import MindMap from './components/MindMap';
 import './App.css';
 
@@ -186,26 +188,16 @@ function App() {
   }, [handleDrop, handleDragEnter, handleDragLeave, handleDragOver]);
 
   return (
-    <div 
-      className="App"
-      ref={appRef}
-    >
+    <div className="App" ref={appRef}>
+      <Navbar onReload={useServer ? () => fetch('http://localhost:8080/api/reload', {method:'POST'}).then(()=>fetchPage(1,pageSize)) : null} />
       <header className="app-header">
         <h1>Function Mind Map</h1>
         <div className="header-content">
           <p>Visualize your Go application's function call hierarchy</p>
           <div className="file-input-section">
             <span className="current-file">Current: {fileName}</span>
-            <label htmlFor="file-input" className="file-input-label">
-              Choose JSON File
-            </label>
-            <input
-              id="file-input"
-              type="file"
-              accept=".json,application/json"
-              onChange={handleFileSelect}
-              className="file-input"
-            />
+            <label htmlFor="file-input" className="file-input-label">Choose JSON File</label>
+            <input id="file-input" type="file" accept=".json,application/json" onChange={handleFileSelect} className="file-input" />
             <label className="server-toggle">
               <input
                 type="checkbox"
@@ -213,7 +205,6 @@ function App() {
                 onChange={(e) => {
                   setUseServer(e.target.checked);
                   if (!e.target.checked) {
-                    // revert to default data
                     setFunctionData(defaultEmployeeAppData);
                     setFileName('EmployeeApp (Default)');
                     setSelectedNode(null);

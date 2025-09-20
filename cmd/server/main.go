@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -52,6 +53,52 @@ func main() {
 		}
 		writeJSON(w, map[string]any{"status": "reloaded", "loadedAt": global.loadedAt})
 	})
+
+	// Root overview page now lives in mind-map-react/public/overview.html
+	publicOverview := filepath.Join(repoPath, "mind-map-react", "public", "overview.html")
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") { // do not hijack API
+			http.NotFound(w, r)
+			return
+		}
+		if r.URL.Path != "/" && r.URL.Path != "" { // only exact root
+			http.NotFound(w, r)
+			return
+		}
+		if _, err := os.Stat(publicOverview); err == nil {
+			http.ServeFile(w, r, publicOverview)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("overview page not found (build not required, ensure overview.html exists)"))
+	})
+
+	// React build served at /view/* (mind-map-react/build)
+	reactBuild := filepath.Join(repoPath, "mind-map-react", "build")
+	if st, err := os.Stat(reactBuild); err == nil && st.IsDir() {
+		// Wrap to provide SPA fallback
+		http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
+			// Try to serve static asset
+			// strip /view/
+			rel := strings.TrimPrefix(r.URL.Path, "/view/")
+			if rel == "" { // root of SPA
+				http.ServeFile(w, r, filepath.Join(reactBuild, "index.html"))
+				return
+			}
+			candidate := filepath.Join(reactBuild, rel)
+			if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+				http.ServeFile(w, r, candidate)
+				return
+			}
+			// fallback to index.html for client routing
+			http.ServeFile(w, r, filepath.Join(reactBuild, "index.html"))
+		})
+		// Also serve static assets without /view prefix if CRA build placed hashed assets in root of build
+		fileServer := http.FileServer(neuteredFileSystem{http.Dir(reactBuild)})
+		http.Handle("/view/static/", http.StripPrefix("/view", fileServer))
+	} else {
+		log.Printf("react build not found at %s (run npm run build in mind-map-react)", reactBuild)
+	}
 
 	log.Printf("server listening on %s", addr)
 	log.Fatal(http.ListenAndServe(addr, corsMiddleware(http.DefaultServeMux)))
@@ -319,4 +366,22 @@ func corsMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// neuteredFileSystem prevents directory listing (optional hardening for static assets)
+type neuteredFileSystem struct{ fs http.FileSystem }
+
+func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
+	f, err := nfs.fs.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	if stat, err := f.Stat(); err == nil && stat.IsDir() {
+		// If directory, look for index.html else block listing
+		index := filepath.Join(path, "index.html")
+		if _, err := nfs.fs.Open(index); err != nil {
+			return nil, fs.ErrPermission
+		}
+	}
+	return f, nil
 }

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoMindMapper – Overview</title>
+  <meta name="description" content="Go function call graph analyzer and interactive mind map" />
+  <style>
+    :root { --bg:#0f0f0f; --surface:#181818; --surface-alt:#1f1f1f; --border:#2a2a2a; --text:#e5e5e5; --muted:#9b9b9b; --accent:#6366f1; --accent-grad:linear-gradient(135deg,#6366f1,#8b5cf6 60%, #ec4899); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Ubuntu,sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    header { padding:48px 28px 24px; max-width:1180px; margin:0 auto; }
+    .badge { display:inline-block; padding:4px 10px; font-size:12px; border:1px solid var(--border); border-radius:999px; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); }
+    h1 { font-size:48px; line-height:1.05; margin:18px 0 20px; background:var(--accent-grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    p.lead { font-size:18px; max-width:720px; line-height:1.45; color:#d0d0d0; }
+    nav.top { position:sticky; top:0; backdrop-filter:saturate(140%) blur(12px); background:rgba(15,15,15,0.78); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:10px 26px; z-index:50; }
+    nav.top a { text-decoration:none; color:var(--muted); font-size:14px; padding:8px 12px; border-radius:6px; }
+    nav.top a:hover { background:#1e1e1e; color:#fff; }
+    nav.top .brand { font-weight:600; color:#fff; letter-spacing:.5px; }
+    .button-row { margin-top:34px; display:flex; gap:16px; flex-wrap:wrap; }
+    .btn { background:var(--surface-alt); border:1px solid var(--border); color:#fff; padding:14px 26px; font-size:14px; font-weight:500; border-radius:10px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+    .btn.primary { background:var(--accent-grad); border:none; }
+    .btn:hover { filter:brightness(1.08); }
+    main { max-width:1180px; margin:0 auto; padding:10px 28px 120px; }
+    section { margin-top:70px; }
+    section h2 { font-size:30px; margin:0 0 24px; letter-spacing:.5px; }
+    .grid { display:grid; gap:28px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+    .card { background:var(--surface); border:1px solid var(--border); padding:22px 22px 24px; border-radius:14px; }
+    .card h3 { margin:0 0 10px; font-size:17px; }
+    .card p { margin:0; font-size:13.5px; line-height:1.5; color:#c1c1c1; }
+    code.inline { background:#222; border:1px solid #2d2d2d; padding:2px 6px; border-radius:6px; font-size:12px; color:#d6d6d6; }
+    pre { background:#101010; border:1px solid #1e1e1e; padding:16px 18px; border-radius:12px; overflow:auto; font-size:13px; line-height:1.5; }
+    .two-col { display:grid; gap:42px; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); }
+    footer { text-align:center; padding:40px 10px 70px; color:var(--muted); font-size:12px; }
+    .border-block { border:1px solid var(--border); padding:26px 28px 30px; border-radius:18px; background:linear-gradient(145deg,#151515,#121212); }
+    ul.feat { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+    ul.feat li { background:#1b1b1b; border:1px solid #242424; padding:10px 14px; border-radius:8px; font-size:13px; color:#d5d5d5; }
+    a.inline { color:var(--accent); text-decoration:none; }
+    a.inline:hover { text-decoration:underline; }
+    @media (max-width:760px){ h1 { font-size:40px; } header { padding-top:36px; } }
+  </style>
+</head>
+<body>
+  <nav class="top">
+    <div style="display:flex;align-items:center;gap:24px">
+      <a href="/" class="brand">GoMindMapper</a>
+      <a href="/">Overview</a>
+      <a href="/view/">Mind Map</a>
+      <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer">GitHub</a>
+    </div>
+    <div>
+      <a href="/view/" class="btn" style="padding:8px 18px; font-size:12px;">Open Map →</a>
+    </div>
+  </nav>
+  <header>
+    <div class="badge">Alpha</div>
+    <h1>Understand your Go code<br/>through an interactive mind map.</h1>
+    <p class="lead">GoMindMapper scans a Go repository, filters noise & framework chatter, then serves a navigable function call graph. Switch between offline JSON snapshots or a live API with pagination across entrypoint roots.</p>
+    <div class="button-row">
+      <a href="/view/" class="btn primary">Launch Mind Map →</a>
+      <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" class="btn">GitHub</a>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>Why</h2>
+      <div class="two-col">
+        <div class="border-block">
+          <p style="margin-top:0;font-size:14px;line-height:1.55;color:#d2d2d2">Reading a large Go service by hopping files is slow. Architects want a high‑level dependency picture while contributors need local, expandable context. Existing tools either over‑simplify (just a list) or overwhelm (full static graph). GoMindMapper returns curated slices: a page of root functions plus the full closure below each—interactive & incremental.</p>
+        </div>
+        <div class="border-block">
+          <ul class="feat">
+            <li>Noise reduction: user→user edges only</li>
+            <li>Pagination across true entrypoints</li>
+            <li>Zoom / pan / expand drill‑down</li>
+            <li>Offline JSON or live API mode</li>
+            <li>Dark ergonomic interface</li>
+            <li>Future: search, metrics, exports</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Quick Start</h2>
+      <div class="two-col">
+        <div class="card">
+          <h3>1. Build & Run</h3>
+          <pre><code>go run cmd/server/main.go -path . -addr :8080
+
+# (optional) React build
+cd mind-map-react
+npm install
+npm run build
+
+# browse http://localhost:8080/</code></pre>
+        </div>
+        <div class="card">
+          <h3>2. Use the Map</h3>
+          <p>Toggle <code class="inline">Use Live Server</code> for paginated data or upload a previously generated <code class="inline">functionmap.json</code>. Pan (drag background), zoom (wheel), expand nodes, inspect details on the side panel.</p>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Architecture</h2>
+      <div class="card" style="margin-top:0">
+<pre><code>Analyzer (cmd/main.go)
+  ↳ writes functions.json / functionmap.json
+Server (cmd/server/main.go)
+  ↳ in-memory cache, pagination, reload
+React (/view)
+  ↳ mind map explorer (BrowserRouter basename)</code></pre>
+      </div>
+    </section>
+    <section>
+      <h2>Roadmap (Excerpt)</h2>
+      <div class="grid">
+        <div class="card"><h3>Search</h3><p>Endpoint + UI for name / fuzzy lookup of functions; focus map on match.</p></div>
+        <div class="card"><h3>Metrics Overlay</h3><p>Display fan‑in / fan‑out badges & heat colors for hotspots.</p></div>
+        <div class="card"><h3>Incremental Watch</h3><p>File watcher updates only changed functions to keep cache fresh.</p></div>
+        <div class="card"><h3>Export Formats</h3><p>GraphML / DOT / CSV for external analysis or knowledge bases.</p></div>
+      </div>
+    </section>
+  </main>
+  <footer>MIT Licensed • <a class="inline" href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer">GitHub Repo</a></footer>
+</body>
+</html>

@@ -8,25 +8,25 @@ const ScreenshotSlideshow = () => {
   // In a real scenario, these would be actual screenshot URLs from the repository
   const screenshots = [
     {
-      url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png', // The one existing screenshot in the repo
+      url: 'https://raw.githubusercontent.com/chinmay-sawant/gomindmapper/refs/heads/notiontypewebsite/screenshots/view.png', // The one existing screenshot in the repo
       title: 'Interactive Mind Map View',
       description: 'Visualize your Go function call hierarchy with an interactive, expandable mind map interface.'
     },
-    {
-      url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
-      title: 'Overview Dashboard',
-      description: 'Get started with GoMindMapper through a clean, intuitive overview of your project structure.'
-    },
-    {
-      url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
-      title: 'Function Details Panel',
-      description: 'Click on any function node to view detailed information including file path, line numbers, and call relationships.'
-    },
-    {
-      url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
-      title: 'Live Server Integration',
-      description: 'Connect to your live Go server for real-time function mapping and pagination through large codebases.'
-    }
+    // {
+    //   url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
+    //   title: 'Overview Dashboard',
+    //   description: 'Get started with GoMindMapper through a clean, intuitive overview of your project structure.'
+    // },
+    // {
+    //   url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
+    //   title: 'Function Details Panel',
+    //   description: 'Click on any function node to view detailed information including file path, line numbers, and call relationships.'
+    // },
+    // {
+    //   url: 'https://raw.githubusercontent.com/chinmay-sawant/gopdfsuit/refs/heads/master/screenshots/1.png',
+    //   title: 'Live Server Integration',
+    //   description: 'Connect to your live Go server for real-time function mapping and pagination through large codebases.'
+    // }
   ];
 
   const nextSlide = () => {

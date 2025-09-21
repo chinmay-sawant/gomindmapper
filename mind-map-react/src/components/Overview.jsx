@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from './Navbar';
 import ScreenshotSlideshow from './ScreenshotSlideshow';
+import ComparisonTable from './ComparisonTable';
 import './Overview.css';
 
 const Overview = () => {
@@ -23,6 +24,8 @@ const Overview = () => {
       </header>
 
       <ScreenshotSlideshow />
+
+      <ComparisonTable />
 
       <main className="main-content">
         <section className="why-section">

@@ -54,24 +54,9 @@ func main() {
 		writeJSON(w, map[string]any{"status": "reloaded", "loadedAt": global.loadedAt})
 	})
 
-	// Root overview page now lives in mind-map-react/public/overview.html
-	publicOverview := filepath.Join(repoPath, "mind-map-react", "public", "overview.html")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") { // do not hijack API
-			http.NotFound(w, r)
-			return
-		}
-		if r.URL.Path != "/" && r.URL.Path != "" { // only exact root
-			http.NotFound(w, r)
-			return
-		}
-		if _, err := os.Stat(publicOverview); err == nil {
-			http.ServeFile(w, r, publicOverview)
-			return
-		}
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte("overview page not found (build not required, ensure overview.html exists)"))
-	})
+	// Serve docs folder at root
+	docsDir := filepath.Join(repoPath, "docs")
+	http.Handle("/", http.FileServer(http.Dir(docsDir)))
 
 	// React build served at /view/* (mind-map-react/build)
 	reactBuild := filepath.Join(repoPath, "mind-map-react", "build")

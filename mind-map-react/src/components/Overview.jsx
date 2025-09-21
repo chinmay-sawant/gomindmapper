@@ -57,14 +57,7 @@ const Overview = () => {
           <div className="two-col">
             <div className="card">
               <h3>1. Build & Run</h3>
-              <pre><code>go run cmd/server/main.go -path . -addr :8080
-
-# (optional) React build
-cd mind-map-react
-npm install
-npm run build
-
-# browse http://localhost:8080/</code></pre>
+              <pre><code>go run cmd/server/main.go -path . -addr :8080</code></pre>
             </div>
             <div className="card">
               <h3>2. Use the Map</h3>

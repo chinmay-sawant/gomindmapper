@@ -283,6 +283,7 @@ pre {
   line-height: 1.5;
   margin: 0;
   color: var(--text-primary);
+  white-space: pre-wrap;
 }
 
 .inline-code {

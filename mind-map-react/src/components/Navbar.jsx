@@ -27,7 +27,7 @@ const ThemeToggle = () => {
   );
 };
 
-export default function Navbar({ onReload }) {
+export default function Navbar({ onReload, onDownload }) {
   const loc = useLocation();
   const isActive = (to) => loc.pathname === to || (to !== '/' && loc.pathname.startsWith(to));
 
@@ -65,6 +65,11 @@ export default function Navbar({ onReload }) {
       </div>
       <div className="nav-right">
         <ThemeToggle />
+        {onDownload && (
+          <a href={onDownload} download="function_relations.json" className="download-btn" title="Download cached relations data">
+            Download Data
+          </a>
+        )}
         {onReload && (
           <button className="reload-btn" onClick={onReload} title="POST /api/reload and refetch">
             Reload Scan

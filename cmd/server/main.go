@@ -54,6 +54,12 @@ func main() {
 		writeJSON(w, map[string]any{"status": "reloaded", "loadedAt": global.loadedAt})
 	})
 
+	http.HandleFunc("/api/download", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Disposition", "attachment; filename=function_relations.json")
+		writeJSON(w, global.relations)
+	})
+
 	// Serve docs folder at root
 	docsDir := filepath.Join(repoPath, "docs")
 	http.Handle("/", http.FileServer(http.Dir(docsDir)))

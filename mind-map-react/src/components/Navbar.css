@@ -115,6 +115,24 @@
 }
 .reload-btn:active { transform: translateY(1px); }
 
+.download-btn {
+	background: var(--btn-secondary-bg);
+	color: var(--btn-secondary-text);
+	font-size: 12px;
+	font-weight: 500;
+	padding: 6px 14px;
+	border: 1px solid var(--btn-secondary-border);
+	border-radius: 6px;
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.download-btn:hover { 
+	background: var(--btn-secondary-hover); 
+	border-color: var(--border-primary); 
+	color: var(--text-primary);
+}
+
 @media (max-width: 720px) {
 	.nav-links { display: none; }
 	.nav-root { justify-content: space-between; }

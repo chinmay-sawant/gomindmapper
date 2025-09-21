@@ -200,7 +200,7 @@ function MindMapApp() {
 
   return (
     <div className="App" ref={appRef}>
-      <Navbar onReload={useServer ? () => fetch(`${window.location.origin}/api/reload`, {method:'POST'}).then(()=>fetchPage(1,pageSize)) : null} />
+      <Navbar onReload={useServer ? () => fetch(`${window.location.origin}/api/reload`, {method:'POST'}).then(()=>fetchPage(1,pageSize)) : null} onDownload={useServer ? `${window.location.origin}/api/download` : null} />
       <header className="app-header">
         <h1>Function Mind Map</h1>
         <div className="header-content">

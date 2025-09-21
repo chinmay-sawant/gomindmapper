@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +14,7 @@ import (
 	"time"
 
 	"github.com/chinmay-sawant/gomindmapper/cmd/analyzer"
+	"github.com/gin-gonic/gin"
 )
 
 // cache holds the in-memory representation of relations + index for quick lookups.
@@ -41,58 +40,59 @@ func main() {
 		log.Fatalf("initial load failed: %v", err)
 	}
 
-	http.HandleFunc("/api/relations", handleRelations)
-	http.HandleFunc("/api/reload", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
+	// Create Gin router
+	router := gin.Default()
+
+	// Add CORS middleware
+	router.Use(corsMiddleware())
+
+	// API routes
+	router.GET("/api/relations", handleRelations)
+	router.POST("/api/reload", func(c *gin.Context) {
 		if err := load(repoPath); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		writeJSON(w, map[string]any{"status": "reloaded", "loadedAt": global.loadedAt})
+		c.JSON(http.StatusOK, gin.H{"status": "reloaded", "loadedAt": global.loadedAt})
 	})
 
-	http.HandleFunc("/api/download", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Content-Disposition", "attachment; filename=function_relations.json")
-		writeJSON(w, global.relations)
+	router.GET("/api/download", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+		c.Header("Content-Disposition", "attachment; filename=function_relations.json")
+		c.JSON(http.StatusOK, global.relations)
 	})
 
-	// Serve docs folder at root
+	// Serve docs folder at /docs
 	docsDir := filepath.Join(repoPath, "docs")
-	http.Handle("/", http.FileServer(http.Dir(docsDir)))
+	router.Static("/docs", docsDir)
 
-	// React build served at /view/* (mind-map-react/build)
-	reactBuild := filepath.Join(repoPath, "mind-map-react", "build")
-	if st, err := os.Stat(reactBuild); err == nil && st.IsDir() {
-		// Wrap to provide SPA fallback
-		http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
-			// Try to serve static asset
-			// strip /view/
-			rel := strings.TrimPrefix(r.URL.Path, "/view/")
-			if rel == "" { // root of SPA
-				http.ServeFile(w, r, filepath.Join(reactBuild, "index.html"))
-				return
-			}
-			candidate := filepath.Join(reactBuild, rel)
-			if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
-				http.ServeFile(w, r, candidate)
-				return
-			}
-			// fallback to index.html for client routing
-			http.ServeFile(w, r, filepath.Join(reactBuild, "index.html"))
-		})
-		// Also serve static assets without /view prefix if CRA build placed hashed assets in root of build
-		fileServer := http.FileServer(neuteredFileSystem{http.Dir(reactBuild)})
-		http.Handle("/view/static/", http.StripPrefix("/view", fileServer))
-	} else {
-		log.Printf("react build not found at %s (run npm run build in mind-map-react)", reactBuild)
-	}
+	// Serve docs files at root
+	router.GET("/", func(c *gin.Context) {
+		c.File(filepath.Join(docsDir, "index.html"))
+	})
+
+	// Serve static assets
+	router.Static("/assets", filepath.Join(docsDir, "assets"))
+
+	// Serve assets at /gomindmapper/assets/ path for HTML compatibility
+	router.Static("/gomindmapper/assets", filepath.Join(docsDir, "assets"))
+
+	// Add routes for /gomindmapper/ path - serve docs content
+	router.GET("/gomindmapper", func(c *gin.Context) {
+		c.File(filepath.Join(docsDir, "index.html"))
+	})
+	router.GET("/gomindmapper/", func(c *gin.Context) {
+		c.File(filepath.Join(docsDir, "index.html"))
+	})
+	router.GET("/gomindmapper/view", func(c *gin.Context) {
+		c.File(filepath.Join(docsDir, "index.html"))
+	})
+	router.GET("/gomindmapper/view/*path", func(c *gin.Context) {
+		c.File(filepath.Join(docsDir, "index.html"))
+	})
 
 	log.Printf("server listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, corsMiddleware(http.DefaultServeMux)))
+	log.Fatal(router.Run(addr))
 }
 
 // load (re)scans repository, rebuilds structures and populates cache.
@@ -216,12 +216,12 @@ func filterCalls(functions []analyzer.FunctionInfo) {
 // handleRelations returns paginated root relations with full dependency closure for each root on the page.
 // Query params: page (1-based), pageSize
 // Response: { page, pageSize, totalRoots, roots: [...root names...], data: [OutRelation ...] }
-func handleRelations(w http.ResponseWriter, r *http.Request) {
+func handleRelations(c *gin.Context) {
 	global.mu.RLock()
 	defer global.mu.RUnlock()
-	page := parseInt(r.URL.Query().Get("page"), 1)
-	pageSize := parseInt(r.URL.Query().Get("pageSize"), 10)
-	includeInternals := strings.EqualFold(r.URL.Query().Get("includeInternals"), "true")
+	page := parseInt(c.Query("page"), 1)
+	pageSize := parseInt(c.Query("pageSize"), 10)
+	includeInternals := strings.EqualFold(c.Query("includeInternals"), "true")
 	if page < 1 {
 		page = 1
 	}
@@ -279,7 +279,7 @@ func handleRelations(w http.ResponseWriter, r *http.Request) {
 		return closure[i].Name < closure[j].Name
 	})
 
-	writeJSON(w, map[string]any{
+	c.JSON(http.StatusOK, gin.H{
 		"page":             page,
 		"pageSize":         pageSize,
 		"totalRoots":       totalRoots,
@@ -291,15 +291,6 @@ func handleRelations(w http.ResponseWriter, r *http.Request) {
 }
 
 // Helpers --------------------------------------------------------------------------------
-
-func writeJSON(w http.ResponseWriter, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(v); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
 
 func parseInt(s string, def int) int {
 	if s == "" {
@@ -346,33 +337,16 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 	return funcs, nil
 }
 
-// Basic CORS middleware
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if r.Method == http.MethodOptions {
+// Basic CORS middleware for Gin
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusOK)
 			return
 		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-// neuteredFileSystem prevents directory listing (optional hardening for static assets)
-type neuteredFileSystem struct{ fs http.FileSystem }
-
-func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
-	f, err := nfs.fs.Open(path)
-	if err != nil {
-		return nil, err
+		c.Next()
 	}
-	if stat, err := f.Stat(); err == nil && stat.IsDir() {
-		// If directory, look for index.html else block listing
-		index := filepath.Join(path, "index.html")
-		if _, err := nfs.fs.Open(index); err != nil {
-			return nil, fs.ErrPermission
-		}
-	}
-	return f, nil
 }

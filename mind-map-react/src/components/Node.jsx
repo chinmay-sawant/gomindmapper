@@ -39,16 +39,20 @@ const Node = ({
   // Create a more descriptive display name
   const getDisplayName = (node) => {
     const funcName = node.name.split('.').pop();
-    
-    // For main functions, add file context to distinguish them
-    if (node.name === 'main.main' && node.filePath) {
-      const pathParts = node.filePath.split('\\');
-      const projectName = pathParts.find(part => 
-        part && !part.includes('.go') && part !== 'cmd' && part !== 'main.go'
-      ) || pathParts[0];
-      return `${funcName} (${projectName})`;
+    if (node.name.endsWith('.main') && node.filePath) {
+      // Derive context folder name just before main.go
+      const parts = node.filePath.split(/\\|\//);
+      let ctx = '';
+      if (parts.length >= 2) {
+        // choose the directory containing main.go (previous segment)
+        ctx = parts[parts.length - 2];
+      }
+      if (!ctx || ctx === 'cmd') {
+        // fallback: pick first non-empty segment
+        ctx = parts.find(p => p && !p.endsWith('.go') && p !== 'cmd') || 'root';
+      }
+      return `${funcName} (${ctx})`;
     }
-    
     return funcName;
   };
   
@@ -62,6 +66,7 @@ const Node = ({
         e.stopPropagation();
         onSelect();
       }}
+      title={`${node.name}\n${node.filePath}:${node.line}`}
     >
       {/* Node background */}
       <rect

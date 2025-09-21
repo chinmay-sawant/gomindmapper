@@ -72,23 +72,39 @@ function MindMapApp() {
   const [useServer, setUseServer] = useState(false);
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const appRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   // Fetch paginated data from backend server
-  const fetchPage = useCallback(async (p = page, ps = pageSize) => {
+  const fetchPage = useCallback(async (p = page, ps = pageSize, query = '') => {
     if (!useServer) return;
     setLoading(true);
     setServerError('');
     try {
-      const res = await fetch(`${window.location.origin}/api/relations?page=${p}&pageSize=${ps}`);
+      const url = query 
+        ? `${window.location.origin}/api/search?q=${encodeURIComponent(query)}&page=${p}&pageSize=${ps}`
+        : `${window.location.origin}/api/relations?page=${p}&pageSize=${ps}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       // json.data is the closure; we use it directly for mind map
       setFunctionData(json.data || []);
-      setTotalRoots(json.totalRoots || 0);
+      if (query) {
+        // For search results, use totalResults for pagination
+        setTotalRoots(json.totalResults || 0);
+      } else {
+        // For normal pagination, use totalRoots
+        setTotalRoots(json.totalRoots || 0);
+      }
       setPage(json.page || p);
       setPageSize(json.pageSize || ps);
-      setFileName(`Server Roots Page ${json.page}`);
+      const label = query 
+        ? `Search: "${query}" (${json.totalResults || 0} matches, page ${json.page})` 
+        : `Server Roots Page ${json.page}`;
+      setFileName(label);
       setSelectedNode(null);
     } catch (e) {
       setServerError(e.message);
@@ -103,6 +119,52 @@ function MindMapApp() {
       fetchPage(page, pageSize);
     }
   }, [useServer, page, pageSize, fetchPage]);
+
+  // Clear search when switching off server mode
+  useEffect(() => {
+    if (!useServer) {
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  }, [useServer]);
+
+  // Search function with debouncing
+  const handleSearch = useCallback(async (query, immediate = false, searchPage = 1) => {
+    if (!useServer) return;
+    
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    const performSearch = async () => {
+      setIsSearching(true);
+      if (query.trim() === '') {
+        // If search is cleared, go back to paginated view
+        await fetchPage(1, pageSize);
+        setSearchResults([]);
+      } else {
+        // Perform search with pagination
+        await fetchPage(searchPage, pageSize, query.trim());
+      }
+      setIsSearching(false);
+    };
+    
+    if (immediate) {
+      await performSearch();
+    } else {
+      // Debounce search by 300ms
+      searchTimeoutRef.current = setTimeout(performSearch, 300);
+    }
+  }, [useServer, fetchPage, pageSize]);
+
+  // Handle search input changes with debouncing
+  const handleSearchInputChange = useCallback((newQuery) => {
+    setSearchQuery(newQuery);
+    // Reset to page 1 when search query changes
+    setPage(1);
+    handleSearch(newQuery, false, 1);
+  }, [handleSearch]);
 
   const handleFileUpload = useCallback((file) => {
     const reader = new FileReader();
@@ -195,6 +257,11 @@ function MindMapApp() {
       appElement.removeEventListener('dragenter', handleDragEnterNonPassive);
       appElement.removeEventListener('dragleave', handleDragLeaveNonPassive);
       appElement.removeEventListener('dragover', handleDragOverNonPassive);
+      
+      // Clear search timeout on cleanup
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
     };
   }, [handleDrop, handleDragEnter, handleDragLeave, handleDragOver]);
 
@@ -224,14 +291,95 @@ function MindMapApp() {
               /> Use Live Server
             </label>
             {useServer && (
-              <div className="pagination-bar">
-                <button className="pg-btn" disabled={loading || page<=1} onClick={() => setPage(p => Math.max(1, p-1))}>&lt;</button>
-                <div className="pg-status">Page {page} / {Math.max(1, Math.ceil(totalRoots / pageSize) || 1)}</div>
-                <button className="pg-btn" disabled={loading || page >= Math.ceil(totalRoots / pageSize)} onClick={() => setPage(p => p+1)}>&gt;</button>
-                <select className="pg-select" disabled={loading} value={pageSize} onChange={(e)=> { setPageSize(parseInt(e.target.value,10)); setPage(1); }}>
-                  {[5,10,15,20,50].map(n => <option key={n} value={n}>{n}/page</option>)}
-                </select>
-                <button className="pg-refresh" disabled={loading} onClick={() => fetchPage(page, pageSize)}>{loading ? '...' : 'Refresh'}</button>
+              <div className="server-controls">
+                <div className="search-bar">
+                  <input 
+                    type="text" 
+                    placeholder="Search functions..." 
+                    value={searchQuery} 
+                    onChange={(e) => handleSearchInputChange(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery, true, 1)}
+                    className="search-input"
+                    disabled={loading || isSearching}
+                  />
+                  <button 
+                    onClick={() => handleSearch(searchQuery, true, 1)} 
+                    disabled={loading || isSearching}
+                    className="search-btn"
+                  >
+                    {isSearching ? '...' : 'Search'}
+                  </button>
+                  {searchQuery && (
+                    <button 
+                      onClick={() => handleSearch('', true, 1)} 
+                      disabled={loading || isSearching}
+                      className="clear-search-btn"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="pagination-bar">
+                  <button 
+                    className="pg-btn" 
+                    disabled={loading || page<=1} 
+                    onClick={() => {
+                      const newPage = Math.max(1, page-1);
+                      setPage(newPage);
+                      if (searchQuery) {
+                        handleSearch(searchQuery, true, newPage);
+                      } else {
+                        fetchPage(newPage, pageSize);
+                      }
+                    }}
+                  >&lt;</button>
+                  <div className="pg-status">
+                    {searchQuery ? 'Search ' : ''}Page {page} / {Math.max(1, Math.ceil(totalRoots / pageSize) || 1)}
+                  </div>
+                  <button 
+                    className="pg-btn" 
+                    disabled={loading || page >= Math.ceil(totalRoots / pageSize)} 
+                    onClick={() => {
+                      const newPage = page + 1;
+                      setPage(newPage);
+                      if (searchQuery) {
+                        handleSearch(searchQuery, true, newPage);
+                      } else {
+                        fetchPage(newPage, pageSize);
+                      }
+                    }}
+                  >&gt;</button>
+                  <select 
+                    className="pg-select" 
+                    disabled={loading} 
+                    value={pageSize} 
+                    onChange={(e)=> { 
+                      const newPageSize = parseInt(e.target.value,10);
+                      setPageSize(newPageSize);
+                      setPage(1);
+                      if (searchQuery) {
+                        handleSearch(searchQuery, true, 1);
+                      } else {
+                        fetchPage(1, newPageSize);
+                      }
+                    }}
+                  >
+                    {[5,10,15,20,50].map(n => <option key={n} value={n}>{n}/page</option>)}
+                  </select>
+                  <button 
+                    className="pg-refresh" 
+                    disabled={loading} 
+                    onClick={() => {
+                      if (searchQuery) {
+                        handleSearch(searchQuery, true, page);
+                      } else {
+                        fetchPage(page, pageSize);
+                      }
+                    }}
+                  >
+                    {loading ? '...' : 'Refresh'}
+                  </button>
+                </div>
               </div>
             )}
           </div>

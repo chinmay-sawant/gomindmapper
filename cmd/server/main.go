@@ -48,6 +48,7 @@ func main() {
 
 	// API routes
 	router.GET("/api/relations", handleRelations)
+	router.GET("/api/search", handleSearch)
 	router.POST("/api/reload", func(c *gin.Context) {
 		if err := load(repoPath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -287,6 +288,127 @@ func handleRelations(c *gin.Context) {
 		"data":             closure,
 		"loadedAt":         global.loadedAt,
 		"includeInternals": includeInternals,
+	})
+}
+
+// handleSearch searches for functions by name and returns their dependency closure with pagination
+// Query params: q (search query), page (1-based), pageSize
+// Response: { query, page, pageSize, totalResults, matchingFunctions: [...], data: [OutRelation ...] }
+func handleSearch(c *gin.Context) {
+	global.mu.RLock()
+	defer global.mu.RUnlock()
+
+	query := strings.TrimSpace(c.Query("q"))
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "search query 'q' is required"})
+		return
+	}
+
+	// Parse pagination parameters
+	page := parseInt(c.Query("page"), 1)
+	pageSize := parseInt(c.Query("pageSize"), 10)
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 || pageSize > 200 {
+		pageSize = 10
+	}
+
+	// Convert query to lowercase for case-insensitive search
+	lowerQuery := strings.ToLower(query)
+
+	// First, try to find functions by name only (prioritized search)
+	var matchingFunctions []analyzer.OutRelation
+	for _, rel := range global.relations {
+		lowerName := strings.ToLower(rel.Name)
+		if strings.Contains(lowerName, lowerQuery) {
+			matchingFunctions = append(matchingFunctions, rel)
+		}
+	}
+
+	// If no results found in function names, search in both function names and file paths
+	if len(matchingFunctions) == 0 {
+		for _, rel := range global.relations {
+			lowerName := strings.ToLower(rel.Name)
+			lowerPath := strings.ToLower(rel.FilePath)
+			if strings.Contains(lowerName, lowerQuery) || strings.Contains(lowerPath, lowerQuery) {
+				matchingFunctions = append(matchingFunctions, rel)
+			}
+		}
+	}
+
+	// Sort matching functions for consistent pagination
+	sort.Slice(matchingFunctions, func(i, j int) bool {
+		if matchingFunctions[i].Name == matchingFunctions[j].Name {
+			return matchingFunctions[i].FilePath < matchingFunctions[j].FilePath
+		}
+		return matchingFunctions[i].Name < matchingFunctions[j].Name
+	})
+
+	// Apply pagination to matching functions
+	totalResults := len(matchingFunctions)
+	start := (page - 1) * pageSize
+	if start > totalResults {
+		start = totalResults
+	}
+	end := start + pageSize
+	if end > totalResults {
+		end = totalResults
+	}
+	paginatedMatches := matchingFunctions[start:end]
+
+	// Build dependency closure for paginated matching functions
+	closureMap := make(map[string]analyzer.OutRelation)
+	ck := func(name, file string) string { return name + "|" + file }
+
+	var collect func(name, file string)
+	collect = func(name, file string) {
+		k := ck(name, file)
+		if _, exists := closureMap[k]; exists {
+			return
+		}
+		rel, ok := global.index[k]
+		if !ok {
+			return
+		}
+		// Exclude internal functions from search results
+		if strings.HasPrefix(name, "analyzer.") || name == "main.findFunctions" || name == "main.load" {
+			for _, c := range rel.Called {
+				collect(c.Name, c.FilePath)
+			}
+			return
+		}
+		closureMap[k] = rel
+		for _, c := range rel.Called {
+			collect(c.Name, c.FilePath)
+		}
+	}
+
+	// Collect closure for each paginated matching function
+	for _, match := range paginatedMatches {
+		collect(match.Name, match.FilePath)
+	}
+
+	// Convert to slice and sort
+	var closure []analyzer.OutRelation
+	for _, v := range closureMap {
+		closure = append(closure, v)
+	}
+	sort.Slice(closure, func(i, j int) bool {
+		if closure[i].Name == closure[j].Name {
+			return closure[i].FilePath < closure[j].FilePath
+		}
+		return closure[i].Name < closure[j].Name
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"query":             query,
+		"page":              page,
+		"pageSize":          pageSize,
+		"totalResults":      totalResults,
+		"matchingFunctions": paginatedMatches,
+		"data":              closure,
+		"loadedAt":          global.loadedAt,
 	})
 }
 

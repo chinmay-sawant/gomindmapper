@@ -58,7 +58,7 @@ Scans a path (default `.`) collecting:
 
 Run:
 ```cmd
-cd /d "D:\Chinmay_Personal_Projects\GoMindMapper"
+cd /d "D:\GoMindMapper"
 go run cmd/main.go -path .
 ```
 Key outputs:
@@ -81,7 +81,7 @@ Static:
 
 Start server (after building frontend if you want the UI):
 ```cmd
-cd /d "D:\Chinmay_Personal_Projects\GoMindMapper"
+cd /d "D:\GoMindMapper"
 go run cmd/server/main.go -path . -addr :8080
 ```
 Browse:  
@@ -105,7 +105,7 @@ Features:
 
 Dev (hot reload):
 ```cmd
-cd /d "D:\Chinmay_Personal_Projects\GoMindMapper\mind-map-react"
+cd /d "D:\GoMindMapper\mind-map-react"
 npm install
 npm start
 ```

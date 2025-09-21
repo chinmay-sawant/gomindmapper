@@ -77,6 +77,8 @@ function MindMapApp() {
   const [isSearching, setIsSearching] = useState(false);
   const appRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const isTypingRef = useRef(false);
 
   // Fetch paginated data from backend server
   const fetchPage = useCallback(async (p = page, ps = pageSize, query = '') => {
@@ -111,14 +113,14 @@ function MindMapApp() {
     } finally {
       setLoading(false);
     }
-  }, [useServer, page, pageSize]);
+  }, [useServer]);
 
-  // Auto fetch when toggling useServer or page changes
+  // Auto fetch when toggling useServer or page changes (but not when there's an active search)
   useEffect(() => {
-    if (useServer) {
+    if (useServer && (!searchQuery || searchQuery.trim() === '')) {
       fetchPage(page, pageSize);
     }
-  }, [useServer, page, pageSize, fetchPage]);
+  }, [useServer, page, pageSize, fetchPage, searchQuery]);
 
   // Clear search when switching off server mode
   useEffect(() => {
@@ -138,25 +140,39 @@ function MindMapApp() {
     }
     
     const performSearch = async () => {
+      // Store the currently focused element before search
+      const activeElement = document.activeElement;
+      const wasFocusedOnSearchInput = activeElement === searchInputRef.current;
+      
       setIsSearching(true);
       if (query.trim() === '') {
-        // If search is cleared, go back to paginated view
+        // If search is cleared, go back to paginated view, use current pageSize
         await fetchPage(1, pageSize);
         setSearchResults([]);
       } else {
-        // Perform search with pagination
+        // Perform search with pagination, use current pageSize
         await fetchPage(searchPage, pageSize, query.trim());
       }
       setIsSearching(false);
+      
+      // Restore focus to search input if it was focused before
+      if (wasFocusedOnSearchInput && searchInputRef.current) {
+        // Use a small timeout to ensure the DOM has updated
+        setTimeout(() => {
+          if (searchInputRef.current && !isTypingRef.current) {
+            searchInputRef.current.focus();
+          }
+        }, 10);
+      }
     };
     
     if (immediate) {
       await performSearch();
     } else {
-      // Debounce search by 300ms
-      searchTimeoutRef.current = setTimeout(performSearch, 300);
+      // Increase debounce time to 1500ms to give more time for typing
+      searchTimeoutRef.current = setTimeout(performSearch, 1500);
     }
-  }, [useServer, fetchPage, pageSize]);
+  }, [useServer, fetchPage]);
 
   // Handle search input changes with debouncing
   const handleSearchInputChange = useCallback((newQuery) => {
@@ -294,13 +310,42 @@ function MindMapApp() {
               <div className="server-controls">
                 <div className="search-bar">
                   <input 
+                    ref={searchInputRef}
                     type="text" 
                     placeholder="Search functions..." 
                     value={searchQuery} 
-                    onChange={(e) => handleSearchInputChange(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery, true, 1)}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      isTypingRef.current = true;
+                      handleSearchInputChange(e.target.value);
+                      // Clear typing flag after a short delay
+                      setTimeout(() => {
+                        isTypingRef.current = false;
+                      }, 100);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        isTypingRef.current = false;
+                        handleSearch(searchQuery, true, 1);
+                      }
+                    }}
+                    onFocus={(e) => {
+                      e.stopPropagation();
+                      isTypingRef.current = true;
+                    }}
+                    onBlur={(e) => {
+                      e.stopPropagation();
+                      // Add delay before clearing typing flag to handle quick refocus
+                      setTimeout(() => {
+                        isTypingRef.current = false;
+                      }, 200);
+                    }}
                     className="search-input"
                     disabled={loading || isSearching}
+                    autoComplete="off"
                   />
                   <button 
                     onClick={() => handleSearch(searchQuery, true, 1)} 
@@ -309,9 +354,12 @@ function MindMapApp() {
                   >
                     {isSearching ? '...' : 'Search'}
                   </button>
-                  {searchQuery && (
+                  {searchQuery && searchQuery.trim() !== '' && (
                     <button 
-                      onClick={() => handleSearch('', true, 1)} 
+                      onClick={() => {
+                        setSearchQuery('');
+                        handleSearch('', true, 1);
+                      }} 
                       disabled={loading || isSearching}
                       className="clear-search-btn"
                     >
@@ -326,7 +374,7 @@ function MindMapApp() {
                     onClick={() => {
                       const newPage = Math.max(1, page-1);
                       setPage(newPage);
-                      if (searchQuery) {
+                      if (searchQuery && searchQuery.trim() !== '') {
                         handleSearch(searchQuery, true, newPage);
                       } else {
                         fetchPage(newPage, pageSize);
@@ -334,7 +382,7 @@ function MindMapApp() {
                     }}
                   >&lt;</button>
                   <div className="pg-status">
-                    {searchQuery ? 'Search ' : ''}Page {page} / {Math.max(1, Math.ceil(totalRoots / pageSize) || 1)}
+                    {searchQuery && searchQuery.trim() !== '' ? 'Search ' : ''}Page {page} / {Math.max(1, Math.ceil(totalRoots / pageSize) || 1)}
                   </div>
                   <button 
                     className="pg-btn" 
@@ -342,7 +390,7 @@ function MindMapApp() {
                     onClick={() => {
                       const newPage = page + 1;
                       setPage(newPage);
-                      if (searchQuery) {
+                      if (searchQuery && searchQuery.trim() !== '') {
                         handleSearch(searchQuery, true, newPage);
                       } else {
                         fetchPage(newPage, pageSize);
@@ -353,14 +401,14 @@ function MindMapApp() {
                     className="pg-select" 
                     disabled={loading} 
                     value={pageSize} 
-                    onChange={(e)=> { 
+                    onChange={async (e)=> { 
                       const newPageSize = parseInt(e.target.value,10);
                       setPageSize(newPageSize);
                       setPage(1);
-                      if (searchQuery) {
-                        handleSearch(searchQuery, true, 1);
+                      if (searchQuery && searchQuery.trim() !== '') {
+                        await handleSearch(searchQuery, true, 1);
                       } else {
-                        fetchPage(1, newPageSize);
+                        await fetchPage(1, newPageSize);
                       }
                     }}
                   >
@@ -370,7 +418,7 @@ function MindMapApp() {
                     className="pg-refresh" 
                     disabled={loading} 
                     onClick={() => {
-                      if (searchQuery) {
+                      if (searchQuery && searchQuery.trim() !== '') {
                         handleSearch(searchQuery, true, page);
                       } else {
                         fetchPage(page, pageSize);

@@ -218,17 +218,27 @@ body {
   flex: 1;
   background: var(--bg-primary);
   color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  outline: none;
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  caret-color: var(--text-primary);
 }
 
 .search-input:focus {
+  background: var(--bg-tertiary);
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  caret-color: var(--text-primary);
+}
+
+.search-input:focus-within {
+  background: var(--bg-tertiary);
+}
+
+.search-input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .search-input:disabled {

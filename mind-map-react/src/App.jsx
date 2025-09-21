@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import './components/Navbar.css';
+import Overview from './components/Overview';
 import MindMap from './components/MindMap';
 import './App.css';
 
@@ -48,6 +50,15 @@ const defaultEmployeeAppData = [
 ];
 
 function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Overview />} />
+      <Route path="/view/*" element={<MindMapApp />} />
+    </Routes>
+  );
+}
+
+function MindMapApp() {
   const [functionData, setFunctionData] = useState(defaultEmployeeAppData);
   const [selectedNode, setSelectedNode] = useState(null);
   const [fileName, setFileName] = useState('EmployeeApp (Default)');

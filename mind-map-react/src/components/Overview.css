@@ -1,22 +1,41 @@
-/* Overview.css */
-:root {
-  --bg: #0f0f0f;
-  --surface: #181818;
-  --surface-alt: #1f1f1f;
-  --border: #2a2a2a;
-  --text: #e5e5e5;
-  --muted: #9b9b9b;
-  --accent: #6366f1;
-  --accent-grad: linear-gradient(135deg, #6366f1, #8b5cf6 60%, #ec4899);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Ubuntu, sans-serif;
-}
-
+/* Overview.css - Using global theme variables */
 .overview-container {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Ubuntu, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.overview-content {
+  overflow-y: auto;
+  padding-top: 60px; /* Account for fixed navbar */
+}
+
+/* Custom scrollbar styles to match theme */
+.overview-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overview-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.overview-content::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+.overview-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Firefox scrollbar */
+.overview-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-secondary);
 }
 
 .overview-container * {
@@ -92,28 +111,28 @@
   display: inline-block;
   padding: 4px 10px;
   font-size: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-primary);
   border-radius: 999px;
   letter-spacing: .5px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  transition: all 0.2s ease;
 }
 
 .hero-section h1 {
   font-size: 48px;
   line-height: 1.05;
   margin: 18px 0 20px;
-  background: var(--accent-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .lead {
   font-size: 18px;
   max-width: 720px;
   line-height: 1.45;
-  color: #d0d0d0;
+  color: var(--text-secondary);
 }
 
 .button-row {
@@ -124,9 +143,9 @@
 }
 
 .btn {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  color: #fff;
+  background: var(--btn-secondary-bg);
+  border: 1px solid var(--btn-secondary-border);
+  color: var(--btn-secondary-text);
   padding: 14px 26px;
   font-size: 14px;
   font-weight: 500;
@@ -136,15 +155,23 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .btn.primary {
-  background: var(--accent-grad);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border: none;
 }
 
 .btn:hover {
-  filter: brightness(1.08);
+  background: var(--btn-secondary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn.primary:hover {
+  background: var(--btn-primary-hover);
 }
 
 /* Main Content */
@@ -162,6 +189,7 @@
   font-size: 30px;
   margin: 0 0 24px;
   letter-spacing: .5px;
+  color: var(--text-primary);
 }
 
 /* Two Column Layout */
@@ -173,30 +201,38 @@
 
 /* Cards */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
   padding: 22px 22px 24px;
   border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
 }
 
 .card h3 {
   margin: 0 0 10px;
   font-size: 17px;
+  color: var(--text-primary);
 }
 
 .card p {
   margin: 0;
   font-size: 13.5px;
   line-height: 1.5;
-  color: #c1c1c1;
+  color: var(--text-secondary);
 }
 
 /* Border Block */
 .border-block {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-primary);
   padding: 26px 28px 30px;
   border-radius: 18px;
-  background: linear-gradient(145deg, #151515, #121212);
+  background: var(--bg-secondary);
+  transition: all 0.2s ease;
 }
 
 .border-block p {
@@ -216,33 +252,40 @@
 }
 
 .feat-list li {
-  background: #1b1b1b;
-  border: 1px solid #242424;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
-  color: #d5d5d5;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.feat-list li:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-primary);
 }
 
 /* Code Styles */
 pre {
-  background: #101010;
-  border: 1px solid #1e1e1e;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
   padding: 16px 18px;
   border-radius: 12px;
   overflow: auto;
   font-size: 13px;
   line-height: 1.5;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .inline-code {
-  background: #222;
-  border: 1px solid #2d2d2d;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
   padding: 2px 6px;
   border-radius: 6px;
   font-size: 12px;
-  color: #d6d6d6;
+  color: var(--text-primary);
 }
 
 /* Grid Layout */
@@ -256,16 +299,18 @@ pre {
 .footer {
   text-align: center;
   padding: 40px 10px 70px;
-  color: var(--muted);
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
 .inline-link {
-  color: var(--accent);
+  color: var(--text-primary);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .inline-link:hover {
+  color: var(--text-secondary);
   text-decoration: underline;
 }
 

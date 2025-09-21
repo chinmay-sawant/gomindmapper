@@ -1,11 +1,12 @@
 .mind-map-container {
   width: 100%;
   height: 100%;
-  background-color: #1a1a1a;
+  background-color: var(--bg-primary);
   position: relative;
   overflow: hidden;
   cursor: grab;
   user-select: none;
+  transition: background-color 0.2s ease;
 }
 
 .mind-map-container:active {
@@ -31,7 +32,7 @@
 }
 
 .connection-line {
-  stroke: #6b7280;
+  stroke: var(--text-tertiary);
   stroke-width: 2;
   fill: none;
   opacity: 0.8;
@@ -39,7 +40,7 @@
 }
 
 .connection-line:hover {
-  stroke: #9ca3af;
+  stroke: var(--text-secondary);
   opacity: 1;
 }
 
@@ -104,10 +105,10 @@
 .zoom-btn, .reset-btn, .collapse-btn {
   width: 40px;
   height: 40px;
-  border: 1px solid #404040;
+  border: 1px solid var(--btn-secondary-border);
   border-radius: 8px;
-  background-color: #2d2d2d;
-  color: #e5e5e5;
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -124,8 +125,9 @@
 }
 
 .zoom-btn:hover, .reset-btn:hover, .collapse-btn:hover {
-  background-color: #404040;
-  border-color: #555;
+  background-color: var(--btn-secondary-hover);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -134,13 +136,14 @@
 }
 
 .collapse-btn {
-  background-color: #dc2626;
-  border-color: #ef4444;
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
 }
 
 .collapse-btn:hover {
-  background-color: #b91c1c;
-  border-color: #dc2626;
+  background-color: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
 }
 
 /* Function type specific styles */

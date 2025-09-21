@@ -1,3 +1,93 @@
+/* CSS Custom Properties for Notion-style theming */
+:root[data-theme="light"] {
+  /* Backgrounds */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f5;
+  --bg-tertiary: #f1f1ef;
+  --bg-hover: rgba(55, 53, 47, 0.08);
+  --bg-selected: rgba(55, 53, 47, 0.16);
+  
+  /* Text colors */
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --text-tertiary: #9b9a97;
+  --text-inverse: #ffffff;
+  
+  /* Borders */
+  --border-primary: rgba(55, 53, 47, 0.16);
+  --border-secondary: rgba(55, 53, 47, 0.09);
+  
+  /* Buttons */
+  --btn-primary-bg: #37352f;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #2f2e29;
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: var(--text-primary);
+  --btn-secondary-hover: var(--bg-hover);
+  --btn-secondary-border: var(--border-primary);
+  
+  /* Shadows */
+  --shadow-sm: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+  --shadow-md: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.2) 0px 3px 6px, rgba(15, 15, 15, 0.4) 0px 9px 24px;
+}
+
+/* Custom scrollbar styles for the entire app */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-secondary);
+}
+
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary: #191919;
+  --bg-secondary: #2f3437;
+  --bg-tertiary: #373c41;
+  --bg-hover: rgba(255, 255, 255, 0.055);
+  --bg-selected: rgba(255, 255, 255, 0.11);
+  
+  /* Text colors */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --text-inverse: #191919;
+  
+  /* Borders */
+  --border-primary: rgba(255, 255, 255, 0.13);
+  --border-secondary: rgba(255, 255, 255, 0.07);
+  
+  /* Buttons */
+  --btn-primary-bg: rgba(255, 255, 255, 0.9);
+  --btn-primary-text: #191919;
+  --btn-primary-hover: rgba(255, 255, 255, 0.95);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: var(--text-primary);
+  --btn-secondary-hover: var(--bg-hover);
+  --btn-secondary-border: var(--border-primary);
+  
+  /* Shadows */
+  --shadow-sm: rgba(0, 0, 0, 0.2) 0px 0px 0px 1px, rgba(0, 0, 0, 0.3) 0px 3px 6px, rgba(0, 0, 0, 0.4) 0px 9px 24px;
+  --shadow-md: rgba(0, 0, 0, 0.3) 0px 0px 0px 1px, rgba(0, 0, 0, 0.4) 0px 3px 6px, rgba(0, 0, 0, 0.5) 0px 9px 24px;
+}
+
 * { 
   margin: 0;  
   padding: 0;  
@@ -11,27 +101,28 @@ body {
     sans-serif;  
   -webkit-font-smoothing: antialiased;  
   -moz-osx-font-smoothing: grayscale;  
-  background-color: #1a1a1a;  
-  color: #e5e5e5;  
-  overflow: hidden;  
+  background-color: var(--bg-primary);  
+  color: var(--text-primary);  
+  transition: background-color 0.2s ease, color 0.2s ease;  
 } 
   
 .App {  
   height: 100vh;  
   display: flex;  
   flex-direction: column;  
-  background-color: #1a1a1a;  
+  background-color: var(--bg-primary);  
+  overflow: hidden;
 } 
   
 .app-header {  
-  background-color: #2d2d2d;  
+  background-color: var(--bg-secondary);  
   padding: 20px;  
-  border-bottom: 1px solid #404040;  
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);  
+  border-bottom: 1px solid var(--border-primary);  
+  box-shadow: var(--shadow-sm);  
 } 
   
 .app-header h1 {  
-  color: #ffffff;  
+  color: var(--text-primary);  
   font-size: 24px;  
   font-weight: 600;  
   margin-bottom: 8px;  
@@ -46,7 +137,7 @@ body {
 } 
   
 .app-header p {  
-  color: #b0b0b0;  
+  color: var(--text-secondary);  
   font-size: 14px;  
   margin: 0;  
 }  
@@ -83,11 +174,12 @@ body {
 } 
   
 .file-input-label:hover {  
-  background-color: #4338ca;  
+  background-color: var(--btn-primary-hover);  
 }  
   
 .file-input-label:active {  
-  background-color: #3730a3;  
+  background-color: var(--btn-primary-hover);  
+  transform: translateY(1px);
 }  
 
 /* Pagination & server toggle */
@@ -96,41 +188,44 @@ body {
   align-items: center;  
   gap: 6px;  
   font-size: 12px;  
-  background: #404040;  
+  background: var(--bg-secondary);  
   padding: 6px 10px;  
   border-radius: 6px;  
-  color: #e5e5e5;  
-  border: 1px solid #555;  
+  color: var(--text-primary);  
+  border: 1px solid var(--border-primary);  
+  transition: all 0.2s ease;
 }
 
 .pagination-bar {  
   display: flex;  
   align-items: center;  
   gap: 8px;  
-  background: #2d2d2d;  
-  border: 1px solid #404040;  
+  background: var(--bg-secondary);  
+  border: 1px solid var(--border-primary);  
   padding: 6px 10px;  
   border-radius: 8px;  
 }
 
 .pg-btn, .pg-refresh {  
-  background: #404040;  
-  color: #e5e5e5;  
-  border: 1px solid #555;  
+  background: var(--btn-secondary-bg);  
+  color: var(--btn-secondary-text);  
+  border: 1px solid var(--btn-secondary-border);  
   padding: 6px 10px;  
   font-size: 12px;  
   border-radius: 6px;  
   cursor: pointer;  
   min-width: 40px;  
-  transition: background .15s, transform .15s;  
+  transition: all 0.15s ease;  
 }
 .pg-btn:disabled, .pg-refresh:disabled {  
   opacity: .4;  
   cursor: not-allowed;  
 }
 .pg-btn:hover:not(:disabled), .pg-refresh:hover:not(:disabled) {  
-  background: #4f46e5;  
-  border-color: #6366f1;  
+  background: var(--btn-secondary-hover);  
+  border-color: var(--border-primary);  
+  color: var(--text-primary);
+  transform: translateY(-1px);
 }
 .pg-btn:active:not(:disabled), .pg-refresh:active:not(:disabled) {  
   transform: translateY(1px);  

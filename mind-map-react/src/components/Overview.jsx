@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
+import ScreenshotSlideshow from './ScreenshotSlideshow';
 import './Overview.css';
 
 const Overview = () => {
@@ -7,7 +8,8 @@ const Overview = () => {
     <div className="overview-container">
       <Navbar />
 
-      <header className="hero-section">
+      <div className="overview-content">
+        <header className="hero-section">
         <div className="badge">Alpha</div>
         <h1>Understand your Go code<br />through an interactive mind map.</h1>
         <p className="lead">
@@ -20,24 +22,31 @@ const Overview = () => {
         </div>
       </header>
 
+      <ScreenshotSlideshow />
+
       <main className="main-content">
         <section className="why-section">
           <h2>Why</h2>
           <div className="two-col">
             <div className="border-block">
               <p>
-                Reading a large Go service by hopping files is slow. Architects want a high‑level dependency picture while contributors need local, expandable context.
-                Existing tools either over‑simplify (just a list) or overwhelm (full static graph). GoMindMapper returns curated slices: a page of root functions plus the full closure below each—interactive & incremental.
+                Earlier I had created <a href="https://github.com/chinmay-sawant/CodeMapper" target="_blank" rel="noreferrer" className="inline-link">CodeMapper</a> as a code visualizer using the react-flow library with a Go backend using AST parsing. 
+                When I tried running it on my organization's custom codebase, it didn't provide the desired output. 
+                So I decided to create GoMindMapper from scratch with improved functionality - custom-built nodes inspired by Google NotebookLLM, better user control with pagination, and the ability to search any directory location.
+              </p>
+              <p>
+                Hopefully you'll like this tool and enjoy using it! If you do, please provide a star on <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="inline-link">GitHub</a>.
               </p>
             </div>
             <div className="border-block">
+              <h3>Key Improvements Over CodeMapper:</h3>
               <ul className="feat-list">
-                <li>Noise reduction: user→user edges only</li>
-                <li>Pagination across true entrypoints</li>
-                <li>Zoom / pan / expand drill‑down</li>
-                <li>Offline JSON or live API mode</li>
-                <li>Dark ergonomic interface</li>
-                <li>Future: search, metrics, exports</li>
+                <li><strong>Custom-built nodes</strong> inspired by Google NotebookLLM for better visualization</li>
+                <li><strong>Pagination support</strong> for handling large codebases efficiently</li>
+                <li><strong>Directory location flexibility</strong> - search any directory you want</li>
+                <li><strong>Built from scratch</strong> with improved AST parsing and analysis</li>
+                <li><strong>Better user control</strong> with interactive mind maps and drill-down</li>
+                <li><strong>Noise reduction</strong> focusing on user-to-user function relationships</li>
               </ul>
             </div>
           </div>
@@ -66,45 +75,12 @@ npm run build
             </div>
           </div>
         </section>
-
-        <section className="architecture-section">
-          <h2>Architecture</h2>
-          <div className="card">
-            <pre><code>Analyzer (cmd/main.go)
-  ↳ writes functions.json / functionmap.json
-Server (cmd/server/main.go)
-  ↳ in-memory cache, pagination, reload
-React (/view)
-  ↳ mind map explorer (BrowserRouter basename)</code></pre>
-          </div>
-        </section>
-
-        <section className="roadmap-section">
-          <h2>Roadmap (Excerpt)</h2>
-          <div className="grid">
-            <div className="card">
-              <h3>Search</h3>
-              <p>Endpoint + UI for name / fuzzy lookup of functions; focus map on match.</p>
-            </div>
-            <div className="card">
-              <h3>Metrics Overlay</h3>
-              <p>Display fan‑in / fan‑out badges & heat colors for hotspots.</p>
-            </div>
-            <div className="card">
-              <h3>Incremental Watch</h3>
-              <p>File watcher updates only changed functions to keep cache fresh.</p>
-            </div>
-            <div className="card">
-              <h3>Export Formats</h3>
-              <p>GraphML / DOT / CSV for external analysis or knowledge bases.</p>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer className="footer">
-        MIT Licensed • <a className="inline-link" href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer">GitHub Repo</a>
+        Made with ❤️ in India • <a className="inline-link" href="https://github.com/chinmay-sawant" target="_blank" rel="noreferrer">Visit GitHub</a>
       </footer>
+      </div>
     </div>
   );
 };

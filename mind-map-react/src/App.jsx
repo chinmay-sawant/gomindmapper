@@ -131,7 +131,7 @@ function MindMapApp() {
   }, [useServer]);
 
   // Search function with debouncing
-  const handleSearch = useCallback(async (query, immediate = false, searchPage = 1) => {
+  const handleSearch = useCallback(async (query, immediate = false, searchPage = 1, searchPageSize = pageSize) => {
     if (!useServer) return;
     
     // Clear existing timeout
@@ -147,11 +147,11 @@ function MindMapApp() {
       setIsSearching(true);
       if (query.trim() === '') {
         // If search is cleared, go back to paginated view, use current pageSize
-        await fetchPage(1, pageSize);
+        await fetchPage(1, searchPageSize);
         setSearchResults([]);
       } else {
         // Perform search with pagination, use current pageSize
-        await fetchPage(searchPage, pageSize, query.trim());
+        await fetchPage(searchPage, searchPageSize, query.trim());
       }
       setIsSearching(false);
       
@@ -329,7 +329,7 @@ function MindMapApp() {
                         e.preventDefault();
                         e.stopPropagation();
                         isTypingRef.current = false;
-                        handleSearch(searchQuery, true, 1);
+                        handleSearch(searchQuery, true, 1, pageSize);
                       }
                     }}
                     onFocus={(e) => {
@@ -348,7 +348,7 @@ function MindMapApp() {
                     autoComplete="off"
                   />
                   <button 
-                    onClick={() => handleSearch(searchQuery, true, 1)} 
+                    onClick={() => handleSearch(searchQuery, true, 1, pageSize)} 
                     disabled={loading || isSearching}
                     className="search-btn"
                   >
@@ -358,7 +358,7 @@ function MindMapApp() {
                     <button 
                       onClick={() => {
                         setSearchQuery('');
-                        handleSearch('', true, 1);
+                        handleSearch('', true, 1, pageSize);
                       }} 
                       disabled={loading || isSearching}
                       className="clear-search-btn"
@@ -375,7 +375,7 @@ function MindMapApp() {
                       const newPage = Math.max(1, page-1);
                       setPage(newPage);
                       if (searchQuery && searchQuery.trim() !== '') {
-                        handleSearch(searchQuery, true, newPage);
+                        handleSearch(searchQuery, true, newPage, pageSize);
                       } else {
                         fetchPage(newPage, pageSize);
                       }
@@ -391,7 +391,7 @@ function MindMapApp() {
                       const newPage = page + 1;
                       setPage(newPage);
                       if (searchQuery && searchQuery.trim() !== '') {
-                        handleSearch(searchQuery, true, newPage);
+                        handleSearch(searchQuery, true, newPage, pageSize);
                       } else {
                         fetchPage(newPage, pageSize);
                       }
@@ -406,7 +406,7 @@ function MindMapApp() {
                       setPageSize(newPageSize);
                       setPage(1);
                       if (searchQuery && searchQuery.trim() !== '') {
-                        await handleSearch(searchQuery, true, 1);
+                        await handleSearch(searchQuery, true, 1, newPageSize);
                       } else {
                         await fetchPage(1, newPageSize);
                       }
@@ -419,7 +419,7 @@ function MindMapApp() {
                     disabled={loading} 
                     onClick={() => {
                       if (searchQuery && searchQuery.trim() !== '') {
-                        handleSearch(searchQuery, true, page);
+                        handleSearch(searchQuery, true, page, pageSize);
                       } else {
                         fetchPage(page, pageSize);
                       }
@@ -455,7 +455,16 @@ function MindMapApp() {
       
       {selectedNode && (
         <div className="node-details">
-          <h3>Function Details</h3>
+          <div className="node-details-header">
+            <h3>Function Details</h3>
+            <button 
+              className="close-btn"
+              onClick={() => setSelectedNode(null)}
+              aria-label="Close details"
+            >
+              ×
+            </button>
+          </div>
           <p><strong>Name:</strong> {selectedNode.name}</p>
           <p><strong>Line:</strong> {selectedNode.line}</p>
           <p><strong>File:</strong> {selectedNode.filePath}</p>

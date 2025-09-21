@@ -370,13 +370,41 @@ body {
   z-index: 1000;  
 } 
   
+.node-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #404040;
+}
+  
 .node-details h3 {  
   color: #ffffff;  
   font-size: 16px;  
-  margin-bottom: 12px;  
-  padding-bottom: 8px;  
-  border-bottom: 1px solid #404040;  
+  margin: 0;
 }  
+  
+.close-btn {
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: #404040;
+  color: #ffffff;
+}
   
 .node-details p {  
   color: #e5e5e5;  

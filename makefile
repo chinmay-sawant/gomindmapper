@@ -9,3 +9,5 @@ ui:
 
 ui-build:
 	cd mind-map-react && npm run build
+
+# make ui-build && make server

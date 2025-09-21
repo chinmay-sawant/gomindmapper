@@ -80,7 +80,7 @@ function MindMapApp() {
     setLoading(true);
     setServerError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/relations?page=${p}&pageSize=${ps}`);
+      const res = await fetch(`${window.location.origin}/api/relations?page=${p}&pageSize=${ps}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       // json.data is the closure; we use it directly for mind map
@@ -200,7 +200,7 @@ function MindMapApp() {
 
   return (
     <div className="App" ref={appRef}>
-      <Navbar onReload={useServer ? () => fetch('http://localhost:8080/api/reload', {method:'POST'}).then(()=>fetchPage(1,pageSize)) : null} />
+      <Navbar onReload={useServer ? () => fetch(`${window.location.origin}/api/reload`, {method:'POST'}).then(()=>fetchPage(1,pageSize)) : null} onDownload={useServer ? `${window.location.origin}/api/download` : null} />
       <header className="app-header">
         <h1>Function Mind Map</h1>
         <div className="header-content">

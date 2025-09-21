@@ -1,15 +1,18 @@
-/* Clean rewritten Navbar styles */
+/* Notion-style Navbar with theme support */
 .nav-root {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 10px 20px;
-	background: #141414;
-	border-bottom: 1px solid #2a2a2a;
-	position: sticky;
+	background: var(--bg-primary);
+	border-bottom: 1px solid var(--border-primary);
+	position: fixed;
 	top: 0;
+	left: 0;
+	right: 0;
 	z-index: 1200;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .nav-left { display: flex; align-items: center; gap: 32px; }
@@ -17,40 +20,118 @@
 .nav-brand {
 	font-size: 16px;
 	font-weight: 600;
-	color: #ffffff;
+	color: var(--text-primary);
 	text-decoration: none;
 	letter-spacing: .5px;
+	transition: color 0.2s ease;
 }
 
 .nav-links { display: flex; gap: 18px; align-items: center; }
-.nav-links a {
-	color: #b5b5b5;
+.nav-links a, .nav-links span {
+	color: var(--text-secondary);
 	text-decoration: none;
 	font-size: 13px;
 	font-weight: 500;
 	padding: 6px 10px;
 	border-radius: 6px;
-	transition: background .15s, color .15s;
+	transition: all 0.15s ease;
+	cursor: pointer;
 }
-.nav-links a:hover { background: #1f1f1f; color: #ffffff; }
-.nav-links a.active { background: #303030; color: #fff; box-shadow: inset 0 0 0 1px #3d3d3d; }
-.external-link { border: 1px solid #303030; }
-.external-link:hover { border-color: #444; }
+.nav-links a:hover, .nav-links span:hover { 
+	background: var(--bg-hover); 
+	color: var(--text-primary); 
+}
+.nav-links a.active, .nav-links span.active { 
+	background: var(--bg-selected); 
+	color: var(--text-primary); 
+	box-shadow: inset 0 0 0 1px var(--border-primary); 
+}
+.external-link { 
+	border: 1px solid var(--border-primary); 
+}
+.external-link:hover { 
+	border-color: var(--border-primary); 
+	background: var(--bg-hover);
+}
 
 .nav-right { display: flex; align-items: center; gap: 12px; }
+
+.theme-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	background: var(--btn-secondary-bg);
+	color: var(--text-secondary);
+	border: 1px solid var(--btn-secondary-border);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.theme-toggle:hover {
+	background: var(--btn-secondary-hover);
+	color: var(--text-primary);
+	border-color: var(--border-primary);
+}
+
+.btn-small {
+	background: var(--btn-primary-bg);
+	color: var(--btn-primary-text);
+	font-size: 13px;
+	font-weight: 500;
+	padding: 8px 16px;
+	border: none;
+	border-radius: 6px;
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.btn-small:hover {
+	background: var(--btn-primary-hover);
+	transform: translateY(-1px);
+}
+
+/* Override btn-small text color for light mode */
+:root[data-theme="light"] .btn-small {
+	color: #37352f;
+}
+
 .reload-btn {
-	background: #232323;
-	color: #eee;
+	background: var(--btn-secondary-bg);
+	color: var(--btn-secondary-text);
 	font-size: 12px;
 	font-weight: 500;
 	padding: 6px 14px;
-	border: 1px solid #3a3a3a;
+	border: 1px solid var(--btn-secondary-border);
 	border-radius: 6px;
 	cursor: pointer;
-	transition: background .15s, border-color .15s;
+	transition: all 0.15s ease;
 }
-.reload-btn:hover { background: #2e2e2e; border-color: #4f46e5; }
+.reload-btn:hover { 
+	background: var(--btn-secondary-hover); 
+	border-color: var(--border-primary); 
+	color: var(--text-primary);
+}
 .reload-btn:active { transform: translateY(1px); }
+
+.download-btn {
+	background: var(--btn-secondary-bg);
+	color: var(--btn-secondary-text);
+	font-size: 12px;
+	font-weight: 500;
+	padding: 6px 14px;
+	border: 1px solid var(--btn-secondary-border);
+	border-radius: 6px;
+	text-decoration: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.download-btn:hover { 
+	background: var(--btn-secondary-hover); 
+	border-color: var(--border-primary); 
+	color: var(--text-primary);
+}
 
 @media (max-width: 720px) {
 	.nav-links { display: none; }

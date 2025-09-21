@@ -6,3 +6,6 @@ server:
 
 ui:
 	cd /d "D:\Chinmay_Personal_Projects\GoMindMapper\mind-map-react" && npm run dev
+
+ui-build:
+	cd /d "D:\Chinmay_Personal_Projects\GoMindMapper\mind-map-react" && npm run build

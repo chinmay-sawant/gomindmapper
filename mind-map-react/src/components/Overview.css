@@ -239,7 +239,13 @@
   margin-top: 0;
   font-size: 14px;
   line-height: 1.55;
-  color: #d2d2d2;
+  color: var(--text-secondary);
+}
+
+.border-block h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: var(--text-primary);
 }
 
 /* Feature List */

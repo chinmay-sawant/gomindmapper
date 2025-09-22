@@ -18,7 +18,7 @@ const Overview = () => {
           Switch between offline JSON snapshots or a live API with pagination across entrypoint roots.
         </p>
         <div className="button-row">
-          <a href="/view/" className="btn primary">Launch Mind Map →</a>
+          <a href="/gomindmapper/view/" className="btn primary">Launch Mind Map →</a>
           <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="btn">GitHub</a>
         </div>
       </header>

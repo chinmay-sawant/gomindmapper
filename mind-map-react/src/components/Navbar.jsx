@@ -32,9 +32,18 @@ export default function Navbar({ onReload, onDownload }) {
 
   useEffect(() => {
     fetch('https://api.github.com/repos/chinmay-sawant/gomindmapper')
-      .then(res => res.json())
-      .then(data => setStars(data.stargazers_count || 0))
-      .catch(() => setStars(0));
+      .then(res => {
+        console.log('GitHub API response status:', res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log('GitHub API data:', data);
+        setStars(data.stargazers_count || 0);
+      })
+      .catch(err => {
+        console.error('Error fetching stars:', err);
+        setStars(0);
+      });
   }, []);
 
   const loc = useLocation();

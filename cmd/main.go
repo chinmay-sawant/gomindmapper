@@ -93,6 +93,14 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 		}
 	}
 
+	// Collect all function names in this file for reference resolution
+	var localFunctions []string
+	for _, line := range lines {
+		if matches := re.FindStringSubmatch(line); matches != nil {
+			localFunctions = append(localFunctions, matches[1])
+		}
+	}
+
 	for i, line := range lines {
 		if matches := re.FindStringSubmatch(line); matches != nil {
 			funcInfo := analyzer.FunctionInfo{
@@ -104,7 +112,23 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 			start, end := analyzer.FindFunctionBody(lines, i)
 			if start != -1 && end != -1 && start+1 < end && end < len(lines) {
 				calls := analyzer.FindCalls(lines[start+1 : end])
-				funcInfo.Calls = calls
+
+				// Resolve local function references by adding package prefix
+				var resolvedCalls []string
+				for _, call := range calls {
+					if !strings.Contains(call, ".") {
+						// Check if it's a local function reference
+						for _, localFunc := range localFunctions {
+							if call == localFunc {
+								resolvedCalls = append(resolvedCalls, packageName+"."+call)
+								break
+							}
+						}
+					} else {
+						resolvedCalls = append(resolvedCalls, call)
+					}
+				}
+				funcInfo.Calls = resolvedCalls
 			}
 			funcs = append(funcs, funcInfo)
 		}

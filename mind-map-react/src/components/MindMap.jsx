@@ -62,7 +62,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
         functionMap.set(uniqueKey, { ...fn, uniqueKey, children: [] });
       });
       
-      // Build the tree structure
+      // Build the tree structure - use references to preserve hierarchy
       functions.forEach(fn => {
         const parentKey = getUniqueKey(fn);
         const parentNode = functionMap.get(parentKey);
@@ -75,8 +75,11 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
             // If child node doesn't exist in main functions, create it as a leaf
             if (!childNode) {
               childNode = { ...calledFn, uniqueKey: childKey, children: [] };
+              functionMap.set(childKey, childNode);
             }
             
+            // Use direct reference to preserve the actual node with its children
+            // This ensures that if handleFillPDF has children, they will be visible
             parentNode.children.push(childNode);
           });
         }
@@ -94,18 +97,44 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
         }
       });
       
+      console.log('Total root nodes:', rootNodes.length);
       return rootNodes;
     };
     
     return buildTree(data);
   }, [data]);
 
-  // Initialize with better default position
+  // Initialize with better default position and auto-expand important nodes
   useEffect(() => {
     if (treeData.length > 0 && pan.x === 0 && pan.y === 0) {
       // Set initial pan to center the content better
       setPan({ x: 200, y: 300 });
       setZoom(0.7);
+    }
+    
+    // Auto-expand nodes with many children (like RegisterRoutes)
+    if (treeData.length > 0) {
+      const nodesToExpand = new Set();
+      
+      const findNodesToExpand = (nodes, depth = 0) => {
+        nodes.forEach(node => {
+          // Only auto-expand the first level of nodes with many children (like RegisterRoutes)
+          if (node.children && node.children.length >= 5 && depth === 0) {
+            nodesToExpand.add(node.uniqueKey);
+          }
+          // Don't recursively expand all children - let user control expansion
+        });
+      };
+      
+      findNodesToExpand(treeData);
+      
+      if (nodesToExpand.size > 0) {
+        setExpandedNodes(prev => {
+          const newExpanded = new Set(prev);
+          nodesToExpand.forEach(key => newExpanded.add(key));
+          return newExpanded;
+        });
+      }
     }
   }, [treeData, pan.x, pan.y]);
 

@@ -1,5 +1,47 @@
 [
   {
+    "name": "handlers.RegisterRoutes",
+    "line": 77,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
+      {
+        "name": "handlers.handleGenerateTemplatePDF",
+        "line": 157,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleFillPDF",
+        "line": 168,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleMergePDFs",
+        "line": 222,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleGetTemplateData",
+        "line": 119,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handlehtmlToPDF",
+        "line": 266,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handlehtmlToImage",
+        "line": 308,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleSPA",
+        "line": 103,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      }
+    ]
+  },
+  {
     "name": "handlers.handleFillPDF",
     "line": 168,
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
@@ -95,7 +137,7 @@
   },
   {
     "name": "main.findFunctions",
-    "line": 62,
+    "line": 73,
     "filePath": "cmd\\main.go",
     "called": [
       {
@@ -111,20 +153,59 @@
     ]
   },
   {
-    "name": "main.main",
-    "line": 8,
-    "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
+    "name": "main.findFunctions",
+    "line": 430,
+    "filePath": "cmd\\server\\main.go",
     "called": [
       {
-        "name": "handlers.RegisterRoutes",
-        "line": 77,
-        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+        "name": "analyzer.FindFunctionBody",
+        "line": 26,
+        "filePath": "cmd\\analyzer\\utils.go"
+      },
+      {
+        "name": "analyzer.FindCalls",
+        "line": 55,
+        "filePath": "cmd\\analyzer\\utils.go"
+      }
+    ]
+  },
+  {
+    "name": "main.load",
+    "line": 100,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "analyzer.GetModule",
+        "line": 11,
+        "filePath": "cmd\\analyzer\\utils.go"
+      },
+      {
+        "name": "analyzer.BuildRelations",
+        "line": 21,
+        "filePath": "cmd\\analyzer\\relations.go"
       }
     ]
   },
   {
     "name": "main.main",
-    "line": 18,
+    "line": 32,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "main.handleRelations",
+        "line": 220,
+        "filePath": "cmd\\server\\main.go"
+      },
+      {
+        "name": "main.handleSearch",
+        "line": 297,
+        "filePath": "cmd\\server\\main.go"
+      }
+    ]
+  },
+  {
+    "name": "main.main",
+    "line": 16,
     "filePath": "cmd\\main.go",
     "called": [
       {
@@ -136,23 +217,23 @@
         "name": "analyzer.CreateJsonFile",
         "line": 10,
         "filePath": "cmd\\analyzer\\fileops.go"
+      },
+      {
+        "name": "analyzer.BuildRelations",
+        "line": 21,
+        "filePath": "cmd\\analyzer\\relations.go"
       }
     ]
   },
   {
     "name": "main.main",
-    "line": 9,
-    "filePath": "EmployeeApp\\main.go",
+    "line": 8,
+    "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
     "called": [
       {
-        "name": "config.Load",
-        "line": 9,
-        "filePath": "EmployeeApp\\internal\\config\\config.go"
-      },
-      {
-        "name": "routes.SetupRouter",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\routes\\routes.go"
+        "name": "handlers.RegisterRoutes",
+        "line": 77,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
       }
     ]
   },
@@ -187,28 +268,6 @@
         "name": "gochromedp.ConvertURLToPDF",
         "line": 128,
         "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "routes.SetupRouter",
-    "line": 10,
-    "filePath": "EmployeeApp\\internal\\routes\\routes.go",
-    "called": [
-      {
-        "name": "middleware.CORS",
-        "line": 5,
-        "filePath": "EmployeeApp\\internal\\middleware\\cors.go"
-      },
-      {
-        "name": "middleware.Logger",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\middleware\\logger.go"
-      },
-      {
-        "name": "handlers.NewEmployeeHandler",
-        "line": 12,
-        "filePath": "EmployeeApp\\internal\\handlers\\employee.go"
       }
     ]
   }

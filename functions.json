@@ -1,5 +1,11 @@
 [
   {
+    "Name": "analyzer.BuildRelations",
+    "Line": 21,
+    "FilePath": "cmd\\analyzer\\relations.go",
+    "Calls": null
+  },
+  {
     "Name": "analyzer.CreateJsonFile",
     "Line": 10,
     "FilePath": "cmd\\analyzer\\fileops.go",
@@ -25,14 +31,8 @@
   },
   {
     "Name": "analyzer.contains",
-    "Line": 181,
+    "Line": 251,
     "FilePath": "cmd\\analyzer\\utils.go",
-    "Calls": null
-  },
-  {
-    "Name": "config.Load",
-    "Line": 9,
-    "FilePath": "EmployeeApp\\internal\\config\\config.go",
     "Calls": null
   },
   {
@@ -78,16 +78,18 @@
     "Calls": null
   },
   {
-    "Name": "handlers.NewEmployeeHandler",
-    "Line": 12,
-    "FilePath": "EmployeeApp\\internal\\handlers\\employee.go",
-    "Calls": null
-  },
-  {
     "Name": "handlers.RegisterRoutes",
     "Line": 77,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "Calls": null
+    "Calls": [
+      "handlers.handleGenerateTemplatePDF",
+      "handlers.handleFillPDF",
+      "handlers.handleMergePDFs",
+      "handlers.handleGetTemplateData",
+      "handlers.handlehtmlToPDF",
+      "handlers.handlehtmlToImage",
+      "handlers.handleSPA"
+    ]
   },
   {
     "Name": "handlers.getProjectRoot",
@@ -148,12 +150,6 @@
     ]
   },
   {
-    "Name": "main.buildFunctionMap",
-    "Line": 104,
-    "FilePath": "cmd\\main.go",
-    "Calls": null
-  },
-  {
     "Name": "main.convertToImage",
     "Line": 140,
     "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
@@ -172,13 +168,46 @@
     ]
   },
   {
+    "Name": "main.corsMiddleware",
+    "Line": 463,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
+  },
+  {
+    "Name": "main.filterCalls",
+    "Line": 188,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
+  },
+  {
     "Name": "main.findFunctions",
-    "Line": 62,
+    "Line": 73,
     "FilePath": "cmd\\main.go",
     "Calls": [
       "analyzer.FindFunctionBody",
       "analyzer.FindCalls"
     ]
+  },
+  {
+    "Name": "main.findFunctions",
+    "Line": 430,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": [
+      "analyzer.FindFunctionBody",
+      "analyzer.FindCalls"
+    ]
+  },
+  {
+    "Name": "main.handleRelations",
+    "Line": 220,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
+  },
+  {
+    "Name": "main.handleSearch",
+    "Line": 297,
+    "FilePath": "cmd\\server\\main.go",
+    "Calls": null
   },
   {
     "Name": "main.init",
@@ -187,11 +216,12 @@
     "Calls": null
   },
   {
-    "Name": "main.main",
-    "Line": 8,
-    "FilePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
+    "Name": "main.load",
+    "Line": 100,
+    "FilePath": "cmd\\server\\main.go",
     "Calls": [
-      "handlers.RegisterRoutes"
+      "analyzer.GetModule",
+      "analyzer.BuildRelations"
     ]
   },
   {
@@ -202,32 +232,35 @@
   },
   {
     "Name": "main.main",
-    "Line": 18,
-    "FilePath": "cmd\\main.go",
+    "Line": 32,
+    "FilePath": "cmd\\server\\main.go",
     "Calls": [
-      "analyzer.GetModule",
-      "analyzer.CreateJsonFile"
+      "main.handleRelations",
+      "main.handleSearch"
     ]
   },
   {
     "Name": "main.main",
-    "Line": 9,
-    "FilePath": "EmployeeApp\\main.go",
+    "Line": 16,
+    "FilePath": "cmd\\main.go",
     "Calls": [
-      "config.Load",
-      "routes.SetupRouter"
+      "analyzer.GetModule",
+      "analyzer.CreateJsonFile",
+      "analyzer.BuildRelations"
     ]
   },
   {
-    "Name": "middleware.CORS",
-    "Line": 5,
-    "FilePath": "EmployeeApp\\internal\\middleware\\cors.go",
-    "Calls": null
+    "Name": "main.main",
+    "Line": 8,
+    "FilePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
+    "Calls": [
+      "handlers.RegisterRoutes"
+    ]
   },
   {
-    "Name": "middleware.Logger",
-    "Line": 10,
-    "FilePath": "EmployeeApp\\internal\\middleware\\logger.go",
+    "Name": "main.parseInt",
+    "Line": 417,
+    "FilePath": "cmd\\server\\main.go",
     "Calls": null
   },
   {
@@ -529,15 +562,5 @@
     "Line": 84,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
     "Calls": null
-  },
-  {
-    "Name": "routes.SetupRouter",
-    "Line": 10,
-    "FilePath": "EmployeeApp\\internal\\routes\\routes.go",
-    "Calls": [
-      "middleware.CORS",
-      "middleware.Logger",
-      "handlers.NewEmployeeHandler"
-    ]
   }
 ]

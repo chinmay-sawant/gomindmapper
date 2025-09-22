@@ -6,44 +6,95 @@ import Overview from './components/Overview';
 import MindMap from './components/MindMap';
 import './App.css';
 
-// Default EmployeeApp data to show by default
+// Default data using current functionmap.json
 const defaultEmployeeAppData = [
   {
-    "name": "main.main",
-    "line": 9,
-    "filePath": "EmployeeApp\\main.go",
+    "name": "handlers.RegisterRoutes",
+    "line": 77,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
-        "name": "config.Load",
-        "line": 9,
-        "filePath": "EmployeeApp\\internal\\config\\config.go"
+        "name": "handlers.handleGenerateTemplatePDF",
+        "line": 157,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
       },
       {
-        "name": "routes.SetupRouter",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\routes\\routes.go"
+        "name": "handlers.handleFillPDF",
+        "line": 168,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleMergePDFs",
+        "line": 222,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleGetTemplateData",
+        "line": 119,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handlehtmlToPDF",
+        "line": 266,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handlehtmlToImage",
+        "line": 308,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "handlers.handleSPA",
+        "line": 103,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
       }
     ]
   },
   {
-    "name": "routes.SetupRouter",
-    "line": 10,
-    "filePath": "EmployeeApp\\internal\\routes\\routes.go",
+    "name": "handlers.handleFillPDF",
+    "line": 168,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
-        "name": "middleware.CORS",
-        "line": 5,
-        "filePath": "EmployeeApp\\internal\\middleware\\cors.go"
-      },
+        "name": "pdf.FillPDFWithXFDF",
+        "line": 718,
+        "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+      }
+    ]
+  },
+  {
+    "name": "handlers.handleGenerateTemplatePDF",
+    "line": 157,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
       {
-        "name": "middleware.Logger",
-        "line": 10,
-        "filePath": "EmployeeApp\\internal\\middleware\\logger.go"
-      },
+        "name": "pdf.GenerateTemplatePDF",
+        "line": 15,
+        "filePath": "gopdfsuit\\internal\\pdf\\generator.go"
+      }
+    ]
+  },
+  {
+    "name": "handlers.handleMergePDFs",
+    "line": 222,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
       {
-        "name": "handlers.NewEmployeeHandler",
-        "line": 12,
-        "filePath": "EmployeeApp\\internal\\handlers\\employee.go"
+        "name": "pdf.MergePDFs",
+        "line": 13,
+        "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
+      }
+    ]
+  },
+  {
+    "name": "main.main",
+    "line": 8,
+    "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
+    "called": [
+      {
+        "name": "handlers.RegisterRoutes",
+        "line": 77,
+        "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
       }
     ]
   }

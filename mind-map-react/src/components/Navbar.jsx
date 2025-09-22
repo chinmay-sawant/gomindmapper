@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext.jsx';
 import './Navbar.css';
@@ -28,6 +28,15 @@ const ThemeToggle = () => {
 };
 
 export default function Navbar({ onReload, onDownload }) {
+  const [stars, setStars] = useState(0);
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/chinmay-sawant/gomindmapper')
+      .then(res => res.json())
+      .then(data => setStars(data.stargazers_count || 0))
+      .catch(() => setStars(0));
+  }, []);
+
   const loc = useLocation();
   const isActive = (to) => loc.pathname === to || (to !== '/' && loc.pathname.startsWith(to));
 
@@ -42,7 +51,7 @@ export default function Navbar({ onReload, onDownload }) {
           <div className="nav-links">
             <span className={isActive('/') ? 'active' : ''}>Overview</span>
             <Link to="/view" className={isActive('/view') ? 'active' : ''}>Mind Map</Link>
-            <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="external-link">GitHub</a>
+            <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="external-link">GitHub ⭐ {stars}</a>
           </div>
         </div>
         <div className="nav-right">
@@ -60,7 +69,7 @@ export default function Navbar({ onReload, onDownload }) {
         <div className="nav-links">
           <Link to="/" className={isActive('/') ? 'active' : ''}>Overview</Link>
           <span className={isActive('/view') ? 'active' : ''}>Mind Map</span>
-          <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="external-link">GitHub</a>
+          <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="external-link">GitHub ⭐ {stars}</a>
         </div>
       </div>
       <div className="nav-right">

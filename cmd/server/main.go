@@ -33,12 +33,24 @@ func main() {
 	var repoPath string
 	var addr string
 	var includeExternal bool
+	var skipFolders string
 	flag.StringVar(&repoPath, "path", ".", "path to repository root")
 	flag.StringVar(&addr, "addr", ":8080", "listen address")
 	flag.BoolVar(&includeExternal, "include-external", false, "include external library calls in relations (store all calls in memory)")
+	flag.StringVar(&skipFolders, "skip-folders", "", "comma-separated list of folder patterns to skip when scanning external dependencies (e.g., 'golang.org,google.golang.org')")
 	flag.Parse()
 
-	if err := load(repoPath, includeExternal); err != nil {
+	// Parse skip patterns
+	var skipPatterns []string
+	if skipFolders != "" {
+		skipPatterns = strings.Split(skipFolders, ",")
+		for i, pattern := range skipPatterns {
+			skipPatterns[i] = strings.TrimSpace(pattern)
+		}
+		log.Printf("Skipping external dependency folders matching: %v", skipPatterns)
+	}
+
+	if err := load(repoPath, includeExternal, skipPatterns); err != nil {
 		log.Fatalf("initial load failed: %v", err)
 	}
 
@@ -53,7 +65,7 @@ func main() {
 	router.GET("/api/search", handleSearch)
 	router.POST("/api/reload", func(c *gin.Context) {
 		log.Printf("Reloading data from repository: %s", repoPath)
-		if err := load(repoPath, includeExternal); err != nil {
+		if err := load(repoPath, includeExternal, skipPatterns); err != nil {
 			log.Printf("Reload failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -131,7 +143,7 @@ func main() {
 }
 
 // load (re)scans repository, rebuilds structures and populates cache.
-func load(root string, includeExternal bool) error {
+func load(root string, includeExternal bool, skipPatterns []string) error {
 	abs, err := filepath.Abs(root)
 	if err != nil {
 		return err
@@ -164,7 +176,10 @@ func load(root string, includeExternal bool) error {
 	// If include-external is true, scan external modules (same as CLI)
 	if includeExternal {
 		log.Println("Scanning external modules...")
-		externalFunctions, err := scanExternalModules(abs, functions)
+		if len(skipPatterns) > 0 {
+			log.Printf("Skipping external dependency folders matching: %v", skipPatterns)
+		}
+		externalFunctions, err := scanExternalModules(abs, functions, skipPatterns)
 		if err != nil {
 			log.Printf("Warning: failed to scan external modules: %v", err)
 		} else {
@@ -570,7 +585,7 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 }
 
 // scanExternalModules scans external modules when include-external is enabled (duplicated from CLI)
-func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) ([]analyzer.FunctionInfo, error) {
+func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
 	// Get external modules from go.mod
 	modules, err := analyzer.GetExternalModules(projectPath)
 	if err != nil {
@@ -578,6 +593,12 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) 
 	}
 
 	log.Printf("Found %d modules in go.mod", len(modules))
+
+	// Filter out modules matching skip patterns
+	if len(skipPatterns) > 0 {
+		modules = analyzer.FilterModulesBySkipPatterns(modules, skipPatterns)
+		log.Printf("After filtering skip patterns, scanning %d modules", len(modules))
+	}
 
 	// We need to collect external calls from the raw function data before filtering
 	// Let's re-scan the project to get unfiltered calls
@@ -600,7 +621,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) 
 	}
 
 	// Filter to only relevant modules (ones that are actually called)
-	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules)
+	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
 

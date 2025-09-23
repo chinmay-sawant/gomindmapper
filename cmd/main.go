@@ -16,8 +16,10 @@ import (
 func main() {
 	var path string
 	var includeExternal bool
+	var skipFolders string
 	flag.StringVar(&path, "path", ".", "path to repository")
 	flag.BoolVar(&includeExternal, "include-external", false, "include external library calls in output (skip removed_calls.json generation)")
+	flag.StringVar(&skipFolders, "skip-folders", "", "comma-separated list of folder patterns to skip when scanning external dependencies (e.g., 'golang.org,google.golang.org')")
 	flag.Parse()
 
 	absPath, err := filepath.Abs(path)
@@ -54,7 +56,18 @@ func main() {
 	// If include-external is true, scan external modules
 	if includeExternal {
 		fmt.Println("Scanning external modules...")
-		externalFunctions, err := scanExternalModules(absPath, functions)
+
+		// Parse skip patterns
+		var skipPatterns []string
+		if skipFolders != "" {
+			skipPatterns = strings.Split(skipFolders, ",")
+			for i, pattern := range skipPatterns {
+				skipPatterns[i] = strings.TrimSpace(pattern)
+			}
+			fmt.Printf("Skipping external dependency folders matching: %v\n", skipPatterns)
+		}
+
+		externalFunctions, err := scanExternalModules(absPath, functions, skipPatterns)
 		if err != nil {
 			fmt.Printf("Warning: failed to scan external modules: %v\n", err)
 		} else {
@@ -168,7 +181,7 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 }
 
 // scanExternalModules scans external modules when include-external is enabled
-func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) ([]analyzer.FunctionInfo, error) {
+func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
 	// Get external modules from go.mod
 	modules, err := analyzer.GetExternalModules(projectPath)
 	if err != nil {
@@ -176,6 +189,12 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) 
 	}
 
 	fmt.Printf("Found %d modules in go.mod\n", len(modules))
+
+	// Filter out modules matching skip patterns
+	if len(skipPatterns) > 0 {
+		modules = analyzer.FilterModulesBySkipPatterns(modules, skipPatterns)
+		fmt.Printf("After filtering skip patterns, scanning %d modules\n", len(modules))
+	}
 
 	// We need to collect external calls from the raw function data before filtering
 	// Let's re-scan the project to get unfiltered calls
@@ -198,7 +217,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo) 
 	}
 
 	// Filter to only relevant modules (ones that are actually called)
-	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules)
+	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
 

@@ -146,6 +146,7 @@ Scans a path (default `.`) collecting:
 ### CLI Features:
 * **Path Specification** - Analyze any Go repository directory with `-path` flag
 * **External Library Control** - Use `--include-external` flag to include/exclude external library calls
+* **Skip Patterns** - Use `--skip-folders` to skip specific dependency folders (e.g., 'golang.org,google.golang.org')
 * **Smart Module Detection** - Automatically detects Go module and package structure
 * **AST-based Analysis** - Uses Go's AST parsing for accurate function extraction
 * **Local Function Resolution** - Resolves local function references within packages
@@ -153,7 +154,11 @@ Scans a path (default `.`) collecting:
 Run:
 ```cmd
 cd /d "D:\GoMindMapper"
+# Basic analysis without external dependencies
 go run cmd/main.go -path . --include-external=false
+
+# Include external dependencies but skip standard library modules
+go run cmd/main.go -path . --include-external=true --skip-folders="golang.org,google.golang.org"
 ```
 
 Key outputs:
@@ -177,6 +182,7 @@ Key outputs:
 * **CORS Support** - Built-in CORS middleware for frontend integration
 * **Concurrent Safety** - Thread-safe operations with proper mutex handling
 * **External Library Toggle** - `--include-external` flag support for server mode
+* **Skip Patterns** - `--skip-folders` flag to skip specific dependency folders during external scanning
 * **Static File Serving** - Serves built React frontend assets
 * **Fallback Routing** - SPA routing support with proper fallbacks
 
@@ -188,7 +194,11 @@ Key outputs:
 Start server (after building frontend if you want the UI):
 ```cmd
 cd /d "D:\GoMindMapper"
+# Basic server without external dependencies
 go run cmd/server/main.go -path . -addr :8080 --include-external=false
+
+# Server with external dependencies, skipping standard library modules
+go run cmd/server/main.go -path . -addr :8080 --include-external=true --skip-folders="golang.org"
 ```
 
 Browse:  
@@ -302,11 +312,13 @@ start http://localhost:5173/view
 **Analyzer CLI:**
 - `-path <directory>` - Repository path to analyze (default: current directory)
 - `--include-external` - Include external library calls in output (default: false)
+- `--skip-folders <patterns>` - Comma-separated list of folder patterns to skip during external scanning (e.g., 'golang.org,google.golang.org')
 
 **Server:**
 - `-path <directory>` - Repository path to analyze (default: current directory)
 - `-addr <address>` - Server listen address (default: :8080)
 - `--include-external` - Include external library calls in relations (default: false)
+- `--skip-folders <patterns>` - Comma-separated list of folder patterns to skip during external scanning
 
 ## 8. Data Model (Simplified)
 ```go

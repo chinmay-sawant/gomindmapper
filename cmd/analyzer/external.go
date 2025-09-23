@@ -99,6 +99,33 @@ func GetExternalModules(projectPath string) (map[string]ExternalModuleInfo, erro
 	return modules, nil
 }
 
+// FilterModulesBySkipPatterns filters out modules that match skip patterns
+func FilterModulesBySkipPatterns(modules map[string]ExternalModuleInfo, skipPatterns []string) map[string]ExternalModuleInfo {
+	if len(skipPatterns) == 0 {
+		return modules
+	}
+
+	filteredModules := make(map[string]ExternalModuleInfo)
+
+	for modulePath, moduleInfo := range modules {
+		skipModule := false
+
+		// Check if module path matches any skip pattern
+		for _, pattern := range skipPatterns {
+			if strings.Contains(modulePath, pattern) {
+				skipModule = true
+				break
+			}
+		}
+
+		if !skipModule {
+			filteredModules[modulePath] = moduleInfo
+		}
+	}
+
+	return filteredModules
+}
+
 // FindModuleInGoPath searches for the module in GOPATH/pkg/mod
 func FindModuleInGoPath(moduleInfo ExternalModuleInfo) (string, error) {
 	gopath := os.Getenv("GOPATH")
@@ -283,7 +310,10 @@ func scanExternalGoFile(filePath, modulePath, moduleImportPath string) ([]Functi
 }
 
 // FilterRelevantExternalModules filters external modules to only include those that are actually called
-func FilterRelevantExternalModules(functions []FunctionInfo, modules map[string]ExternalModuleInfo) map[string]ExternalModuleInfo {
+func FilterRelevantExternalModules(functions []FunctionInfo, modules map[string]ExternalModuleInfo, skipPatterns []string) map[string]ExternalModuleInfo {
+	// First filter by skip patterns
+	modules = FilterModulesBySkipPatterns(modules, skipPatterns)
+
 	relevantModules := make(map[string]ExternalModuleInfo)
 
 	// Collect all external calls

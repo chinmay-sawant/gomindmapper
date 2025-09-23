@@ -434,7 +434,11 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 	}
 	lines := strings.Split(string(content), "\n")
 	var funcs []analyzer.FunctionInfo
-	re := regexp.MustCompile(`^\s*func\s+(\w+)`)
+	// Updated regex to match both regular functions and methods
+	// Regular function: func functionName(...)
+	// Method: func (receiver Type) methodName(...)
+	reFunc := regexp.MustCompile(`^\s*func\s+(\w+)`)
+	reMethod := regexp.MustCompile(`^\s*func\s+\([^)]+\)\s+(\w+)`)
 	relPath, err := filepath.Rel(absPath, filePath)
 	if err != nil {
 		return nil, err
@@ -452,15 +456,28 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 	// Collect all function names in this file for reference resolution
 	var localFunctions []string
 	for _, line := range lines {
-		if matches := re.FindStringSubmatch(line); matches != nil {
+		// Check for regular functions
+		if matches := reFunc.FindStringSubmatch(line); matches != nil {
+			localFunctions = append(localFunctions, matches[1])
+		} else if matches := reMethod.FindStringSubmatch(line); matches != nil {
+			// Check for methods
 			localFunctions = append(localFunctions, matches[1])
 		}
 	}
 
 	for i, line := range lines {
-		if matches := re.FindStringSubmatch(line); matches != nil {
+		var functionName string
+		// Check for regular functions first
+		if matches := reFunc.FindStringSubmatch(line); matches != nil {
+			functionName = matches[1]
+		} else if matches := reMethod.FindStringSubmatch(line); matches != nil {
+			// Check for methods
+			functionName = matches[1]
+		}
+
+		if functionName != "" {
 			fi := analyzer.FunctionInfo{
-				Name:     packageName + "." + matches[1],
+				Name:     packageName + "." + functionName,
 				Line:     i + 1,
 				FilePath: relPath,
 			}

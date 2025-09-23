@@ -36,48 +36,6 @@
     "Calls": null
   },
   {
-    "Name": "gochromedp.ConvertHTMLToImage",
-    "Line": 201,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.ConvertHTMLToPDF",
-    "Line": 52,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.ConvertURLToImage",
-    "Line": 268,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.ConvertURLToPDF",
-    "Line": 128,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.DefaultConvertOptions",
-    "Line": 34,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.getPageDimensions",
-    "Line": 333,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
-    "Name": "gochromedp.parseMarginValue",
-    "Line": 354,
-    "FilePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go",
-    "Calls": null
-  },
-  {
     "Name": "handlers.RegisterRoutes",
     "Line": 77,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
@@ -150,26 +108,8 @@
     ]
   },
   {
-    "Name": "main.convertToImage",
-    "Line": 140,
-    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "Calls": [
-      "gochromedp.ConvertURLToImage",
-      "gochromedp.ConvertHTMLToImage"
-    ]
-  },
-  {
-    "Name": "main.convertToPDF",
-    "Line": 108,
-    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "Calls": [
-      "gochromedp.ConvertURLToPDF",
-      "gochromedp.ConvertHTMLToPDF"
-    ]
-  },
-  {
     "Name": "main.corsMiddleware",
-    "Line": 463,
+    "Line": 513,
     "FilePath": "cmd\\server\\main.go",
     "Calls": null
   },
@@ -181,8 +121,8 @@
   },
   {
     "Name": "main.findFunctions",
-    "Line": 73,
-    "FilePath": "cmd\\main.go",
+    "Line": 430,
+    "FilePath": "cmd\\server\\main.go",
     "Calls": [
       "analyzer.FindFunctionBody",
       "analyzer.FindCalls"
@@ -190,8 +130,8 @@
   },
   {
     "Name": "main.findFunctions",
-    "Line": 430,
-    "FilePath": "cmd\\server\\main.go",
+    "Line": 73,
+    "FilePath": "cmd\\main.go",
     "Calls": [
       "analyzer.FindFunctionBody",
       "analyzer.FindCalls"
@@ -210,12 +150,6 @@
     "Calls": null
   },
   {
-    "Name": "main.init",
-    "Line": 84,
-    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "Calls": null
-  },
-  {
     "Name": "main.load",
     "Line": 100,
     "FilePath": "cmd\\server\\main.go",
@@ -226,9 +160,13 @@
   },
   {
     "Name": "main.main",
-    "Line": 170,
-    "FilePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "Calls": null
+    "Line": 16,
+    "FilePath": "cmd\\main.go",
+    "Calls": [
+      "analyzer.GetModule",
+      "analyzer.CreateJsonFile",
+      "analyzer.BuildRelations"
+    ]
   },
   {
     "Name": "main.main",
@@ -237,16 +175,6 @@
     "Calls": [
       "main.handleRelations",
       "main.handleSearch"
-    ]
-  },
-  {
-    "Name": "main.main",
-    "Line": 16,
-    "FilePath": "cmd\\main.go",
-    "Calls": [
-      "analyzer.GetModule",
-      "analyzer.CreateJsonFile",
-      "analyzer.BuildRelations"
     ]
   },
   {
@@ -264,22 +192,28 @@
     "Calls": null
   },
   {
+    "Name": "pdf.AddNewPage",
+    "Line": 27,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pagemanager.go",
+    "Calls": null
+  },
+  {
+    "Name": "pdf.CheckPageBreak",
+    "Line": 37,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pagemanager.go",
+    "Calls": null
+  },
+  {
     "Name": "pdf.ConvertHTMLToImage",
     "Line": 59,
     "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "Calls": [
-      "gochromedp.ConvertHTMLToImage",
-      "gochromedp.ConvertURLToImage"
-    ]
+    "Calls": null
   },
   {
     "Name": "pdf.ConvertHTMLToPDF",
     "Line": 21,
     "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "Calls": [
-      "gochromedp.ConvertHTMLToPDF",
-      "gochromedp.ConvertURLToPDF"
-    ]
+    "Calls": null
   },
   {
     "Name": "pdf.DetectFormFields",
@@ -315,6 +249,18 @@
     "Name": "pdf.GenerateTemplatePDF",
     "Line": 15,
     "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
+    "Calls": null
+  },
+  {
+    "Name": "pdf.GetCurrentContentStream",
+    "Line": 42,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pagemanager.go",
+    "Calls": null
+  },
+  {
+    "Name": "pdf.GetCurrentPageID",
+    "Line": 47,
+    "FilePath": "gopdfsuit\\internal\\pdf\\pagemanager.go",
     "Calls": null
   },
   {

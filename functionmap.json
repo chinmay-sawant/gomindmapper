@@ -102,43 +102,9 @@
     ]
   },
   {
-    "name": "main.convertToImage",
-    "line": 140,
-    "filePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertURLToImage",
-        "line": 268,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertHTMLToImage",
-        "line": 201,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "main.convertToPDF",
-    "line": 108,
-    "filePath": "gochromedp\\cmd\\gochromedp\\main.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertURLToPDF",
-        "line": 128,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertHTMLToPDF",
-        "line": 52,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
     "name": "main.findFunctions",
-    "line": 73,
-    "filePath": "cmd\\main.go",
+    "line": 430,
+    "filePath": "cmd\\server\\main.go",
     "called": [
       {
         "name": "analyzer.FindFunctionBody",
@@ -154,8 +120,8 @@
   },
   {
     "name": "main.findFunctions",
-    "line": 430,
-    "filePath": "cmd\\server\\main.go",
+    "line": 73,
+    "filePath": "cmd\\main.go",
     "called": [
       {
         "name": "analyzer.FindFunctionBody",
@@ -188,23 +154,6 @@
   },
   {
     "name": "main.main",
-    "line": 32,
-    "filePath": "cmd\\server\\main.go",
-    "called": [
-      {
-        "name": "main.handleRelations",
-        "line": 220,
-        "filePath": "cmd\\server\\main.go"
-      },
-      {
-        "name": "main.handleSearch",
-        "line": 297,
-        "filePath": "cmd\\server\\main.go"
-      }
-    ]
-  },
-  {
-    "name": "main.main",
     "line": 16,
     "filePath": "cmd\\main.go",
     "called": [
@@ -227,6 +176,23 @@
   },
   {
     "name": "main.main",
+    "line": 32,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "main.handleRelations",
+        "line": 220,
+        "filePath": "cmd\\server\\main.go"
+      },
+      {
+        "name": "main.handleSearch",
+        "line": 297,
+        "filePath": "cmd\\server\\main.go"
+      }
+    ]
+  },
+  {
+    "name": "main.main",
     "line": 8,
     "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
     "called": [
@@ -234,40 +200,6 @@
         "name": "handlers.RegisterRoutes",
         "line": 77,
         "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
-      }
-    ]
-  },
-  {
-    "name": "pdf.ConvertHTMLToImage",
-    "line": 59,
-    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertHTMLToImage",
-        "line": 201,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertURLToImage",
-        "line": 268,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      }
-    ]
-  },
-  {
-    "name": "pdf.ConvertHTMLToPDF",
-    "line": 21,
-    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "called": [
-      {
-        "name": "gochromedp.ConvertHTMLToPDF",
-        "line": 52,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
-      },
-      {
-        "name": "gochromedp.ConvertURLToPDF",
-        "line": 128,
-        "filePath": "gochromedp\\pkg\\gochromedp\\chrometopdf.go"
       }
     ]
   }

@@ -50,10 +50,13 @@ func main() {
 	router.GET("/api/relations", handleRelations)
 	router.GET("/api/search", handleSearch)
 	router.POST("/api/reload", func(c *gin.Context) {
+		log.Printf("Reloading data from repository: %s", repoPath)
 		if err := load(repoPath); err != nil {
+			log.Printf("Reload failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		log.Printf("Data reload completed successfully")
 		c.JSON(http.StatusOK, gin.H{"status": "reloaded", "loadedAt": global.loadedAt})
 	})
 
@@ -181,6 +184,15 @@ func load(root string) error {
 	global.roots = roots
 	global.loadedAt = time.Now()
 	global.mu.Unlock()
+
+	// Log statistics about the loaded data
+	log.Printf("Data loaded successfully:")
+	log.Printf("  - Total functions detected: %d", len(functions))
+	log.Printf("  - Total relations built: %d", len(relations))
+	log.Printf("  - Total root functions (entry points): %d", len(roots))
+	log.Printf("  - Total functions in index: %d", len(idx))
+	log.Printf("  - Data loaded at: %s", global.loadedAt.Format("2006-01-02 15:04:05"))
+
 	return nil
 }
 

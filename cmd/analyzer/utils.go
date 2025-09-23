@@ -55,6 +55,9 @@ func FindFunctionBody(lines []string, funcLine int) (int, int) {
 func FindCalls(bodyLines []string) []string {
 	var calls []string
 	reCalls := regexp.MustCompile(`(\w+(?:\.\w+)*)\(`)
+	// Enhanced regex to capture function references passed as arguments
+	// This captures function names that appear as arguments (not followed by parentheses)
+	reFuncRefs := regexp.MustCompile(`(?:\s|,|\()(handle[A-Za-z]\w+)(?:\s*[,\)\s]|$)`)
 
 	// Standard library packages to ignore
 	standardPackages := map[string]bool{
@@ -140,7 +143,46 @@ func FindCalls(bodyLines []string) []string {
 		"Wait": true,
 	}
 
+	// Keywords and common variable names to exclude
+	excludeKeywords := map[string]bool{
+		"true":      true,
+		"false":     true,
+		"nil":       true,
+		"err":       true,
+		"error":     true,
+		"string":    true,
+		"int":       true,
+		"float":     true,
+		"bool":      true,
+		"byte":      true,
+		"rune":      true,
+		"if":        true,
+		"for":       true,
+		"switch":    true,
+		"case":      true,
+		"default":   true,
+		"return":    true,
+		"break":     true,
+		"continue":  true,
+		"goto":      true,
+		"var":       true,
+		"const":     true,
+		"type":      true,
+		"func":      true,
+		"package":   true,
+		"import":    true,
+		"range":     true,
+		"select":    true,
+		"go":        true,
+		"defer":     true,
+		"chan":      true,
+		"map":       true,
+		"struct":    true,
+		"interface": true,
+	}
+
 	for _, line := range bodyLines {
+		// Find traditional function calls (package.function())
 		matches := reCalls.FindAllStringSubmatch(line, -1)
 		for _, match := range matches {
 			call := match[1]
@@ -172,6 +214,34 @@ func FindCalls(bodyLines []string) []string {
 
 			if !contains(calls, call) {
 				calls = append(calls, call)
+			}
+		}
+
+		// Find function references passed as arguments
+		refMatches := reFuncRefs.FindAllStringSubmatch(line, -1)
+		for _, match := range refMatches {
+			if len(match) > 1 {
+				funcRef := strings.TrimSpace(match[1])
+
+				// Skip if it's a keyword or common variable name
+				if excludeKeywords[funcRef] {
+					continue
+				}
+
+				// Skip if it's too short to be meaningful
+				if len(funcRef) < 3 {
+					continue
+				}
+
+				// Skip if it contains dots (already handled by reCalls)
+				if strings.Contains(funcRef, ".") {
+					continue
+				}
+
+				// Add the current package prefix to make it consistent with other calls
+				if !contains(calls, funcRef) {
+					calls = append(calls, funcRef)
+				}
 			}
 		}
 	}

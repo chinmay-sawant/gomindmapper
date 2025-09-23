@@ -66,8 +66,37 @@ func main() {
 		c.JSON(http.StatusOK, global.relations)
 	})
 
+	// Get the absolute path to the executable to locate static files
+	execDir, err := os.Executable()
+	if err != nil {
+		log.Fatalf("failed to get executable path: %v", err)
+	}
+	execDir = filepath.Dir(execDir)
+
+	// Try to find the docs directory - look in multiple possible locations
+	var docsDir string
+	possibleDocsPaths := []string{
+		filepath.Join(execDir, "docs"),             // next to executable
+		filepath.Join(execDir, "..", "..", "docs"), // from cmd/server/ to root
+		"docs", // relative to current working directory
+	}
+
+	for _, path := range possibleDocsPaths {
+		if absPath, err := filepath.Abs(path); err == nil {
+			if _, err := os.Stat(filepath.Join(absPath, "index.html")); err == nil {
+				docsDir = absPath
+				break
+			}
+		}
+	}
+
+	if docsDir == "" {
+		log.Fatalf("could not find docs directory with index.html in any of the expected locations")
+	}
+
+	log.Printf("Serving frontend from: %s", docsDir)
+
 	// Serve docs folder at /docs
-	docsDir := filepath.Join(repoPath, "docs")
 	router.Static("/docs", docsDir)
 
 	// Serve docs files at root

@@ -1,5 +1,9 @@
 package analyzer
 
+import (
+	"strings"
+)
+
 // OutCalled is a light-weight representation of a called function used in JSON output.
 type OutCalled struct {
 	Name     string `json:"name"`
@@ -17,13 +21,29 @@ type OutRelation struct {
 
 // BuildRelations converts raw FunctionInfo + their Calls into OutRelation list.
 // If includeExternal is false, the provided slice must already have Calls filtered to user-defined packages (CreateJsonFile performs this filtering).
-// If includeExternal is true, all calls are included in the relations.
+// If includeExternal is true, all calls are included in the relations, including external module functions.
 // We still defensively exclude relations that have zero called entries to preserve prior semantics unless includeExternal is true.
 func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelation {
 	// index by name for quick lookup
 	funcMap := make(map[string]FunctionInfo, len(functions))
+	// Also create an index by suffix for external function matching
+	suffixMap := make(map[string]FunctionInfo)
+
 	for _, f := range functions {
 		funcMap[f.Name] = f
+		// If this is an external function, also index by its suffix for partial matching
+		if strings.HasPrefix(f.FilePath, "external:") {
+			parts := strings.Split(f.Name, "/")
+			if len(parts) >= 1 {
+				// Get the last segment after the final slash, then split by dot to get package.function
+				lastPart := parts[len(parts)-1]
+				dotParts := strings.Split(lastPart, ".")
+				if len(dotParts) >= 2 {
+					suffix := strings.Join(dotParts[len(dotParts)-2:], ".")
+					suffixMap[suffix] = f
+				}
+			}
+		}
 	}
 
 	out := make([]OutRelation, 0, len(functions))
@@ -34,11 +54,16 @@ func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelatio
 		rel := OutRelation{Name: f.Name, Line: f.Line, FilePath: f.FilePath}
 		for _, cname := range f.Calls {
 			if cf, ok := funcMap[cname]; ok {
-				// Function exists in our codebase
+				// Function exists in our codebase (including external modules when scanned)
 				rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
 			} else if includeExternal {
-				// External function call - include with placeholder info
-				rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
+				// Try to match with external functions by suffix
+				if cf, ok := suffixMap[cname]; ok {
+					rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+				} else {
+					// External function call not found in scanned modules - include with placeholder info
+					rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
+				}
 			}
 		}
 		if len(rel.Called) > 0 || includeExternal {

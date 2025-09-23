@@ -98,6 +98,7 @@ const MindMap = ({ data, selectedNode, onNodeSelect }) => {
       });
       
       console.log('Total root nodes:', rootNodes.length);
+      console.log('External functions found:', functions.filter(f => f.filePath && f.filePath.startsWith('external:')).length);
       return rootNodes;
     };
     

@@ -267,7 +267,7 @@ npm run build
 
 :: 2. Start Go server with external library filtering (from repo root)
 cd ..
-go run cmd/server/main.go -path . -addr :8080 --include-external=false
+go run cmd/server/main.go -path . -addr :8080 --include-external=true
 
 :: 3. Open browser
 start http://localhost:8080/
@@ -276,7 +276,7 @@ start http://localhost:8080/
 ### CLI-only Analysis:
 ```cmd
 :: Generate JSON artifacts for offline analysis
-go run cmd/main.go -path . --include-external=false
+go run cmd/main.go -path . --include-external=true
 
 :: This creates:
 :: - functions.json (all functions with raw calls)

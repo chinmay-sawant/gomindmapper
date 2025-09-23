@@ -15,7 +15,9 @@ import (
 
 func main() {
 	var path string
+	var includeExternal bool
 	flag.StringVar(&path, "path", ".", "path to repository")
+	flag.BoolVar(&includeExternal, "include-external", false, "include external library calls in output (skip removed_calls.json generation)")
 	flag.Parse()
 
 	absPath, err := filepath.Abs(path)
@@ -54,10 +56,10 @@ func main() {
 	})
 
 	// Persist raw filtered functions (existing behaviour)
-	analyzer.CreateJsonFile(functions)
+	analyzer.CreateJsonFile(functions, includeExternal)
 
 	// Build relations and write functionmap.json (replaces buildFunctionMap)
-	relations := analyzer.BuildRelations(functions)
+	relations := analyzer.BuildRelations(functions, includeExternal)
 	data, err := json.MarshalIndent(relations, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling relations:", err)

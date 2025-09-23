@@ -1,9 +1,61 @@
 [
   {
+    "name": "analyzer.BuildRelations",
+    "line": 22,
+    "filePath": "cmd\\analyzer\\relations.go"
+  },
+  {
+    "name": "analyzer.CreateJsonFile",
+    "line": 10,
+    "filePath": "cmd\\analyzer\\fileops.go"
+  },
+  {
+    "name": "analyzer.FindCalls",
+    "line": 55,
+    "filePath": "cmd\\analyzer\\utils.go",
+    "called": [
+      {
+        "name": "package.function",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "analyzer.FindFunctionBody",
+    "line": 26,
+    "filePath": "cmd\\analyzer\\utils.go"
+  },
+  {
+    "name": "analyzer.GetModule",
+    "line": 11,
+    "filePath": "cmd\\analyzer\\utils.go"
+  },
+  {
+    "name": "analyzer.contains",
+    "line": 251,
+    "filePath": "cmd\\analyzer\\utils.go"
+  },
+  {
     "name": "handlers.RegisterRoutes",
     "line": 77,
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
+      {
+        "name": "router.Static",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "router.Group",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "v1.POST",
+        "line": 0,
+        "filePath": "external"
+      },
       {
         "name": "handlers.handleGenerateTemplatePDF",
         "line": 157,
@@ -18,6 +70,11 @@
         "name": "handlers.handleMergePDFs",
         "line": 222,
         "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "v1.GET",
+        "line": 0,
+        "filePath": "external"
       },
       {
         "name": "handlers.handleGetTemplateData",
@@ -35,9 +92,26 @@
         "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
       },
       {
+        "name": "router.NoRoute",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "handlers.handleSPA",
         "line": 103,
         "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      }
+    ]
+  },
+  {
+    "name": "handlers.getProjectRoot",
+    "line": 22,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
+      {
+        "name": "info.IsDir",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -47,9 +121,54 @@
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
+        "name": "c.Request.FormFile",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pdfFile.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pdfFile.Read",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "xfdfFile.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "xfdfFile.Read",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.PostForm",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "pdf.FillPDFWithXFDF",
         "line": 718,
         "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -59,9 +178,46 @@
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
+        "name": "c.ShouldBindJSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "pdf.GenerateTemplatePDF",
         "line": 15,
         "filePath": "gopdfsuit\\internal\\pdf\\generator.go"
+      }
+    ]
+  },
+  {
+    "name": "handlers.handleGetTemplateData",
+    "line": 119,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
+      {
+        "name": "c.Query",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -71,9 +227,56 @@
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
+        "name": "c.MultipartForm",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "fh.Open",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "f.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "pdf.MergePDFs",
         "line": 13,
         "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "handlers.handleSPA",
+    "line": 103,
+    "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
+    "called": [
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.File",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -83,9 +286,29 @@
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
+        "name": "c.ShouldBindJSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "pdf.ConvertHTMLToImage",
         "line": 59,
         "filePath": "gopdfsuit\\internal\\pdf\\pdf.go"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -95,15 +318,62 @@
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "called": [
       {
+        "name": "c.ShouldBindJSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "pdf.ConvertHTMLToPDF",
         "line": 21,
         "filePath": "gopdfsuit\\internal\\pdf\\pdf.go"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
   {
+    "name": "main.corsMiddleware",
+    "line": 561,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.AbortWithStatus",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Next",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "main.filterCalls",
+    "line": 231,
+    "filePath": "cmd\\server\\main.go"
+  },
+  {
     "name": "main.findFunctions",
-    "line": 430,
+    "line": 478,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
@@ -120,7 +390,7 @@
   },
   {
     "name": "main.findFunctions",
-    "line": 73,
+    "line": 75,
     "filePath": "cmd\\main.go",
     "called": [
       {
@@ -136,8 +406,62 @@
     ]
   },
   {
+    "name": "main.handleRelations",
+    "line": 268,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "global.mu.RLock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "global.mu.RUnlock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Query",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "main.handleSearch",
+    "line": 345,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "global.mu.RLock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "global.mu.RUnlock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Query",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
     "name": "main.load",
-    "line": 100,
+    "line": 134,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
@@ -146,9 +470,29 @@
         "filePath": "cmd\\analyzer\\utils.go"
       },
       {
+        "name": "info.IsDir",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "analyzer.BuildRelations",
-        "line": 21,
+        "line": 22,
         "filePath": "cmd\\analyzer\\relations.go"
+      },
+      {
+        "name": "global.mu.Lock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "global.mu.Unlock",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "global.loadedAt.Format",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -163,13 +507,18 @@
         "filePath": "cmd\\analyzer\\utils.go"
       },
       {
+        "name": "info.IsDir",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "analyzer.CreateJsonFile",
         "line": 10,
         "filePath": "cmd\\analyzer\\fileops.go"
       },
       {
         "name": "analyzer.BuildRelations",
-        "line": 21,
+        "line": 22,
         "filePath": "cmd\\analyzer\\relations.go"
       }
     ]
@@ -180,14 +529,59 @@
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
+        "name": "gin.Default",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "router.Use",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "router.GET",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "main.handleRelations",
-        "line": 220,
+        "line": 268,
         "filePath": "cmd\\server\\main.go"
       },
       {
         "name": "main.handleSearch",
-        "line": 297,
+        "line": 345,
         "filePath": "cmd\\server\\main.go"
+      },
+      {
+        "name": "router.POST",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.JSON",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "router.Static",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.File",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "router.Run",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   },
@@ -197,9 +591,594 @@
     "filePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
     "called": [
       {
+        "name": "gin.Default",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
         "name": "handlers.RegisterRoutes",
         "line": 77,
         "filePath": "gopdfsuit\\internal\\handlers\\handlers.go"
+      },
+      {
+        "name": "router.Run",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "main.parseInt",
+    "line": 465,
+    "filePath": "cmd\\server\\main.go"
+  },
+  {
+    "name": "pdf.AddNewPage",
+    "line": 27,
+    "filePath": "gopdfsuit\\internal\\pdf\\pagemanager.go"
+  },
+  {
+    "name": "pdf.CheckPageBreak",
+    "line": 37,
+    "filePath": "gopdfsuit\\internal\\pdf\\pagemanager.go"
+  },
+  {
+    "name": "pdf.ConvertHTMLToImage",
+    "line": 59,
+    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
+    "called": [
+      {
+        "name": "gochromedp.ConvertHTMLToImage",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "gochromedp.ConvertURLToImage",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.ConvertHTMLToPDF",
+    "line": 21,
+    "filePath": "gopdfsuit\\internal\\pdf\\pdf.go",
+    "called": [
+      {
+        "name": "gochromedp.ConvertHTMLToPDF",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "gochromedp.ConvertURLToPDF",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.DetectFormFields",
+    "line": 654,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.DetectFormFieldsAdvanced",
+    "line": 449,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.FillPDFWithXFDF",
+    "line": 718,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "widthsBuf.WriteString",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "widthsBuf.String",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "zlib.NewWriterLevel",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "zw.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "zw.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "compBuf.Bytes",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "xrefBuf.WriteString",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "xrefBuf.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.FillPDFWithXFDFAdvanced",
+    "line": 669,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.FlattenPDFBytes",
+    "line": 1044,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "scripts.FlattenPDFBytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.GenerateTemplatePDF",
+    "line": 15,
+    "filePath": "gopdfsuit\\internal\\pdf\\generator.go",
+    "called": [
+      {
+        "name": "pdfBuffer.WriteString",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pdfBuffer.Len",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "contentStream.Len",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pdfBuffer.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "contentStream.Bytes",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Header",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "c.Data",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pdfBuffer.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.GetCurrentContentStream",
+    "line": 42,
+    "filePath": "gopdfsuit\\internal\\pdf\\pagemanager.go"
+  },
+  {
+    "name": "pdf.GetCurrentPageID",
+    "line": 47,
+    "filePath": "gopdfsuit\\internal\\pdf\\pagemanager.go"
+  },
+  {
+    "name": "pdf.IsFormFieldObject",
+    "line": 363,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
+  },
+  {
+    "name": "pdf.MergePDFs",
+    "line": 13,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "called": [
+      {
+        "name": "out.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.Len",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.WriteString",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.NewPageManager",
+    "line": 15,
+    "filePath": "gopdfsuit\\internal\\pdf\\pagemanager.go"
+  },
+  {
+    "name": "pdf.ParseXFDF",
+    "line": 42,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.addParentRef",
+    "line": 287,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "called": [
+      {
+        "name": "result.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "result.WriteString",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "result.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.buildXFDF",
+    "line": 698,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.byteSlice",
+    "line": 238,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
+  },
+  {
+    "name": "pdf.bytesIndex",
+    "line": 64,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.decodeHexString",
+    "line": 69,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "hex.DecodeString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.decompressStreams",
+    "line": 616,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "buf.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "buf.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.detectFormFieldsNaive",
+    "line": 578,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.drawFooter",
+    "line": 226,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.drawPageBorder",
+    "line": 49,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.drawPageNumber",
+    "line": 245,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.drawTable",
+    "line": 105,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "pageManager.CheckPageBreak",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pageManager.AddNewPage",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pageManager.GetCurrentContentStream",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.drawTitle",
+    "line": 78,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.drawWatermark",
+    "line": 13,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go",
+    "called": [
+      {
+        "name": "contentStream.WriteString",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.escapePDFString",
+    "line": 105,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go",
+    "called": [
+      {
+        "name": "sb.WriteRune",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "sb.String",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.escapeText",
+    "line": 78,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go"
+  },
+  {
+    "name": "pdf.extractFormFieldsFromFile",
+    "line": 304,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go"
+  },
+  {
+    "name": "pdf.extractStringFromBytes",
+    "line": 196,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.extractTokenGroups",
+    "line": 109,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.findRootRef",
+    "line": 175,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.findWidgetAnnotationsForName",
+    "line": 320,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.formatPageKids",
+    "line": 96,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go"
+  },
+  {
+    "name": "pdf.generateAllContent",
+    "line": 107,
+    "filePath": "gopdfsuit\\internal\\pdf\\generator.go",
+    "called": [
+      {
+        "name": "pageManager.GetCurrentContentStream",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pageManager.CheckPageBreak",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "pageManager.AddNewPage",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.getAcroFormRef",
+    "line": 184,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.getFontReference",
+    "line": 84,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go"
+  },
+  {
+    "name": "pdf.getPageDimensions",
+    "line": 23,
+    "filePath": "gopdfsuit\\internal\\pdf\\types.go"
+  },
+  {
+    "name": "pdf.initializePage",
+    "line": 41,
+    "filePath": "gopdfsuit\\internal\\pdf\\draw.go"
+  },
+  {
+    "name": "pdf.parseArrayInts",
+    "line": 145,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.parseBorders",
+    "line": 66,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go"
+  },
+  {
+    "name": "pdf.parseProps",
+    "line": 10,
+    "filePath": "gopdfsuit\\internal\\pdf\\utils.go"
+  },
+  {
+    "name": "pdf.parseXRefStreams",
+    "line": 375,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.readUint",
+    "line": 166,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.replaceRefsOutsideStreams",
+    "line": 248,
+    "filePath": "gopdfsuit\\internal\\pdf\\merge.go",
+    "called": [
+      {
+        "name": "out.Write",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.resolveValueRef",
+    "line": 275,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.trailerHasEncrypt",
+    "line": 363,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.traverseField",
+    "line": 213,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go"
+  },
+  {
+    "name": "pdf.tryFlateDecompress",
+    "line": 98,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "flate.NewReader",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "r.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.Bytes",
+        "line": 0,
+        "filePath": "external"
+      }
+    ]
+  },
+  {
+    "name": "pdf.tryZlibDecompress",
+    "line": 84,
+    "filePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
+    "called": [
+      {
+        "name": "zlib.NewReader",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "r.Close",
+        "line": 0,
+        "filePath": "external"
+      },
+      {
+        "name": "out.Bytes",
+        "line": 0,
+        "filePath": "external"
       }
     ]
   }

@@ -1,7 +1,7 @@
 [
   {
     "Name": "analyzer.BuildRelations",
-    "Line": 21,
+    "Line": 22,
     "FilePath": "cmd\\analyzer\\relations.go",
     "Calls": null
   },
@@ -15,7 +15,9 @@
     "Name": "analyzer.FindCalls",
     "Line": 55,
     "FilePath": "cmd\\analyzer\\utils.go",
-    "Calls": null
+    "Calls": [
+      "package.function"
+    ]
   },
   {
     "Name": "analyzer.FindFunctionBody",
@@ -40,12 +42,17 @@
     "Line": 77,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
+      "router.Static",
+      "router.Group",
+      "v1.POST",
       "handlers.handleGenerateTemplatePDF",
       "handlers.handleFillPDF",
       "handlers.handleMergePDFs",
+      "v1.GET",
       "handlers.handleGetTemplateData",
       "handlers.handlehtmlToPDF",
       "handlers.handlehtmlToImage",
+      "router.NoRoute",
       "handlers.handleSPA"
     ]
   },
@@ -53,14 +60,25 @@
     "Name": "handlers.getProjectRoot",
     "Line": 22,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "Calls": null
+    "Calls": [
+      "info.IsDir"
+    ]
   },
   {
     "Name": "handlers.handleFillPDF",
     "Line": 168,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
-      "pdf.FillPDFWithXFDF"
+      "c.Request.FormFile",
+      "pdfFile.Close",
+      "pdfFile.Read",
+      "xfdfFile.Close",
+      "xfdfFile.Read",
+      "c.PostForm",
+      "c.JSON",
+      "pdf.FillPDFWithXFDF",
+      "c.Header",
+      "c.Data"
     ]
   },
   {
@@ -68,6 +86,8 @@
     "Line": 157,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
+      "c.ShouldBindJSON",
+      "c.JSON",
       "pdf.GenerateTemplatePDF"
     ]
   },
@@ -75,28 +95,46 @@
     "Name": "handlers.handleGetTemplateData",
     "Line": 119,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "Calls": null
+    "Calls": [
+      "c.Query",
+      "c.JSON",
+      "c.Header",
+      "c.Data"
+    ]
   },
   {
     "Name": "handlers.handleMergePDFs",
     "Line": 222,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
-      "pdf.MergePDFs"
+      "c.MultipartForm",
+      "c.JSON",
+      "fh.Open",
+      "f.Close",
+      "pdf.MergePDFs",
+      "c.Header",
+      "c.Data"
     ]
   },
   {
     "Name": "handlers.handleSPA",
     "Line": 103,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
-    "Calls": null
+    "Calls": [
+      "c.JSON",
+      "c.File"
+    ]
   },
   {
     "Name": "handlers.handlehtmlToImage",
     "Line": 308,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
-      "pdf.ConvertHTMLToImage"
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "pdf.ConvertHTMLToImage",
+      "c.Header",
+      "c.Data"
     ]
   },
   {
@@ -104,24 +142,32 @@
     "Line": 266,
     "FilePath": "gopdfsuit\\internal\\handlers\\handlers.go",
     "Calls": [
-      "pdf.ConvertHTMLToPDF"
+      "c.ShouldBindJSON",
+      "c.JSON",
+      "pdf.ConvertHTMLToPDF",
+      "c.Header",
+      "c.Data"
     ]
   },
   {
     "Name": "main.corsMiddleware",
-    "Line": 513,
+    "Line": 561,
     "FilePath": "cmd\\server\\main.go",
-    "Calls": null
+    "Calls": [
+      "c.Header",
+      "c.AbortWithStatus",
+      "c.Next"
+    ]
   },
   {
     "Name": "main.filterCalls",
-    "Line": 188,
+    "Line": 231,
     "FilePath": "cmd\\server\\main.go",
     "Calls": null
   },
   {
     "Name": "main.findFunctions",
-    "Line": 430,
+    "Line": 478,
     "FilePath": "cmd\\server\\main.go",
     "Calls": [
       "analyzer.FindFunctionBody",
@@ -130,7 +176,7 @@
   },
   {
     "Name": "main.findFunctions",
-    "Line": 73,
+    "Line": 75,
     "FilePath": "cmd\\main.go",
     "Calls": [
       "analyzer.FindFunctionBody",
@@ -139,23 +185,37 @@
   },
   {
     "Name": "main.handleRelations",
-    "Line": 220,
+    "Line": 268,
     "FilePath": "cmd\\server\\main.go",
-    "Calls": null
+    "Calls": [
+      "global.mu.RLock",
+      "global.mu.RUnlock",
+      "c.Query",
+      "c.JSON"
+    ]
   },
   {
     "Name": "main.handleSearch",
-    "Line": 297,
+    "Line": 345,
     "FilePath": "cmd\\server\\main.go",
-    "Calls": null
+    "Calls": [
+      "global.mu.RLock",
+      "global.mu.RUnlock",
+      "c.Query",
+      "c.JSON"
+    ]
   },
   {
     "Name": "main.load",
-    "Line": 100,
+    "Line": 134,
     "FilePath": "cmd\\server\\main.go",
     "Calls": [
       "analyzer.GetModule",
-      "analyzer.BuildRelations"
+      "info.IsDir",
+      "analyzer.BuildRelations",
+      "global.mu.Lock",
+      "global.mu.Unlock",
+      "global.loadedAt.Format"
     ]
   },
   {
@@ -164,6 +224,7 @@
     "FilePath": "cmd\\main.go",
     "Calls": [
       "analyzer.GetModule",
+      "info.IsDir",
       "analyzer.CreateJsonFile",
       "analyzer.BuildRelations"
     ]
@@ -173,8 +234,17 @@
     "Line": 32,
     "FilePath": "cmd\\server\\main.go",
     "Calls": [
+      "gin.Default",
+      "router.Use",
+      "router.GET",
       "main.handleRelations",
-      "main.handleSearch"
+      "main.handleSearch",
+      "router.POST",
+      "c.JSON",
+      "c.Header",
+      "router.Static",
+      "c.File",
+      "router.Run"
     ]
   },
   {
@@ -182,12 +252,14 @@
     "Line": 8,
     "FilePath": "gopdfsuit\\cmd\\gopdfsuit\\main.go",
     "Calls": [
-      "handlers.RegisterRoutes"
+      "gin.Default",
+      "handlers.RegisterRoutes",
+      "router.Run"
     ]
   },
   {
     "Name": "main.parseInt",
-    "Line": 417,
+    "Line": 465,
     "FilePath": "cmd\\server\\main.go",
     "Calls": null
   },
@@ -207,13 +279,19 @@
     "Name": "pdf.ConvertHTMLToImage",
     "Line": 59,
     "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "Calls": null
+    "Calls": [
+      "gochromedp.ConvertHTMLToImage",
+      "gochromedp.ConvertURLToImage"
+    ]
   },
   {
     "Name": "pdf.ConvertHTMLToPDF",
     "Line": 21,
     "FilePath": "gopdfsuit\\internal\\pdf\\pdf.go",
-    "Calls": null
+    "Calls": [
+      "gochromedp.ConvertHTMLToPDF",
+      "gochromedp.ConvertURLToPDF"
+    ]
   },
   {
     "Name": "pdf.DetectFormFields",
@@ -231,7 +309,16 @@
     "Name": "pdf.FillPDFWithXFDF",
     "Line": 718,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "widthsBuf.WriteString",
+      "widthsBuf.String",
+      "zlib.NewWriterLevel",
+      "zw.Write",
+      "zw.Close",
+      "compBuf.Bytes",
+      "xrefBuf.WriteString",
+      "xrefBuf.Bytes"
+    ]
   },
   {
     "Name": "pdf.FillPDFWithXFDFAdvanced",
@@ -243,13 +330,24 @@
     "Name": "pdf.FlattenPDFBytes",
     "Line": 1044,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "scripts.FlattenPDFBytes"
+    ]
   },
   {
     "Name": "pdf.GenerateTemplatePDF",
     "Line": 15,
     "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
-    "Calls": null
+    "Calls": [
+      "pdfBuffer.WriteString",
+      "pdfBuffer.Len",
+      "contentStream.Len",
+      "pdfBuffer.Write",
+      "contentStream.Bytes",
+      "c.Header",
+      "c.Data",
+      "pdfBuffer.Bytes"
+    ]
   },
   {
     "Name": "pdf.GetCurrentContentStream",
@@ -273,7 +371,12 @@
     "Name": "pdf.MergePDFs",
     "Line": 13,
     "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
-    "Calls": null
+    "Calls": [
+      "out.Write",
+      "out.Len",
+      "out.WriteString",
+      "out.Bytes"
+    ]
   },
   {
     "Name": "pdf.NewPageManager",
@@ -291,7 +394,11 @@
     "Name": "pdf.addParentRef",
     "Line": 287,
     "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
-    "Calls": null
+    "Calls": [
+      "result.Write",
+      "result.WriteString",
+      "result.Bytes"
+    ]
   },
   {
     "Name": "pdf.buildXFDF",
@@ -315,13 +422,18 @@
     "Name": "pdf.decodeHexString",
     "Line": 69,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "hex.DecodeString"
+    ]
   },
   {
     "Name": "pdf.decompressStreams",
     "Line": 616,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "buf.Write",
+      "buf.Bytes"
+    ]
   },
   {
     "Name": "pdf.detectFormFieldsNaive",
@@ -333,43 +445,61 @@
     "Name": "pdf.drawFooter",
     "Line": 226,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.drawPageBorder",
     "Line": 49,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.drawPageNumber",
     "Line": 245,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.drawTable",
     "Line": 105,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage",
+      "pageManager.GetCurrentContentStream",
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.drawTitle",
     "Line": 78,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.drawWatermark",
     "Line": 13,
     "FilePath": "gopdfsuit\\internal\\pdf\\draw.go",
-    "Calls": null
+    "Calls": [
+      "contentStream.WriteString"
+    ]
   },
   {
     "Name": "pdf.escapePDFString",
     "Line": 105,
     "FilePath": "gopdfsuit\\internal\\pdf\\utils.go",
-    "Calls": null
+    "Calls": [
+      "sb.WriteRune",
+      "sb.String"
+    ]
   },
   {
     "Name": "pdf.escapeText",
@@ -417,7 +547,11 @@
     "Name": "pdf.generateAllContent",
     "Line": 107,
     "FilePath": "gopdfsuit\\internal\\pdf\\generator.go",
-    "Calls": null
+    "Calls": [
+      "pageManager.GetCurrentContentStream",
+      "pageManager.CheckPageBreak",
+      "pageManager.AddNewPage"
+    ]
   },
   {
     "Name": "pdf.getAcroFormRef",
@@ -477,7 +611,10 @@
     "Name": "pdf.replaceRefsOutsideStreams",
     "Line": 248,
     "FilePath": "gopdfsuit\\internal\\pdf\\merge.go",
-    "Calls": null
+    "Calls": [
+      "out.Write",
+      "out.Bytes"
+    ]
   },
   {
     "Name": "pdf.resolveValueRef",
@@ -501,12 +638,20 @@
     "Name": "pdf.tryFlateDecompress",
     "Line": 98,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "flate.NewReader",
+      "r.Close",
+      "out.Bytes"
+    ]
   },
   {
     "Name": "pdf.tryZlibDecompress",
     "Line": 84,
     "FilePath": "gopdfsuit\\internal\\pdf\\xfdf.go",
-    "Calls": null
+    "Calls": [
+      "zlib.NewReader",
+      "r.Close",
+      "out.Bytes"
+    ]
   }
 ]

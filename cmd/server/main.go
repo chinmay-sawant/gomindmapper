@@ -32,11 +32,13 @@ var global cache
 func main() {
 	var repoPath string
 	var addr string
+	var includeExternal bool
 	flag.StringVar(&repoPath, "path", ".", "path to repository root")
 	flag.StringVar(&addr, "addr", ":8080", "listen address")
+	flag.BoolVar(&includeExternal, "include-external", false, "include external library calls in relations (store all calls in memory)")
 	flag.Parse()
 
-	if err := load(repoPath); err != nil {
+	if err := load(repoPath, includeExternal); err != nil {
 		log.Fatalf("initial load failed: %v", err)
 	}
 
@@ -51,7 +53,7 @@ func main() {
 	router.GET("/api/search", handleSearch)
 	router.POST("/api/reload", func(c *gin.Context) {
 		log.Printf("Reloading data from repository: %s", repoPath)
-		if err := load(repoPath); err != nil {
+		if err := load(repoPath, includeExternal); err != nil {
 			log.Printf("Reload failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -129,7 +131,7 @@ func main() {
 }
 
 // load (re)scans repository, rebuilds structures and populates cache.
-func load(root string) error {
+func load(root string, includeExternal bool) error {
 	abs, err := filepath.Abs(root)
 	if err != nil {
 		return err
@@ -162,9 +164,9 @@ func load(root string) error {
 	// Filter calls like CLI does (reusing CreateJsonFile side effect free variant)
 	// We temporarily copy functions then call CreateJsonFile to produce filtered Calls but ignore file writes.
 	// Simpler: replicate minimal filtering here (to avoid writing files). We'll replicate logic from CreateJsonFile.
-	filterCalls(functions)
+	filterCalls(functions, includeExternal)
 
-	relations := analyzer.BuildRelations(functions)
+	relations := analyzer.BuildRelations(functions, includeExternal)
 	// stable sort by name then filePath
 	sort.Slice(relations, func(i, j int) bool {
 		if relations[i].Name == relations[j].Name {
@@ -226,7 +228,12 @@ func load(root string) error {
 }
 
 // replicate minimal call filtering from CreateJsonFile without file writes
-func filterCalls(functions []analyzer.FunctionInfo) {
+func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
+	if includeExternal {
+		// If including external calls, don't filter - keep all calls as-is
+		return
+	}
+
 	userPrefixes := make(map[string]bool)
 	for _, f := range functions {
 		if dot := strings.Index(f.Name, "."); dot != -1 {

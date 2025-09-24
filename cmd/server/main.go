@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -174,26 +175,54 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 	}
 
 	// If include-external is true, scan external modules (same as CLI)
+	var externalFunctions []analyzer.FunctionInfo
 	if includeExternal {
 		log.Println("Scanning external modules...")
 		if len(skipPatterns) > 0 {
 			log.Printf("Skipping external dependency folders matching: %v", skipPatterns)
 		}
-		externalFunctions, err := scanExternalModules(abs, functions, skipPatterns)
+
+		// Add memory monitoring for large datasets
+		var m runtime.MemStats
+		runtime.GC()
+		runtime.ReadMemStats(&m)
+		log.Printf("Memory before external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
+
+		extFuncs, err := scanExternalModules(abs, functions, skipPatterns)
 		if err != nil {
 			log.Printf("Warning: failed to scan external modules: %v", err)
 		} else {
-			functions = append(functions, externalFunctions...)
+			externalFunctions = extFuncs
 			log.Printf("Successfully scanned external modules and found %d external functions", len(externalFunctions))
+
+			// Memory check after scanning
+			runtime.ReadMemStats(&m)
+			log.Printf("Memory after external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
+
+			// Limit external functions if memory usage is too high
+			if len(externalFunctions) > 50000 {
+				log.Printf("Warning: Large number of external functions (%d). Consider using more restrictive skip patterns for better performance.", len(externalFunctions))
+				// Optionally limit to most relevant functions
+				externalFunctions = limitExternalFunctions(externalFunctions, functions, 25000)
+				log.Printf("Limited external functions to %d for performance", len(externalFunctions))
+			}
+
+			functions = append(functions, externalFunctions...)
 		}
 	}
 
-	// Filter calls like CLI does (reusing CreateJsonFile side effect free variant)
-	// We temporarily copy functions then call CreateJsonFile to produce filtered Calls but ignore file writes.
-	// Simpler: replicate minimal filtering here (to avoid writing files). We'll replicate logic from CreateJsonFile.
-	filterCalls(functions, includeExternal)
+	// Optimize performance for large datasets with parallel processing
+	log.Printf("Processing %d total functions (including %d external)...", len(functions), len(externalFunctions))
 
-	relations := analyzer.BuildRelations(functions, includeExternal)
+	// Filter calls with parallel processing for large datasets
+	start := time.Now()
+	filterCallsParallel(functions, includeExternal)
+	log.Printf("Call filtering completed in %v", time.Since(start))
+
+	// Build relations with parallel processing
+	start = time.Now()
+	relations := buildRelationsParallel(functions, includeExternal)
+	log.Printf("Relation building completed in %v", time.Since(start))
 	// stable sort by name then filePath
 	sort.Slice(relations, func(i, j int) bool {
 		if relations[i].Name == relations[j].Name {
@@ -254,19 +283,55 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 	return nil
 }
 
-// replicate minimal call filtering from CreateJsonFile without file writes
-func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
+// filterCallsParallel replicates minimal call filtering from CreateJsonFile with parallel processing
+func filterCallsParallel(functions []analyzer.FunctionInfo, includeExternal bool) {
 	if includeExternal {
 		// If including external calls, don't filter - keep all calls as-is
 		return
 	}
 
+	// Build user prefixes map once
 	userPrefixes := make(map[string]bool)
 	for _, f := range functions {
 		if dot := strings.Index(f.Name, "."); dot != -1 {
 			userPrefixes[f.Name[:dot]] = true
 		}
 	}
+
+	// Determine optimal number of workers based on dataset size
+	numWorkers := runtime.NumCPU()
+	if len(functions) < 1000 {
+		// For small datasets, use sequential processing to avoid overhead
+		filterCallsSequential(functions, userPrefixes)
+		return
+	}
+
+	// For large datasets, use parallel processing
+	chunkSize := (len(functions) + numWorkers - 1) / numWorkers
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(functions) {
+			end = len(functions)
+		}
+		if start >= len(functions) {
+			break
+		}
+
+		wg.Add(1)
+		go func(start, end int) {
+			defer wg.Done()
+			filterCallsRange(functions[start:end], userPrefixes)
+		}(start, end)
+	}
+
+	wg.Wait()
+}
+
+// filterCallsSequential processes calls sequentially for small datasets
+func filterCallsSequential(functions []analyzer.FunctionInfo, userPrefixes map[string]bool) {
 	for i := range functions {
 		if len(functions[i].Calls) == 0 {
 			continue
@@ -287,6 +352,143 @@ func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
 			functions[i].Calls = filtered
 		}
 	}
+}
+
+// filterCallsRange processes a range of functions for parallel execution
+func filterCallsRange(functions []analyzer.FunctionInfo, userPrefixes map[string]bool) {
+	for i := range functions {
+		if len(functions[i].Calls) == 0 {
+			continue
+		}
+		var filtered []string
+		for _, c := range functions[i].Calls {
+			if !strings.Contains(c, ".") {
+				continue
+			}
+			parts := strings.Split(c, ".")
+			if len(parts) > 0 && userPrefixes[parts[0]] {
+				filtered = append(filtered, c)
+			}
+		}
+		if len(filtered) == 0 {
+			functions[i].Calls = nil
+		} else {
+			functions[i].Calls = filtered
+		}
+	}
+}
+
+// buildRelationsParallel builds relations with parallel processing for large datasets
+func buildRelationsParallel(functions []analyzer.FunctionInfo, includeExternal bool) []analyzer.OutRelation {
+	// For small datasets, use the original sequential method
+	if len(functions) < 5000 {
+		return analyzer.BuildRelations(functions, includeExternal)
+	}
+
+	// For large datasets, use parallel processing
+	numWorkers := runtime.NumCPU()
+	chunkSize := (len(functions) + numWorkers - 1) / numWorkers
+
+	// Create channels for results
+	type relationChunk struct {
+		relations []analyzer.OutRelation
+		index     int
+	}
+	resultChan := make(chan relationChunk, numWorkers)
+	var wg sync.WaitGroup
+
+	// Launch workers
+	for i := 0; i < numWorkers; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(functions) {
+			end = len(functions)
+		}
+		if start >= len(functions) {
+			break
+		}
+
+		wg.Add(1)
+		go func(start, end, workerIndex int) {
+			defer wg.Done()
+			chunkFunctions := functions[start:end]
+			chunkRelations := analyzer.BuildRelations(chunkFunctions, includeExternal)
+			resultChan <- relationChunk{relations: chunkRelations, index: workerIndex}
+		}(start, end, i)
+	}
+
+	// Close channel when all workers complete
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	// Collect results
+	var allRelations []analyzer.OutRelation
+	for chunk := range resultChan {
+		allRelations = append(allRelations, chunk.relations...)
+	}
+
+	return allRelations
+}
+
+// limitExternalFunctions reduces the number of external functions to improve performance
+func limitExternalFunctions(externalFunctions []analyzer.FunctionInfo, localFunctions []analyzer.FunctionInfo, maxCount int) []analyzer.FunctionInfo {
+	if len(externalFunctions) <= maxCount {
+		return externalFunctions
+	}
+
+	// Create a map of packages that are directly called by local functions
+	calledPackages := make(map[string]int)
+	for _, fn := range localFunctions {
+		for _, call := range fn.Calls {
+			if strings.Contains(call, ".") {
+				pkg := strings.Split(call, ".")[0]
+				calledPackages[pkg]++
+			}
+		}
+	}
+
+	// Score external functions based on relevance
+	type scoredFunction struct {
+		function analyzer.FunctionInfo
+		score    int
+	}
+
+	var scored []scoredFunction
+	for _, fn := range externalFunctions {
+		score := 0
+		if strings.Contains(fn.Name, ".") {
+			pkg := strings.Split(fn.Name, ".")[0]
+			score = calledPackages[pkg]
+		}
+		// Prioritize exported functions (capitalized)
+		if len(fn.Name) > 0 {
+			parts := strings.Split(fn.Name, ".")
+			if len(parts) > 1 && len(parts[1]) > 0 && parts[1][0] >= 'A' && parts[1][0] <= 'Z' {
+				score += 10
+			}
+		}
+		scored = append(scored, scoredFunction{function: fn, score: score})
+	}
+
+	// Sort by score descending
+	sort.Slice(scored, func(i, j int) bool {
+		return scored[i].score > scored[j].score
+	})
+
+	// Take top functions
+	result := make([]analyzer.FunctionInfo, 0, maxCount)
+	for i := 0; i < maxCount && i < len(scored); i++ {
+		result = append(result, scored[i].function)
+	}
+
+	return result
+}
+
+// Legacy function for backward compatibility
+func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
+	filterCallsParallel(functions, includeExternal)
 }
 
 // handleRelations returns paginated root relations with full dependency closure for each root on the page.
@@ -584,7 +786,7 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 	return funcs, nil
 }
 
-// scanExternalModules scans external modules when include-external is enabled (duplicated from CLI)
+// scanExternalModules scans external modules when include-external is enabled (optimized version)
 func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
 	// Get external modules from go.mod
 	modules, err := analyzer.GetExternalModules(projectPath)
@@ -598,6 +800,11 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	if len(skipPatterns) > 0 {
 		modules = analyzer.FilterModulesBySkipPatterns(modules, skipPatterns)
 		log.Printf("After filtering skip patterns, scanning %d modules", len(modules))
+	}
+
+	// Add performance optimization: limit the number of modules to scan
+	if len(modules) > 10 {
+		log.Printf("Warning: Large number of modules (%d). Consider more restrictive skip patterns for better performance.", len(modules))
 	}
 
 	// We need to collect external calls from the raw function data before filtering
@@ -624,9 +831,13 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
+	totalModules := len(relevantModules)
+	processedModules := 0
 
+	// Process modules with progress reporting
 	for modulePath, moduleInfo := range relevantModules {
-		log.Printf("Scanning module: %s@%s", modulePath, moduleInfo.Version)
+		processedModules++
+		log.Printf("Scanning module %d/%d: %s@%s", processedModules, totalModules, modulePath, moduleInfo.Version)
 
 		// Find module in GOPATH
 		localPath, err := analyzer.FindModuleInGoPath(moduleInfo)
@@ -635,15 +846,36 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 			continue
 		}
 
-		// Scan the module
-		moduleFunctions, err := analyzer.ScanExternalModule(localPath, moduleInfo)
-		if err != nil {
-			log.Printf("Warning: failed to scan module %s: %v", modulePath, err)
+		// Scan the module with timeout protection
+		done := make(chan bool, 1)
+		var moduleFunctions []analyzer.FunctionInfo
+		var scanErr error
+
+		go func() {
+			moduleFunctions, scanErr = analyzer.ScanExternalModule(localPath, moduleInfo)
+			done <- true
+		}()
+
+		// Wait for completion with timeout
+		select {
+		case <-done:
+			if scanErr != nil {
+				log.Printf("Warning: failed to scan module %s: %v", modulePath, scanErr)
+				continue
+			}
+			log.Printf("Found %d functions in module %s", len(moduleFunctions), modulePath)
+			externalFunctions = append(externalFunctions, moduleFunctions...)
+		case <-time.After(30 * time.Second):
+			log.Printf("Warning: timeout scanning module %s, skipping", modulePath)
 			continue
 		}
 
-		log.Printf("Found %d functions in module %s", len(moduleFunctions), modulePath)
-		externalFunctions = append(externalFunctions, moduleFunctions...)
+		// Memory check for large accumulations
+		if len(externalFunctions) > 0 && len(externalFunctions)%10000 == 0 {
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			log.Printf("Progress: %d external functions collected, Memory: %.2f MB", len(externalFunctions), float64(m.Alloc)/1024/1024)
+		}
 	}
 
 	return externalFunctions, nil

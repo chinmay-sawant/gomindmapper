@@ -211,6 +211,12 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 		}
 	}
 
+	// Add interface implementation detection for better call resolution
+	if !includeExternal {
+		log.Println("Detecting interface implementations...")
+		functions = enhanceProjectFunctionsWithInterfaceDetection(functions, abs)
+	}
+
 	// Optimize performance for large datasets with parallel processing
 	log.Printf("Processing %d total functions (including %d external)...", len(functions), len(externalFunctions))
 
@@ -430,6 +436,76 @@ func buildRelationsParallel(functions []analyzer.FunctionInfo, includeExternal b
 	}
 
 	return allRelations
+}
+
+// enhanceProjectFunctionsWithInterfaceDetection enhances project functions with interface implementation detection
+func enhanceProjectFunctionsWithInterfaceDetection(functions []analyzer.FunctionInfo, projectPath string) []analyzer.FunctionInfo {
+	// Parse type information for the project
+	typeInfo, err := analyzer.ParseTypeInformation(projectPath, make(map[string]analyzer.ExternalModuleInfo))
+	if err != nil {
+		log.Printf("Warning: failed to parse project type information: %v", err)
+		return functions
+	}
+
+	// Parse comprehensive file information
+	fileInfoMap := make(map[string]analyzer.FileTypeInfo)
+	err = filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
+			relPath, _ := filepath.Rel(projectPath, path)
+			fileInfo, err := analyzer.ParseGoFileForTypesAndImports(path, projectPath)
+			if err != nil {
+				return nil // Skip files that can't be parsed
+			}
+			fileInfoMap[relPath] = fileInfo
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("Warning: failed to parse comprehensive file information: %v", err)
+		return functions
+	}
+
+	// Find interface implementations
+	implementations, err := analyzer.FindInterfaceImplementations(projectPath)
+	if err != nil {
+		log.Printf("Warning: failed to find interface implementations: %v", err)
+		implementations = make(map[string][]analyzer.InterfaceImplementation)
+	}
+
+	if len(implementations) > 0 {
+		log.Printf("Found %d interface implementations", len(implementations))
+	}
+
+	// Process each function to resolve its method calls and add implementation calls
+	var enhancedFunctions []analyzer.FunctionInfo
+	for _, fn := range functions {
+		enhancedCalls := make([]string, 0, len(fn.Calls))
+
+		for _, call := range fn.Calls {
+			// Try to resolve the call using comprehensive type information
+			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo, implementations)
+			enhancedCalls = append(enhancedCalls, resolvedCall)
+
+			// If this is an interface method call, add the implementation calls
+			implementationFunctions := analyzer.GetImplementationCalls(call, implementations)
+			for _, implFunc := range implementationFunctions {
+				// Add the implementation function to our function list
+				enhancedFunctions = append(enhancedFunctions, implFunc)
+
+				// Also add a call relationship from the current function to the implementation
+				enhancedCalls = append(enhancedCalls, implFunc.Name)
+			}
+		}
+
+		fn.Calls = enhancedCalls
+		enhancedFunctions = append(enhancedFunctions, fn)
+	}
+
+	return enhancedFunctions
 }
 
 // limitExternalFunctions reduces the number of external functions to improve performance

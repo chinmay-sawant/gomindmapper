@@ -317,43 +317,11 @@ func findFunctionsWithAllCalls(filePath, absPath string) ([]analyzer.FunctionInf
 // enhanceExternalFunctionsWithTypeInfo uses comprehensive type information to resolve method calls
 func enhanceExternalFunctionsWithTypeInfo(functions []analyzer.FunctionInfo, typeInfo map[string]analyzer.TypeInfo) []analyzer.FunctionInfo {
 	// Parse all project files again to get comprehensive file type information
-	projectPath := "."
-	fileInfoMap := make(map[string]analyzer.FileTypeInfo)
-
-	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
-			relPath, _ := filepath.Rel(projectPath, path)
-			fileInfo, err := analyzer.ParseGoFileForTypesAndImports(path, projectPath)
-			if err != nil {
-				return nil // Skip files that can't be parsed
-			}
-			fileInfoMap[relPath] = fileInfo
-		}
-		return nil
-	})
-
-	if err != nil {
-		fmt.Printf("Warning: failed to parse file type information: %v\n", err)
-	}
-
-	// Process each function to resolve its method calls
-	for i, fn := range functions {
-		enhancedCalls := make([]string, 0, len(fn.Calls))
-		for _, call := range fn.Calls {
-			// Try to resolve the call using comprehensive type information
-			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo)
-			enhancedCalls = append(enhancedCalls, resolvedCall)
-		}
-		functions[i].Calls = enhancedCalls
-	}
-
+	// This function has been replaced by enhanceProjectFunctionsWithTypeInfo
 	return functions
 }
 
-// enhanceProjectFunctionsWithTypeInfo enhances project functions with type resolution
+// enhanceProjectFunctionsWithTypeInfo enhances project functions with type resolution and interface implementation detection
 func enhanceProjectFunctionsWithTypeInfo(functions []analyzer.FunctionInfo) []analyzer.FunctionInfo {
 	// Parse type information for the project
 	projectPath := "."
@@ -385,30 +353,41 @@ func enhanceProjectFunctionsWithTypeInfo(functions []analyzer.FunctionInfo) []an
 		return functions
 	}
 
-	// Process each function to resolve its method calls
-	for i, fn := range functions {
+	// Find interface implementations
+	implementations, err := analyzer.FindInterfaceImplementations(projectPath)
+	if err != nil {
+		fmt.Printf("Warning: failed to find interface implementations: %v\n", err)
+		implementations = make(map[string][]analyzer.InterfaceImplementation)
+	}
+
+	fmt.Printf("Found %d interface implementations\n", len(implementations))
+
+	// Process each function to resolve its method calls and add implementation calls
+	var enhancedFunctions []analyzer.FunctionInfo
+	for _, fn := range functions {
 		enhancedCalls := make([]string, 0, len(fn.Calls))
+
 		for _, call := range fn.Calls {
 			// Try to resolve the call using comprehensive type information
-			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo)
+			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo, implementations)
 			enhancedCalls = append(enhancedCalls, resolvedCall)
+
+			// If this is an interface method call, add the implementation calls
+			implementationFunctions := analyzer.GetImplementationCalls(call, implementations)
+			for _, implFunc := range implementationFunctions {
+				// Add the implementation function to our function list
+				enhancedFunctions = append(enhancedFunctions, implFunc)
+
+				// Also add a call relationship from the current function to the implementation
+				enhancedCalls = append(enhancedCalls, implFunc.Name)
+			}
 		}
-		functions[i].Calls = enhancedCalls
+
+		fn.Calls = enhancedCalls
+		enhancedFunctions = append(enhancedFunctions, fn)
 	}
 
-	return functions
-
-	for i, fn := range functions {
-		enhancedCalls := make([]string, 0, len(fn.Calls))
-		for _, call := range fn.Calls {
-			// Try to resolve the call using type information
-			resolvedCall := resolveCallWithTypeInfo(call, typeInfo)
-			enhancedCalls = append(enhancedCalls, resolvedCall)
-		}
-		functions[i].Calls = enhancedCalls
-	}
-
-	return functions
+	return enhancedFunctions
 }
 
 // resolveCallWithTypeInfo attempts to resolve a call using type information

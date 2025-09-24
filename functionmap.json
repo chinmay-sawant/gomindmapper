@@ -1,5 +1,91 @@
 [
   {
+    "name": "analyzer.FindCalls",
+    "line": 55,
+    "filePath": "cmd\\analyzer\\utils.go",
+    "called": [
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      }
+    ]
+  },
+  {
+    "name": "example.AnotherFunction",
+    "line": 32,
+    "filePath": "example\\service.go",
+    "called": [
+      {
+        "name": "main.TestFormDatastore.CreateNew",
+        "line": 43,
+        "filePath": "example\\test_implementation.go"
+      }
+    ]
+  },
+  {
+    "name": "example.GeneratePDFDocument",
+    "line": 15,
+    "filePath": "example\\service.go",
+    "called": [
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      }
+    ]
+  },
+  {
     "name": "handlers.RegisterRoutes",
     "line": 77,
     "filePath": "gopdfsuit\\internal\\handlers\\handlers.go",
@@ -102,47 +188,131 @@
     ]
   },
   {
-    "name": "main.enhanceExternalFunctionsWithTypeInfo",
-    "line": 318,
-    "filePath": "cmd\\main.go",
+    "name": "main.GenerateDocument",
+    "line": 76,
+    "filePath": "example\\test_implementation.go",
     "called": [
       {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.GetFormId",
+        "line": 20,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      },
+      {
+        "name": "main.TestFormDatastore.SaveForm",
+        "line": 36,
+        "filePath": "example\\test_implementation.go"
+      }
+    ]
+  },
+  {
+    "name": "main.buildRelationsParallel",
+    "line": 388,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "analyzer.BuildRelations",
+        "line": 26,
+        "filePath": "cmd\\analyzer\\relations.go"
+      }
+    ]
+  },
+  {
+    "name": "main.enhanceProjectFunctionsWithInterfaceDetection",
+    "line": 442,
+    "filePath": "cmd\\server\\main.go",
+    "called": [
+      {
+        "name": "analyzer.ParseTypeInformation",
+        "line": 58,
+        "filePath": "cmd\\analyzer\\types_resolver.go"
+      },
+      {
         "name": "analyzer.ParseGoFileForTypesAndImports",
-        "line": 86,
+        "line": 105,
+        "filePath": "cmd\\analyzer\\types_resolver.go"
+      },
+      {
+        "name": "analyzer.FindInterfaceImplementations",
+        "line": 502,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       },
       {
         "name": "analyzer.ResolveMethodCall",
-        "line": 348,
+        "line": 367,
+        "filePath": "cmd\\analyzer\\types_resolver.go"
+      },
+      {
+        "name": "analyzer.GetImplementationCalls",
+        "line": 666,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       }
     ]
   },
   {
     "name": "main.enhanceProjectFunctionsWithTypeInfo",
-    "line": 357,
+    "line": 325,
     "filePath": "cmd\\main.go",
     "called": [
       {
         "name": "analyzer.ParseTypeInformation",
-        "line": 39,
+        "line": 58,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       },
       {
         "name": "analyzer.ParseGoFileForTypesAndImports",
-        "line": 86,
+        "line": 105,
+        "filePath": "cmd\\analyzer\\types_resolver.go"
+      },
+      {
+        "name": "analyzer.FindInterfaceImplementations",
+        "line": 502,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       },
       {
         "name": "analyzer.ResolveMethodCall",
-        "line": 348,
+        "line": 367,
+        "filePath": "cmd\\analyzer\\types_resolver.go"
+      },
+      {
+        "name": "analyzer.GetImplementationCalls",
+        "line": 666,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       }
     ]
   },
   {
     "name": "main.findFunctions",
-    "line": 505,
+    "line": 783,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
@@ -193,7 +363,7 @@
   },
   {
     "name": "main.findFunctionsWithAllCalls",
-    "line": 653,
+    "line": 961,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
@@ -210,18 +380,13 @@
   },
   {
     "name": "main.load",
-    "line": 146,
+    "line": 147,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
         "name": "analyzer.GetModule",
         "line": 11,
         "filePath": "cmd\\analyzer\\utils.go"
-      },
-      {
-        "name": "analyzer.BuildRelations",
-        "line": 26,
-        "filePath": "cmd\\analyzer\\relations.go"
       }
     ]
   },
@@ -261,39 +426,34 @@
   },
   {
     "name": "main.main",
-    "line": 10,
-    "filePath": "debug_types.go",
+    "line": 11,
+    "filePath": "test_interface_detection.go",
     "called": [
       {
-        "name": "analyzer.ParseTypeInformation",
-        "line": 39,
+        "name": "analyzer.FindInterfaceImplementations",
+        "line": 502,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       },
       {
-        "name": "analyzer.ParseGoFileForTypesAndImports",
-        "line": 86,
-        "filePath": "cmd\\analyzer\\types_resolver.go"
-      },
-      {
-        "name": "analyzer.ResolveMethodCall",
-        "line": 348,
+        "name": "analyzer.GetImplementationCalls",
+        "line": 666,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       }
     ]
   },
   {
     "name": "main.main",
-    "line": 32,
+    "line": 33,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {
         "name": "main.handleRelations",
-        "line": 295,
+        "line": 573,
         "filePath": "cmd\\server\\main.go"
       },
       {
         "name": "main.handleSearch",
-        "line": 372,
+        "line": 650,
         "filePath": "cmd\\server\\main.go"
       }
     ]
@@ -315,7 +475,7 @@
       },
       {
         "name": "analyzer.ParseTypeInformation",
-        "line": 39,
+        "line": 58,
         "filePath": "cmd\\analyzer\\types_resolver.go"
       },
       {
@@ -337,7 +497,7 @@
   },
   {
     "name": "main.scanExternalModules",
-    "line": 588,
+    "line": 866,
     "filePath": "cmd\\server\\main.go",
     "called": [
       {

@@ -14,6 +14,16 @@ func CreateJsonFile(functions []FunctionInfo, includeExternal bool) {
 		if dot := strings.Index(f.Name, "."); dot != -1 {
 			userPrefixes[f.Name[:dot]] = true
 		}
+		// Also include packages from resolved calls to handle interface types
+		for _, call := range f.Calls {
+			if dot := strings.Index(call, "."); dot != -1 {
+				pkg := call[:dot]
+				// Include packages that seem to be local (not starting with external URLs)
+				if !strings.Contains(pkg, "/") || strings.Contains(pkg, "example") {
+					userPrefixes[pkg] = true
+				}
+			}
+		}
 	}
 
 	// Track removed calls for reporting

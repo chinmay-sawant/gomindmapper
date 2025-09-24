@@ -212,6 +212,59 @@ func ScanExternalModule(modulePath string, moduleInfo ExternalModuleInfo) ([]Fun
 	return functions, err
 }
 
+// ScanExternalModuleRecursively scans external modules and recursively analyzes their dependencies
+func ScanExternalModuleRecursively(modulePath string, moduleInfo ExternalModuleInfo, scannedModules map[string]bool, allExternalModules map[string]ExternalModuleInfo) ([]FunctionInfo, error) {
+	// Avoid infinite recursion
+	if scannedModules[moduleInfo.ModulePath] {
+		return nil, nil
+	}
+	scannedModules[moduleInfo.ModulePath] = true
+
+	var allFunctions []FunctionInfo
+
+	// First scan the current module
+	functions, err := ScanExternalModule(modulePath, moduleInfo)
+	if err != nil {
+		return nil, err
+	}
+	allFunctions = append(allFunctions, functions...)
+
+	// Now recursively scan modules that these functions call
+	externalCalls := make(map[string]bool)
+	for _, fn := range functions {
+		for _, call := range fn.Calls {
+			if strings.Contains(call, ".") && !strings.HasPrefix(call, moduleInfo.ModulePath) {
+				// This is a call to another external module
+				parts := strings.Split(call, ".")
+				if len(parts) >= 2 {
+					potentialModule := strings.Join(parts[:len(parts)-1], ".")
+					externalCalls[potentialModule] = true
+				}
+			}
+		}
+	}
+
+	// Recursively scan the external modules that are called
+	for calledModule := range externalCalls {
+		for extModulePath, extModuleInfo := range allExternalModules {
+			if strings.HasSuffix(extModulePath, calledModule) || strings.Contains(extModulePath, calledModule) {
+				extLocalPath, err := FindModuleInGoPath(extModuleInfo)
+				if err != nil {
+					continue // Skip modules that can't be found
+				}
+
+				recursiveFunctions, err := ScanExternalModuleRecursively(extLocalPath, extModuleInfo, scannedModules, allExternalModules)
+				if err != nil {
+					continue // Skip modules that can't be scanned
+				}
+				allFunctions = append(allFunctions, recursiveFunctions...)
+			}
+		}
+	}
+
+	return allFunctions, nil
+}
+
 // scanExternalGoFile scans a single Go file in an external module
 func scanExternalGoFile(filePath, modulePath, moduleImportPath string) ([]FunctionInfo, error) {
 	content, err := os.ReadFile(filePath)

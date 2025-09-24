@@ -61,8 +61,20 @@ func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelatio
 				if cf, ok := suffixMap[cname]; ok {
 					rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
 				} else {
-					// External function call not found in scanned modules - include with placeholder info
-					rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
+					// Try more flexible matching for method calls
+					matched := false
+					for fullName, cf := range funcMap {
+						if strings.HasSuffix(fullName, "."+cname) ||
+							strings.Contains(fullName, cname) {
+							rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+							matched = true
+							break
+						}
+					}
+					if !matched {
+						// External function call not found in scanned modules - include with placeholder info
+						rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
+					}
 				}
 			}
 		}

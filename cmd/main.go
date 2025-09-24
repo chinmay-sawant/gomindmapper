@@ -76,6 +76,11 @@ func main() {
 		}
 	}
 
+	// Enhance project functions with type resolution before external scanning
+	if !includeExternal {
+		functions = enhanceProjectFunctionsWithTypeInfo(functions)
+	}
+
 	sort.Slice(functions, func(i, j int) bool {
 		return functions[i].Name < functions[j].Name
 	})
@@ -196,6 +201,14 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 		fmt.Printf("After filtering skip patterns, scanning %d modules\n", len(modules))
 	}
 
+	// Parse type information for better call resolution
+	fmt.Println("Analyzing type information...")
+	typeInfo, err := analyzer.ParseTypeInformation(projectPath, modules)
+	if err != nil {
+		fmt.Printf("Warning: failed to parse type information: %v\n", err)
+		typeInfo = make(map[string]analyzer.TypeInfo)
+	}
+
 	// We need to collect external calls from the raw function data before filtering
 	// Let's re-scan the project to get unfiltered calls
 	var allFunctions []analyzer.FunctionInfo
@@ -220,7 +233,9 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
+	scannedModules := make(map[string]bool)
 
+	// Enhanced scanning with type resolution
 	for modulePath, moduleInfo := range relevantModules {
 		fmt.Printf("Scanning module: %s@%s\n", modulePath, moduleInfo.Version)
 
@@ -231,16 +246,19 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 			continue
 		}
 
-		// Scan the module
-		moduleFunctions, err := analyzer.ScanExternalModule(localPath, moduleInfo)
+		// Use recursive scanning for better dependency resolution
+		moduleFunctions, err := analyzer.ScanExternalModuleRecursively(localPath, moduleInfo, scannedModules, modules)
 		if err != nil {
 			fmt.Printf("Warning: failed to scan module %s: %v\n", modulePath, err)
 			continue
 		}
 
-		fmt.Printf("Found %d functions in module %s\n", len(moduleFunctions), modulePath)
+		fmt.Printf("Found %d functions (including dependencies) in module %s\n", len(moduleFunctions), modulePath)
 		externalFunctions = append(externalFunctions, moduleFunctions...)
 	}
+
+	// Post-process external functions with type information
+	externalFunctions = enhanceExternalFunctionsWithTypeInfo(externalFunctions, typeInfo)
 
 	return externalFunctions, nil
 }
@@ -294,6 +312,131 @@ func findFunctionsWithAllCalls(filePath, absPath string) ([]analyzer.FunctionInf
 		}
 	}
 	return funcs, nil
+}
+
+// enhanceExternalFunctionsWithTypeInfo uses comprehensive type information to resolve method calls
+func enhanceExternalFunctionsWithTypeInfo(functions []analyzer.FunctionInfo, typeInfo map[string]analyzer.TypeInfo) []analyzer.FunctionInfo {
+	// Parse all project files again to get comprehensive file type information
+	projectPath := "."
+	fileInfoMap := make(map[string]analyzer.FileTypeInfo)
+
+	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
+			relPath, _ := filepath.Rel(projectPath, path)
+			fileInfo, err := analyzer.ParseGoFileForTypesAndImports(path, projectPath)
+			if err != nil {
+				return nil // Skip files that can't be parsed
+			}
+			fileInfoMap[relPath] = fileInfo
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Warning: failed to parse file type information: %v\n", err)
+	}
+
+	// Process each function to resolve its method calls
+	for i, fn := range functions {
+		enhancedCalls := make([]string, 0, len(fn.Calls))
+		for _, call := range fn.Calls {
+			// Try to resolve the call using comprehensive type information
+			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo)
+			enhancedCalls = append(enhancedCalls, resolvedCall)
+		}
+		functions[i].Calls = enhancedCalls
+	}
+
+	return functions
+}
+
+// enhanceProjectFunctionsWithTypeInfo enhances project functions with type resolution
+func enhanceProjectFunctionsWithTypeInfo(functions []analyzer.FunctionInfo) []analyzer.FunctionInfo {
+	// Parse type information for the project
+	projectPath := "."
+	typeInfo, err := analyzer.ParseTypeInformation(projectPath, make(map[string]analyzer.ExternalModuleInfo))
+	if err != nil {
+		fmt.Printf("Warning: failed to parse project type information: %v\n", err)
+		return functions
+	}
+
+	// Parse comprehensive file information
+	fileInfoMap := make(map[string]analyzer.FileTypeInfo)
+	err = filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
+			relPath, _ := filepath.Rel(projectPath, path)
+			fileInfo, err := analyzer.ParseGoFileForTypesAndImports(path, projectPath)
+			if err != nil {
+				return nil // Skip files that can't be parsed
+			}
+			fileInfoMap[relPath] = fileInfo
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Warning: failed to parse comprehensive file information: %v\n", err)
+		return functions
+	}
+
+	// Process each function to resolve its method calls
+	for i, fn := range functions {
+		enhancedCalls := make([]string, 0, len(fn.Calls))
+		for _, call := range fn.Calls {
+			// Try to resolve the call using comprehensive type information
+			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo)
+			enhancedCalls = append(enhancedCalls, resolvedCall)
+		}
+		functions[i].Calls = enhancedCalls
+	}
+
+	return functions
+
+	for i, fn := range functions {
+		enhancedCalls := make([]string, 0, len(fn.Calls))
+		for _, call := range fn.Calls {
+			// Try to resolve the call using type information
+			resolvedCall := resolveCallWithTypeInfo(call, typeInfo)
+			enhancedCalls = append(enhancedCalls, resolvedCall)
+		}
+		functions[i].Calls = enhancedCalls
+	}
+
+	return functions
+}
+
+// resolveCallWithTypeInfo attempts to resolve a call using type information
+func resolveCallWithTypeInfo(call string, typeInfo map[string]analyzer.TypeInfo) string {
+	parts := strings.Split(call, ".")
+	if len(parts) < 2 {
+		return call
+	}
+
+	// For calls like "FormDatastore.GetFormId", try to resolve to the actual interface/struct
+	if len(parts) == 2 {
+		fieldType := parts[0]
+		methodName := parts[1]
+
+		// Look for interface types that have this method
+		for typeName, info := range typeInfo {
+			if info.IsInterface && strings.HasSuffix(typeName, "."+fieldType+"Client") {
+				// Check if this interface has the method
+				for _, method := range info.Methods {
+					if method == methodName {
+						return typeName + "." + methodName
+					}
+				}
+			}
+		}
+	}
+
+	return call
 }
 
 // legacy buildFunctionMap removed: functionality now in analyzer.BuildRelations

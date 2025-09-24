@@ -58,6 +58,8 @@ func FindCalls(bodyLines []string) []string {
 	// Enhanced regex to capture function references passed as arguments
 	// This captures function names that appear as arguments (not followed by parentheses)
 	reFuncRefs := regexp.MustCompile(`(?:\s|,|\()(handle[A-Za-z]\w+)(?:\s*[,\)\s]|$)`)
+	// Enhanced regex to capture method calls on struct fields (e.g., svc.FormDatastore.GetFormId)
+	reMethodCalls := regexp.MustCompile(`(\w+\.\w+\.\w+)\(`)
 
 	// Standard library packages to ignore
 	standardPackages := map[string]bool{
@@ -182,6 +184,25 @@ func FindCalls(bodyLines []string) []string {
 	}
 
 	for _, line := range bodyLines {
+		// First, find method calls on struct fields (e.g., svc.FormDatastore.GetFormId())
+		methodMatches := reMethodCalls.FindAllStringSubmatch(line, -1)
+		for _, match := range methodMatches {
+			call := match[1]
+			parts := strings.Split(call, ".")
+			if len(parts) >= 3 {
+				// For calls like svc.FormDatastore.GetFormId, we want to capture FormDatastore.GetFormId
+				// This helps with type resolution later
+				methodCall := strings.Join(parts[1:], ".")
+				if !contains(calls, methodCall) {
+					calls = append(calls, methodCall)
+				}
+				// Also capture the full call for complete analysis
+				if !contains(calls, call) {
+					calls = append(calls, call)
+				}
+			}
+		}
+
 		// Find traditional function calls (package.function())
 		matches := reCalls.FindAllStringSubmatch(line, -1)
 		for _, match := range matches {

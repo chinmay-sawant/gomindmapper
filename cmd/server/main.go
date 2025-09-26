@@ -168,19 +168,19 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 
 	log.Printf("Scanning repository: %s", abs)
 
-	// First, try to load existing functionmap.json if it exists and includes external dependencies
+	// First, try to load existing functionmap.json if it exists
 	var relations []analyzer.OutRelation
 	var functions []analyzer.FunctionInfo
 	functionMapPath := filepath.Join(abs, "functionmap.json")
-	if includeExternal {
-		if stat, err := os.Stat(functionMapPath); err == nil && !stat.IsDir() {
-			log.Printf("Found existing functionmap.json, attempting to load...")
-			if loadedRelations, err := loadExistingFunctionMap(functionMapPath); err == nil {
-				log.Printf("Successfully loaded %d relations from functionmap.json", len(loadedRelations))
-				relations = loadedRelations
-			} else {
-				log.Printf("Failed to load functionmap.json: %v, falling back to scanning", err)
-			}
+
+	// Always try to load functionmap.json if it exists, regardless of includeExternal flag
+	if stat, err := os.Stat(functionMapPath); err == nil && !stat.IsDir() {
+		log.Printf("Found existing functionmap.json, attempting to load...")
+		if loadedRelations, err := loadExistingFunctionMap(functionMapPath); err == nil {
+			log.Printf("Successfully loaded %d relations from functionmap.json", len(loadedRelations))
+			relations = loadedRelations
+		} else {
+			log.Printf("Failed to load functionmap.json: %v, falling back to scanning", err)
 		}
 	}
 
@@ -237,14 +237,6 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 				// Memory check after scanning
 				runtime.ReadMemStats(&m)
 				log.Printf("Memory after external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
-
-				// Limit external functions if memory usage is too high
-				if len(externalFunctions) > 50000 {
-					log.Printf("Warning: Large number of external functions (%d). Consider using more restrictive skip patterns for better performance.", len(externalFunctions))
-					// Optionally limit to most relevant functions
-					externalFunctions = limitExternalFunctions(externalFunctions, functions, 25000)
-					log.Printf("Limited external functions to %d for performance", len(externalFunctions))
-				}
 
 				functions = append(functions, externalFunctions...)
 			}

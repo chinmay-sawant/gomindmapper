@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -143,92 +144,132 @@ func main() {
 	log.Fatal(router.Run(addr))
 }
 
+// loadExistingFunctionMap tries to load existing functionmap.json file for consistency
+func loadExistingFunctionMap(functionMapPath string) ([]analyzer.OutRelation, error) {
+	data, err := os.ReadFile(functionMapPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var relations []analyzer.OutRelation
+	if err := json.Unmarshal(data, &relations); err != nil {
+		return nil, err
+	}
+
+	return relations, nil
+}
+
 // load (re)scans repository, rebuilds structures and populates cache.
 func load(root string, includeExternal bool, skipPatterns []string) error {
 	abs, err := filepath.Abs(root)
 	if err != nil {
 		return err
 	}
-	module, err := analyzer.GetModule(abs)
-	if err != nil {
-		return err
+
+	log.Printf("Scanning repository: %s", abs)
+
+	// First, try to load existing functionmap.json if it exists and includes external dependencies
+	var relations []analyzer.OutRelation
+	var functions []analyzer.FunctionInfo
+	functionMapPath := filepath.Join(abs, "functionmap.json")
+	if includeExternal {
+		if stat, err := os.Stat(functionMapPath); err == nil && !stat.IsDir() {
+			log.Printf("Found existing functionmap.json, attempting to load...")
+			if loadedRelations, err := loadExistingFunctionMap(functionMapPath); err == nil {
+				log.Printf("Successfully loaded %d relations from functionmap.json", len(loadedRelations))
+				relations = loadedRelations
+			} else {
+				log.Printf("Failed to load functionmap.json: %v, falling back to scanning", err)
+			}
+		}
 	}
 
-	var functions []analyzer.FunctionInfo
-	// Walk & extract
-	err = filepath.Walk(abs, func(path string, info os.FileInfo, err error) error {
+	// If we couldn't load the existing file, scan and generate relations
+	if len(relations) == 0 {
+		module, err := analyzer.GetModule(abs)
 		if err != nil {
 			return err
 		}
-		if info.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+
+		log.Println("Scanning Go files for functions...")
+		// Walk & extract
+		err = filepath.Walk(abs, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+				return nil
+			}
+			fns, ferr := findFunctions(path, abs, module)
+			if ferr != nil {
+				return ferr
+			}
+			functions = append(functions, fns...)
 			return nil
-		}
-		fns, ferr := findFunctions(path, abs, module)
-		if ferr != nil {
-			return ferr
-		}
-		functions = append(functions, fns...)
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	// If include-external is true, scan external modules (same as CLI)
-	var externalFunctions []analyzer.FunctionInfo
-	if includeExternal {
-		log.Println("Scanning external modules...")
-		if len(skipPatterns) > 0 {
-			log.Printf("Skipping external dependency folders matching: %v", skipPatterns)
-		}
-
-		// Add memory monitoring for large datasets
-		var m runtime.MemStats
-		runtime.GC()
-		runtime.ReadMemStats(&m)
-		log.Printf("Memory before external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
-
-		extFuncs, err := scanExternalModules(abs, functions, skipPatterns)
+		})
 		if err != nil {
-			log.Printf("Warning: failed to scan external modules: %v", err)
-		} else {
-			externalFunctions = extFuncs
-			log.Printf("Successfully scanned external modules and found %d external functions", len(externalFunctions))
+			return err
+		}
 
-			// Memory check after scanning
-			runtime.ReadMemStats(&m)
-			log.Printf("Memory after external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
+		log.Printf("Found %d functions in local repository", len(functions))
 
-			// Limit external functions if memory usage is too high
-			if len(externalFunctions) > 50000 {
-				log.Printf("Warning: Large number of external functions (%d). Consider using more restrictive skip patterns for better performance.", len(externalFunctions))
-				// Optionally limit to most relevant functions
-				externalFunctions = limitExternalFunctions(externalFunctions, functions, 25000)
-				log.Printf("Limited external functions to %d for performance", len(externalFunctions))
+		// If include-external is true, scan external modules (same as CLI)
+		var externalFunctions []analyzer.FunctionInfo
+		if includeExternal {
+			log.Println("Scanning external modules...")
+			if len(skipPatterns) > 0 {
+				log.Printf("Skipping external dependency folders matching: %v", skipPatterns)
 			}
 
-			functions = append(functions, externalFunctions...)
+			// Add memory monitoring for large datasets
+			var m runtime.MemStats
+			runtime.GC()
+			runtime.ReadMemStats(&m)
+			log.Printf("Memory before external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
+
+			extFuncs, err := scanExternalModules(abs, functions, skipPatterns)
+			if err != nil {
+				log.Printf("Warning: failed to scan external modules: %v", err)
+			} else {
+				externalFunctions = extFuncs
+				log.Printf("Successfully scanned external modules and found %d external functions", len(externalFunctions))
+
+				// Memory check after scanning
+				runtime.ReadMemStats(&m)
+				log.Printf("Memory after external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
+
+				// Limit external functions if memory usage is too high
+				if len(externalFunctions) > 50000 {
+					log.Printf("Warning: Large number of external functions (%d). Consider using more restrictive skip patterns for better performance.", len(externalFunctions))
+					// Optionally limit to most relevant functions
+					externalFunctions = limitExternalFunctions(externalFunctions, functions, 25000)
+					log.Printf("Limited external functions to %d for performance", len(externalFunctions))
+				}
+
+				functions = append(functions, externalFunctions...)
+			}
 		}
+
+		// Add interface implementation detection for better call resolution
+		if !includeExternal {
+			log.Println("Detecting interface implementations...")
+			functions = enhanceProjectFunctionsWithInterfaceDetection(functions, abs)
+		}
+
+		// Optimize performance for large datasets with parallel processing
+		log.Printf("Processing %d total functions (including %d external)...", len(functions), len(externalFunctions))
+
+		// Filter calls with parallel processing for large datasets
+		start := time.Now()
+		// filterCallsParallel(functions, includeExternal)
+		// log.Printf("Call filtering completed in %v", time.Since(start))
+
+		// Build relations with parallel processing
+		start = time.Now()
+		relations = buildRelationsParallel(functions, includeExternal)
+		log.Printf("Relation building completed in %v", time.Since(start))
 	}
 
-	// Add interface implementation detection for better call resolution
-	if !includeExternal {
-		log.Println("Detecting interface implementations...")
-		functions = enhanceProjectFunctionsWithInterfaceDetection(functions, abs)
-	}
-
-	// Optimize performance for large datasets with parallel processing
-	log.Printf("Processing %d total functions (including %d external)...", len(functions), len(externalFunctions))
-
-	// Filter calls with parallel processing for large datasets
-	start := time.Now()
-	filterCallsParallel(functions, includeExternal)
-	log.Printf("Call filtering completed in %v", time.Since(start))
-
-	// Build relations with parallel processing
-	start = time.Now()
-	relations := buildRelationsParallel(functions, includeExternal)
-	log.Printf("Relation building completed in %v", time.Since(start))
 	// stable sort by name then filePath
 	sort.Slice(relations, func(i, j int) bool {
 		if relations[i].Name == relations[j].Name {
@@ -269,6 +310,8 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 		}
 		return roots[i].Name < roots[j].Name
 	})
+
+	// Use the functions array whether loaded from file or generated
 
 	global.mu.Lock()
 	global.functions = functions
@@ -937,6 +980,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, allModules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
+	scannedModules := make(map[string]bool)
 	totalModules := len(relevantModules)
 	processedModules := 0
 
@@ -958,7 +1002,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 		var scanErr error
 
 		go func() {
-			moduleFunctions, scanErr = analyzer.ScanExternalModule(localPath, moduleInfo)
+			moduleFunctions, scanErr = analyzer.ScanExternalModuleRecursively(localPath, moduleInfo, scannedModules, allModules)
 			done <- true
 		}()
 

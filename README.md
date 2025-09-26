@@ -198,7 +198,7 @@ cd /d "D:\GoMindMapper"
 go run cmd/server/main.go -path . -addr :8080 --include-external=false
 
 # Server with external dependencies, skipping standard library modules
-go run cmd/server/main.go -path . -addr :8080 --include-external=true --skip-folders="golang.org"
+go run cmd/server/main.go -path gopdfsuit -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic,bytedance,ugorji,go-playground"
 ```
 
 Browse:  

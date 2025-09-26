@@ -57,17 +57,65 @@ const Overview = () => {
 
         <section className="quick-start-section">
           <h2>Quick Start</h2>
-          <div className="two-col">
-            <div className="card">
-              <h3>1. Build & Run</h3>
-              <pre><code>go run cmd/server/main.go -path . -addr :8080</code></pre>
+
+          <div className="quick-start-grid">
+            <div className="primary-card card">
+              <h3>Run the application (single command)</h3>
+              <p className="lead muted">Run the server against a target repository/subfolder — this example uses <code>gopdfsuit</code>:</p>
+              <pre className="cmd"><code>go run cmd/server/main.go -path gopdfsuit -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic,bytedance,ugorji,go-playground"</code></pre>
+              <div className="flag-list">
+                <strong>Flags</strong>
+                <ul>
+                  <li><code>-path &lt;dir&gt;</code>: repository/subfolder to analyze (e.g., <code>gopdfsuit</code>).</li>
+                  <li><code>-addr &lt;addr&gt;</code>: HTTP server address (default <code>:8080</code>).</li>
+                  <li><code>--include-external</code>: include external module functions in the graph.</li>
+                  <li><code>--skip-folders</code>: comma-separated dependency prefixes to ignore during external scanning.</li>
+                </ul>
+              </div>
+              <p className="muted">Note: production React assets are built into <code>/docs</code> (see <code>mind-map-react/vite.config.js</code>) and are served by the Go server — you don't need to run the React project separately for production.</p>
             </div>
-            <div className="card">
-              <h3>2. Use the Map</h3>
-              <p>
-                Toggle <code className="inline-code">Use Live Server</code> for paginated data or upload a previously generated <code className="inline-code">functionmap.json</code>.
-                Pan (drag background), zoom (wheel), expand nodes, inspect details on the side panel.
-              </p>
+
+            <div className="aux-cards">
+              <div className="card">
+                <h4>Build & Run (production)</h4>
+                <pre><code>cd &lt;repo-root&gt;
+go run cmd/server/main.go -path . -addr :8080</code></pre>
+                <p className="muted">Starts the Go server which serves the Overview at <code>/gomindmapper/</code> and the app at <code>/gomindmapper/view/</code>.</p>
+              </div>
+
+              <div className="card">
+                <h4>Build Frontend (optional)</h4>
+                <pre><code>cd mind-map-react
+npm install
+npm run build</code></pre>
+                <p className="muted">Places production files into <code>../docs</code> for the Go server to serve.</p>
+              </div>
+
+              <div className="card">
+                <h4>Development Mode</h4>
+                <pre><code>// Terminal 1
+cd mind-map-react
+npm install
+npm run dev
+
+// Terminal 2
+cd &lt;repo-root&gt;
+go run cmd/server/main.go -path . -addr :8080</code></pre>
+                <p className="muted">Use Vite dev server for UI hot-reload while the Go server provides live data. Open <code>http://localhost:5173/gomindmapper/view</code>.</p>
+              </div>
+
+              <div className="card">
+                <h4>CLI-only Analysis</h4>
+                <pre><code>go run cmd/main.go -path . --include-external=true</code></pre>
+                <p className="muted">Generates <code>functions.json</code>, <code>functionmap.json</code> and <code>removed_calls.json</code> for offline analysis.</p>
+              </div>
+
+              <div className="card">
+                <h4>Makefile Shortcuts</h4>
+                <pre><code>make ui-build   # builds the React app
+make server     # runs the Go server</code></pre>
+                <p className="muted">Convenient targets to build and run the project.</p>
+              </div>
             </div>
           </div>
         </section>

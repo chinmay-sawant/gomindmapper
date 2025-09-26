@@ -307,6 +307,26 @@ npm run dev
 start http://localhost:5173/view
 ```
 
+### Quick: Run the application directly
+
+Copy or download the repository and run the following command (example uses the `gopdfsuit` subdirectory):
+
+```cmd
+go run cmd/server/main.go -path gopdfsuit -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic,bytedance,ugorji,go-playground"
+```
+
+Flags explained:
+- `-path <dir>`: path to the repository or submodule to analyze (e.g., `gopdfsuit`).
+- `-addr <addr>`: listen address for the HTTP server (default `:8080`).
+- `--include-external`: include external module calls in the generated graph.
+- `--skip-folders`: comma-separated dependency prefixes to ignore when scanning external modules.
+
+Note: the production React build is emitted to `../docs` by Vite (see `mind-map-react/vite.config.js`) and served by the Go server under `/gomindmapper/` — you do not need to run the React dev server for production usage.
+
+Developer shortcuts (Makefile):
+- `make ui-build` — builds the React app into `docs/`.
+- `make server` — starts the Go server (equivalent to running `go run cmd/server/main.go`).
+
 ### Available Command-line Options:
 
 **Analyzer CLI:**

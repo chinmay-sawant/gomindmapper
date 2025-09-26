@@ -321,7 +321,140 @@ pre {
   text-decoration: underline;
 }
 
-/* Responsive */
+/* Quick Start specific styles */
+.quick-start-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+  margin-bottom: 6px;
+}
+
+.primary-card {
+  padding: 26px 28px;
+  border-radius: 16px;
+  /* use flat background to keep consistent with other cards */
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+}
+
+/* primary-card should match the same font stack as auxiliary cards (inherit global UI font)
+   command blocks (pre.cmd) remain monospace for readability */
+.primary-card,
+.primary-card h3,
+.primary-card .lead,
+.primary-card .muted,
+.primary-card .flag-list {
+  font-family: inherit;
+}
+
+/* Keep headings bold while using monospace */
+.primary-card h3 {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Spacing between paragraph and code block in primary card */
+.primary-card p {
+  margin-bottom: 12px;
+}
+.primary-card pre {
+  margin-top: 10px;
+}
+
+.aux-cards {
+  display: grid;
+  gap: 18px;
+  grid-auto-rows: min-content;
+}
+
+/* Command block emphasised for copy and readability */
+pre.cmd {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  padding: 14px 16px;
+  border-radius: 10px;
+  overflow: auto;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  /* Linux-style monospace font stack */
+  font-family: 'Ubuntu Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Menlo', 'monospace';
+}
+
+/* Flag list styling */
+.flag-list {
+  margin-top: 14px;
+  /* use same monospace stack as command block for consistent appearance */
+  font-family: 'Ubuntu Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Menlo', 'monospace';
+  font-size: 13.5px;
+}
+
+.flag-list strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.flag-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.flag-list li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.012);
+  border: 1px solid rgba(255,255,255,0.02);
+  font-size: 13px;
+  color: var(--text-secondary);
+  /* ensure flag descriptions are legible in monospace too */
+  font-family: inherit;
+}
+
+.flag-list code {
+  background: transparent;
+  border: none;
+  padding: 0 6px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+/* Slightly larger monospace for small inline code references */
+pre.cmd code, .cmd .inline-code {
+  font-size: 13.5px;
+}
+
+/* Improve spacing for auxiliary cards inside quick start */
+.quick-start-grid .card h4 {
+  margin-top: 0;
+}
+
+/* Increase spacing between auxiliary card headings (h4) and their code blocks */
+.aux-cards .card h4 {
+  margin-bottom: 12px;
+}
+.aux-cards .card pre {
+  margin-top: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 980px) {
+  .quick-start-grid {
+    grid-template-columns: 1fr;
+  }
+  .primary-card {
+    order: 0;
+  }
+}
+
 @media (max-width: 760px) {
   .hero-section h1 {
     font-size: 40px;

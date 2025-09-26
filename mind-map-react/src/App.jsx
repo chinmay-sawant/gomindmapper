@@ -116,7 +116,7 @@ function MindMapApp() {
   const [dragActive, setDragActive] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [dragCounter, setDragCounter] = useState(0);
-  // Pagination state when using backend
+  // Pagination state when using backend or local file
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [totalRoots, setTotalRoots] = useState(0);
@@ -126,14 +126,129 @@ function MindMapApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  // Local file data management
+  const [fullLocalData, setFullLocalData] = useState(null);
+  const [useLocalPagination, setUseLocalPagination] = useState(false);
+  const [localSearchResults, setLocalSearchResults] = useState([]);
   const appRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const searchInputRef = useRef(null);
   const isTypingRef = useRef(false);
 
+  // Get root nodes from data (functions that aren't called by others)
+  const getRootNodes = useCallback((data) => {
+    const getUniqueKey = (fn) => `${fn.name}@${fn.filePath}`;
+    
+    return data.filter(fn => {
+      const fnKey = getUniqueKey(fn);
+      return !data.some(f => 
+        f.called && f.called.some(c => getUniqueKey(c) === fnKey)
+      );
+    });
+  }, []);
+
+  // Client-side pagination for local data
+  const paginateLocalData = useCallback((data, p, ps, query = '') => {
+    let filteredData = data;
+    
+    if (query && query.trim() !== '') {
+      // Search in function names, file paths, and called function names
+      const searchTerm = query.trim().toLowerCase();
+      const searchResults = data.filter(fn => {
+        // Search in function name
+        if (fn.name && fn.name.toLowerCase().includes(searchTerm)) return true;
+        
+        // Search in file path
+        if (fn.filePath && fn.filePath.toLowerCase().includes(searchTerm)) return true;
+        
+        // Search in called function names
+        if (fn.called && fn.called.some(called => 
+          called.name && called.name.toLowerCase().includes(searchTerm)
+        )) return true;
+        
+        return false;
+      });
+      
+      setLocalSearchResults(searchResults);
+      filteredData = searchResults;
+    } else {
+      setLocalSearchResults([]);
+    }
+
+    // Get root nodes from filtered data
+    const roots = getRootNodes(filteredData);
+    const totalRoots = roots.length;
+    
+    // Calculate pagination
+    const startIndex = (p - 1) * ps;
+    const endIndex = startIndex + ps;
+    const paginatedRoots = roots.slice(startIndex, endIndex);
+    
+    // Build complete data with dependencies for paginated roots
+    const buildCompleteData = (rootNodes, allData) => {
+      const result = [];
+      const processed = new Set();
+      
+      const processNode = (node) => {
+        const key = `${node.name}@${node.filePath}`;
+        if (processed.has(key)) return;
+        processed.add(key);
+        
+        result.push(node);
+        
+        // Add all called functions
+        if (node.called) {
+          node.called.forEach(calledFn => {
+            const fullCalledFn = allData.find(f => 
+              f.name === calledFn.name && f.filePath === calledFn.filePath
+            );
+            if (fullCalledFn) {
+              processNode(fullCalledFn);
+            }
+          });
+        }
+      };
+      
+      rootNodes.forEach(processNode);
+      return result;
+    };
+    
+    const completeData = buildCompleteData(paginatedRoots, data);
+    
+    return {
+      data: completeData,
+      totalRoots,
+      page: p,
+      pageSize: ps
+    };
+  }, [getRootNodes]);
+
   // Fetch paginated data from backend server
   const fetchPage = useCallback(async (p = page, ps = pageSize, query = '') => {
-    if (!useServer) return;
+    if (!useServer) {
+      // Handle local pagination
+      if (useLocalPagination && fullLocalData) {
+        setLoading(true);
+        try {
+          const result = paginateLocalData(fullLocalData, p, ps, query);
+          setFunctionData(result.data);
+          setTotalRoots(result.totalRoots);
+          setPage(result.page);
+          setPageSize(result.pageSize);
+          
+          const rootsCount = getRootNodes(fullLocalData).length;
+          const label = query 
+            ? `Local Search: "${query}" (${result.totalRoots} matches, page ${result.page})` 
+            : `Local File (${rootsCount} total roots, page ${result.page})`;
+          setFileName(label);
+          setSelectedNode(null);
+        } finally {
+          setLoading(false);
+        }
+      }
+      return;
+    }
+    
     setLoading(true);
     setServerError('');
     try {
@@ -164,26 +279,27 @@ function MindMapApp() {
     } finally {
       setLoading(false);
     }
-  }, [useServer]);
+  }, [useServer, useLocalPagination, fullLocalData, paginateLocalData, getRootNodes]);
 
   // Auto fetch when toggling useServer or page changes (but not when there's an active search)
   useEffect(() => {
-    if (useServer && (!searchQuery || searchQuery.trim() === '')) {
+    if ((useServer || useLocalPagination) && (!searchQuery || searchQuery.trim() === '')) {
       fetchPage(page, pageSize);
     }
-  }, [useServer, page, pageSize, fetchPage, searchQuery]);
+  }, [useServer, useLocalPagination, page, pageSize, fetchPage, searchQuery]);
 
-  // Clear search when switching off server mode
+  // Clear search when switching off server mode or local pagination
   useEffect(() => {
-    if (!useServer) {
+    if (!useServer && !useLocalPagination) {
       setSearchQuery('');
       setSearchResults([]);
+      setLocalSearchResults([]);
     }
-  }, [useServer]);
+  }, [useServer, useLocalPagination]);
 
   // Search function with debouncing
   const handleSearch = useCallback(async (query, immediate = false, searchPage = 1, searchPageSize = pageSize) => {
-    if (!useServer) return;
+    if (!useServer && !useLocalPagination) return;
     
     // Clear existing timeout
     if (searchTimeoutRef.current) {
@@ -223,7 +339,7 @@ function MindMapApp() {
       // Increase debounce time to 1500ms to give more time for typing
       searchTimeoutRef.current = setTimeout(performSearch, 1500);
     }
-  }, [useServer, fetchPage]);
+  }, [useServer, useLocalPagination, fetchPage]);
 
   // Handle search input changes with debouncing
   const handleSearchInputChange = useCallback((newQuery) => {
@@ -238,15 +354,42 @@ function MindMapApp() {
     reader.onload = (e) => {
       try {
         const jsonData = JSON.parse(e.target.result);
-        setFunctionData(jsonData);
-        setFileName(file.name);
+        
+        // Check if the data is large enough to warrant pagination
+        const rootNodes = getRootNodes(jsonData);
+        const shouldUsePagination = rootNodes.length > 10; // Enable pagination if more than 10 root nodes
+        
+        if (shouldUsePagination) {
+          // Store full data and enable local pagination
+          setFullLocalData(jsonData);
+          setUseLocalPagination(true);
+          setUseServer(false); // Disable server mode
+          setPage(1); // Reset to first page
+          setSearchQuery(''); // Clear any existing search
+          
+          // Paginate the data immediately
+          const result = paginateLocalData(jsonData, 1, pageSize);
+          setFunctionData(result.data);
+          setTotalRoots(result.totalRoots);
+          
+          setFileName(`${file.name} (${rootNodes.length} total roots, paginated)`);
+          alert(`Large dataset detected! Loaded ${rootNodes.length} root functions with pagination enabled. Use the pagination controls and search to navigate through the data.`);
+        } else {
+          // Small dataset, load normally
+          setFullLocalData(null);
+          setUseLocalPagination(false);
+          setFunctionData(jsonData);
+          setTotalRoots(rootNodes.length);
+          setFileName(file.name);
+        }
+        
         setSelectedNode(null); // Clear selection when new data loads
       } catch (error) {
         alert('Error parsing JSON file: ' + error.message);
       }
     };
     reader.readAsText(file);
-  }, []);
+  }, [getRootNodes, paginateLocalData, pageSize]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -350,14 +493,34 @@ function MindMapApp() {
                 onChange={(e) => {
                   setUseServer(e.target.checked);
                   if (!e.target.checked) {
-                    setFunctionData(defaultEmployeeAppData);
-                    setFileName('EmployeeApp (Default)');
+                    // If we have local paginated data, go back to it
+                    if (useLocalPagination && fullLocalData) {
+                      const result = paginateLocalData(fullLocalData, 1, pageSize);
+                      setFunctionData(result.data);
+                      setTotalRoots(result.totalRoots);
+                      setPage(1);
+                      const rootNodes = getRootNodes(fullLocalData);
+                      setFileName(`Local File (${rootNodes.length} total roots, paginated)`);
+                    } else {
+                      // No local data, go back to default
+                      setUseLocalPagination(false);
+                      setFullLocalData(null);
+                      setFunctionData(defaultEmployeeAppData);
+                      setFileName('EmployeeApp (Default)');
+                      setTotalRoots(0);
+                    }
                     setSelectedNode(null);
+                    setSearchQuery('');
+                    setSearchResults([]);
+                    setLocalSearchResults([]);
                   }
                 }}
               /> Use Live Server
             </label>
-            {useServer && (
+            {useLocalPagination && !useServer && (
+              <span className="pagination-indicator">📄 Local File Pagination Active</span>
+            )}
+            {(useServer || useLocalPagination) && (
               <div className="server-controls">
                 <div className="search-bar">
                   <input 
@@ -495,7 +658,7 @@ function MindMapApp() {
       )}
       
       <main className="app-main">
-        {useServer && loading && <div className="loading-indicator">Loading...</div>}
+        {(useServer || useLocalPagination) && loading && <div className="loading-indicator">Loading...</div>}
         {useServer && serverError && <div className="error-indicator">Error: {serverError}</div>}
         <MindMap 
           data={functionData} 

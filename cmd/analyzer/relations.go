@@ -1,5 +1,9 @@
 package analyzer
 
+import (
+	"strings"
+)
+
 // OutCalled is a light-weight representation of a called function used in JSON output.
 type OutCalled struct {
 	Name     string `json:"name"`
@@ -15,28 +19,84 @@ type OutRelation struct {
 	Called   []OutCalled `json:"called,omitempty"`
 }
 
-// BuildRelations converts raw FunctionInfo + their filtered Calls into OutRelation list identical to previous buildFunctionMap output.
-// The provided slice must already have Calls filtered to user-defined packages (CreateJsonFile performs this filtering). We
-// still defensively exclude relations that have zero called entries to preserve prior semantics.
-func BuildRelations(functions []FunctionInfo) []OutRelation {
+// BuildRelations converts raw FunctionInfo + their Calls into OutRelation list.
+// If includeExternal is false, the provided slice must already have Calls filtered to user-defined packages (CreateJsonFile performs this filtering).
+// If includeExternal is true, all calls are included in the relations, including external module functions.
+// We still defensively exclude relations that have zero called entries to preserve prior semantics unless includeExternal is true.
+func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelation {
 	// index by name for quick lookup
 	funcMap := make(map[string]FunctionInfo, len(functions))
+	// Also create an index by suffix for external function matching
+	suffixMap := make(map[string]FunctionInfo)
+
 	for _, f := range functions {
 		funcMap[f.Name] = f
+		// If this is an external function, also index by its suffix for partial matching
+		if strings.HasPrefix(f.FilePath, "external:") {
+			parts := strings.Split(f.Name, "/")
+			if len(parts) >= 1 {
+				// Get the last segment after the final slash, then split by dot to get package.function
+				lastPart := parts[len(parts)-1]
+				dotParts := strings.Split(lastPart, ".")
+				if len(dotParts) >= 2 {
+					suffix := strings.Join(dotParts[len(dotParts)-2:], ".")
+					suffixMap[suffix] = f
+				}
+			}
+		}
 	}
 
 	out := make([]OutRelation, 0, len(functions))
 	for _, f := range functions {
-		if len(f.Calls) == 0 {
+		if len(f.Calls) == 0 && !includeExternal {
 			continue // skip functions with no user-defined calls (previous behaviour)
 		}
 		rel := OutRelation{Name: f.Name, Line: f.Line, FilePath: f.FilePath}
 		for _, cname := range f.Calls {
-			if cf, ok := funcMap[cname]; ok { // only include if present
+			if cf, ok := funcMap[cname]; ok {
+				// Function exists in our codebase (including external modules when scanned)
 				rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+			} else if includeExternal {
+				// Try to match with external functions by suffix
+				if cf, ok := suffixMap[cname]; ok {
+					rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+				} else {
+					// Try more flexible matching for method calls
+					matched := false
+					var matchedFunction FunctionInfo
+
+					// First try: exact suffix match with dot notation
+					for fullName, cf := range funcMap {
+						if strings.HasSuffix(fullName, "."+cname) {
+							rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+							matched = true
+							break
+						}
+					}
+
+					// Second try: if not matched, try partial matching
+					if !matched {
+						for fullName, cf := range funcMap {
+							if strings.Contains(fullName, cname) {
+								matchedFunction = cf
+								matched = true
+								break
+							}
+						}
+						if matched {
+							rel.Called = append(rel.Called, OutCalled{Name: matchedFunction.Name, Line: matchedFunction.Line, FilePath: matchedFunction.FilePath})
+						}
+					}
+
+					if !matched {
+						// External function call not found in scanned modules - include with placeholder info
+						rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
+					}
+				}
 			}
 		}
-		if len(rel.Called) > 0 { // only append if at least one resolved call
+		if len(rel.Called) > 0 || includeExternal {
+			// Include the relation if it has calls OR if we're including all functions
 			out = append(out, rel)
 		}
 	}

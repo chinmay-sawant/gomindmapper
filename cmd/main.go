@@ -186,24 +186,54 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 }
 
 // scanExternalModules scans external modules when include-external is enabled
+// This function now recursively finds all go.mod files in the repository and scans their dependencies
 func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
-	// Get external modules from go.mod
-	modules, err := analyzer.GetExternalModules(projectPath)
+	// Find all go.mod files recursively in the repository
+	var goModPaths []string
+	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && info.Name() == "go.mod" {
+			goModPaths = append(goModPaths, filepath.Dir(path))
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get external modules: %v", err)
+		return nil, fmt.Errorf("failed to find go.mod files: %v", err)
 	}
 
-	fmt.Printf("Found %d modules in go.mod\n", len(modules))
+	fmt.Printf("Found %d go.mod files in repository\n", len(goModPaths))
+
+	// Collect all external modules from all go.mod files
+	allModules := make(map[string]analyzer.ExternalModuleInfo)
+	for _, modPath := range goModPaths {
+		modules, err := analyzer.GetExternalModules(modPath)
+		if err != nil {
+			fmt.Printf("Warning: failed to get external modules from %s: %v\n", modPath, err)
+			continue
+		}
+		fmt.Printf("Found %d modules in %s\n", len(modules), modPath)
+
+		// Merge modules, avoiding duplicates
+		for modName, modInfo := range modules {
+			if _, exists := allModules[modName]; !exists {
+				allModules[modName] = modInfo
+			}
+		}
+	}
+
+	fmt.Printf("Total unique external modules found: %d\n", len(allModules))
 
 	// Filter out modules matching skip patterns
 	if len(skipPatterns) > 0 {
-		modules = analyzer.FilterModulesBySkipPatterns(modules, skipPatterns)
-		fmt.Printf("After filtering skip patterns, scanning %d modules\n", len(modules))
+		allModules = analyzer.FilterModulesBySkipPatterns(allModules, skipPatterns)
+		fmt.Printf("After filtering skip patterns, scanning %d modules\n", len(allModules))
 	}
 
 	// Parse type information for better call resolution
 	fmt.Println("Analyzing type information...")
-	typeInfo, err := analyzer.ParseTypeInformation(projectPath, modules)
+	typeInfo, err := analyzer.ParseTypeInformation(projectPath, allModules)
 	if err != nil {
 		fmt.Printf("Warning: failed to parse type information: %v\n", err)
 		typeInfo = make(map[string]analyzer.TypeInfo)
@@ -230,7 +260,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	}
 
 	// Filter to only relevant modules (ones that are actually called)
-	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
+	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, allModules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
 	scannedModules := make(map[string]bool)
@@ -247,7 +277,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 		}
 
 		// Use recursive scanning for better dependency resolution
-		moduleFunctions, err := analyzer.ScanExternalModuleRecursively(localPath, moduleInfo, scannedModules, modules)
+		moduleFunctions, err := analyzer.ScanExternalModuleRecursively(localPath, moduleInfo, scannedModules, allModules)
 		if err != nil {
 			fmt.Printf("Warning: failed to scan module %s: %v\n", modulePath, err)
 			continue

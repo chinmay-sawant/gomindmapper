@@ -863,24 +863,54 @@ func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, e
 }
 
 // scanExternalModules scans external modules when include-external is enabled (optimized version)
+// This function now recursively finds all go.mod files in the repository and scans their dependencies
 func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
-	// Get external modules from go.mod
-	modules, err := analyzer.GetExternalModules(projectPath)
+	// Find all go.mod files recursively in the repository
+	var goModPaths []string
+	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && info.Name() == "go.mod" {
+			goModPaths = append(goModPaths, filepath.Dir(path))
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get external modules: %v", err)
+		return nil, fmt.Errorf("failed to find go.mod files: %v", err)
 	}
 
-	log.Printf("Found %d modules in go.mod", len(modules))
+	log.Printf("Found %d go.mod files in repository", len(goModPaths))
+
+	// Collect all external modules from all go.mod files
+	allModules := make(map[string]analyzer.ExternalModuleInfo)
+	for _, modPath := range goModPaths {
+		modules, err := analyzer.GetExternalModules(modPath)
+		if err != nil {
+			log.Printf("Warning: failed to get external modules from %s: %v", modPath, err)
+			continue
+		}
+		log.Printf("Found %d modules in %s", len(modules), modPath)
+
+		// Merge modules, avoiding duplicates
+		for modName, modInfo := range modules {
+			if _, exists := allModules[modName]; !exists {
+				allModules[modName] = modInfo
+			}
+		}
+	}
+
+	log.Printf("Total unique external modules found: %d", len(allModules))
 
 	// Filter out modules matching skip patterns
 	if len(skipPatterns) > 0 {
-		modules = analyzer.FilterModulesBySkipPatterns(modules, skipPatterns)
-		log.Printf("After filtering skip patterns, scanning %d modules", len(modules))
+		allModules = analyzer.FilterModulesBySkipPatterns(allModules, skipPatterns)
+		log.Printf("After filtering skip patterns, scanning %d modules", len(allModules))
 	}
 
 	// Add performance optimization: limit the number of modules to scan
-	if len(modules) > 10 {
-		log.Printf("Warning: Large number of modules (%d). Consider more restrictive skip patterns for better performance.", len(modules))
+	if len(allModules) > 10 {
+		log.Printf("Warning: Large number of modules (%d). Consider more restrictive skip patterns for better performance.", len(allModules))
 	}
 
 	// We need to collect external calls from the raw function data before filtering
@@ -904,7 +934,7 @@ func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, 
 	}
 
 	// Filter to only relevant modules (ones that are actually called)
-	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, modules, skipPatterns)
+	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, allModules, skipPatterns)
 
 	var externalFunctions []analyzer.FunctionInfo
 	totalModules := len(relevantModules)

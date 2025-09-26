@@ -126,7 +126,7 @@ func FilterModulesBySkipPatterns(modules map[string]ExternalModuleInfo, skipPatt
 	return filteredModules
 }
 
-// FindModuleInGoPath searches for the module in GOPATH/pkg/mod
+// FindModuleInGoPath searches for the module in GOPATH/pkg/mod using recursive traversal
 func FindModuleInGoPath(moduleInfo ExternalModuleInfo) (string, error) {
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
@@ -156,10 +156,51 @@ func FindModuleInGoPath(moduleInfo ExternalModuleInfo) (string, error) {
 	encodedPath := encodeModulePath(moduleDir)
 	possiblePaths = append(possiblePaths, filepath.Join(modCachePath, encodedPath))
 
+	// First try the predefined paths for performance
 	for _, path := range possiblePaths {
 		if _, err := os.Stat(path); err == nil {
 			return path, nil
 		}
+	}
+
+	// If not found in predefined paths, use recursive search like -path option
+	var foundPath string
+	err := filepath.Walk(modCachePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip if not a directory
+		if !info.IsDir() {
+			return nil
+		}
+
+		// Extract the directory name
+		dirName := filepath.Base(path)
+
+		// Check if this directory matches our module
+		if dirName == moduleDir ||
+			dirName == strings.ToLower(moduleDir) ||
+			dirName == encodedPath {
+			foundPath = path
+			return filepath.SkipDir // Found it, stop searching this branch
+		}
+
+		// Also check if the directory contains the module path (for nested structures)
+		if strings.Contains(dirName, moduleInfo.ModulePath) && strings.Contains(dirName, version) {
+			foundPath = path
+			return filepath.SkipDir
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("error searching for module %s: %v", moduleInfo.ModulePath, err)
+	}
+
+	if foundPath != "" {
+		return foundPath, nil
 	}
 
 	return "", fmt.Errorf("module %s not found in module cache", moduleInfo.ModulePath)
@@ -332,14 +373,16 @@ func scanExternalGoFile(filePath, modulePath, moduleImportPath string) ([]Functi
 				FilePath: "external:" + relPath, // Mark as external with relative path
 			}
 
-			// Find function body and calls
+			// Find function body and calls with line numbers
 			start, end := FindFunctionBody(lines, i)
 			if start != -1 && end != -1 && start+1 < end && end < len(lines) {
-				calls := FindCalls(lines[start+1 : end])
+				callsWithLines := FindCallsWithLines(lines[start+1:end], start+1)
 
-				// Resolve local function references
+				// For backward compatibility with the existing string-based Calls field,
+				// we extract just the names, but we should track line numbers separately
 				var resolvedCalls []string
-				for _, call := range calls {
+				for _, callInfo := range callsWithLines {
+					call := callInfo.Name
 					if !strings.Contains(call, ".") {
 						// Check if it's a local function reference
 						for _, localFunc := range localFunctions {

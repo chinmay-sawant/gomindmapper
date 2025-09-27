@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"time"
 
 	"github.com/chinmay-sawant/gomindmapper/cmd/analyzer"
+	"github.com/chinmay-sawant/gomindmapper/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -79,7 +79,13 @@ func main() {
 	router.GET("/api/download", func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		c.Header("Content-Disposition", "attachment; filename=function_relations.json")
-		c.JSON(http.StatusOK, global.relations)
+		// Pretty-print the in-memory relations for download
+		data, err := json.MarshalIndent(global.relations, "", "  ")
+		if err != nil {
+			c.String(http.StatusInternalServerError, fmt.Sprintf("failed to format JSON: %v", err))
+			return
+		}
+		c.Data(http.StatusOK, "application/json", data)
 	})
 
 	// Get the absolute path to the executable to locate static files
@@ -200,7 +206,7 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 			if info.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
 				return nil
 			}
-			fns, ferr := findFunctions(path, abs, module)
+			fns, ferr := analyzer.FindFunctions(path, abs, module)
 			if ferr != nil {
 				return ferr
 			}
@@ -227,7 +233,7 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 			runtime.ReadMemStats(&m)
 			log.Printf("Memory before external scanning: %.2f MB", float64(m.Alloc)/1024/1024)
 
-			extFuncs, err := scanExternalModules(abs, functions, skipPatterns)
+			extFuncs, err := analyzer.ScanExternalModules(abs, functions, skipPatterns)
 			if err != nil {
 				log.Printf("Warning: failed to scan external modules: %v", err)
 			} else {
@@ -245,19 +251,14 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 		// Add interface implementation detection for better call resolution
 		if !includeExternal {
 			log.Println("Detecting interface implementations...")
-			functions = enhanceProjectFunctionsWithInterfaceDetection(functions, abs)
+			functions = analyzer.EnhanceProjectFunctionsWithTypeInfo(functions, abs)
 		}
 
 		// Optimize performance for large datasets with parallel processing
 		log.Printf("Processing %d total functions (including %d external)...", len(functions), len(externalFunctions))
 
-		// Filter calls with parallel processing for large datasets
+		// Build relations (parallelized for large datasets)
 		start := time.Now()
-		// filterCallsParallel(functions, includeExternal)
-		// log.Printf("Call filtering completed in %v", time.Since(start))
-
-		// Build relations with parallel processing
-		start = time.Now()
 		relations = buildRelationsParallel(functions, includeExternal)
 		log.Printf("Relation building completed in %v", time.Since(start))
 	}
@@ -324,101 +325,6 @@ func load(root string, includeExternal bool, skipPatterns []string) error {
 	return nil
 }
 
-// filterCallsParallel replicates minimal call filtering from CreateJsonFile with parallel processing
-func filterCallsParallel(functions []analyzer.FunctionInfo, includeExternal bool) {
-	if includeExternal {
-		// If including external calls, don't filter - keep all calls as-is
-		return
-	}
-
-	// Build user prefixes map once
-	userPrefixes := make(map[string]bool)
-	for _, f := range functions {
-		if dot := strings.Index(f.Name, "."); dot != -1 {
-			userPrefixes[f.Name[:dot]] = true
-		}
-	}
-
-	// Determine optimal number of workers based on dataset size
-	numWorkers := runtime.NumCPU()
-	if len(functions) < 1000 {
-		// For small datasets, use sequential processing to avoid overhead
-		filterCallsSequential(functions, userPrefixes)
-		return
-	}
-
-	// For large datasets, use parallel processing
-	chunkSize := (len(functions) + numWorkers - 1) / numWorkers
-	var wg sync.WaitGroup
-
-	for i := 0; i < numWorkers; i++ {
-		start := i * chunkSize
-		end := start + chunkSize
-		if end > len(functions) {
-			end = len(functions)
-		}
-		if start >= len(functions) {
-			break
-		}
-
-		wg.Add(1)
-		go func(start, end int) {
-			defer wg.Done()
-			filterCallsRange(functions[start:end], userPrefixes)
-		}(start, end)
-	}
-
-	wg.Wait()
-}
-
-// filterCallsSequential processes calls sequentially for small datasets
-func filterCallsSequential(functions []analyzer.FunctionInfo, userPrefixes map[string]bool) {
-	for i := range functions {
-		if len(functions[i].Calls) == 0 {
-			continue
-		}
-		var filtered []string
-		for _, c := range functions[i].Calls {
-			if !strings.Contains(c, ".") {
-				continue
-			}
-			parts := strings.Split(c, ".")
-			if len(parts) > 0 && userPrefixes[parts[0]] {
-				filtered = append(filtered, c)
-			}
-		}
-		if len(filtered) == 0 {
-			functions[i].Calls = nil
-		} else {
-			functions[i].Calls = filtered
-		}
-	}
-}
-
-// filterCallsRange processes a range of functions for parallel execution
-func filterCallsRange(functions []analyzer.FunctionInfo, userPrefixes map[string]bool) {
-	for i := range functions {
-		if len(functions[i].Calls) == 0 {
-			continue
-		}
-		var filtered []string
-		for _, c := range functions[i].Calls {
-			if !strings.Contains(c, ".") {
-				continue
-			}
-			parts := strings.Split(c, ".")
-			if len(parts) > 0 && userPrefixes[parts[0]] {
-				filtered = append(filtered, c)
-			}
-		}
-		if len(filtered) == 0 {
-			functions[i].Calls = nil
-		} else {
-			functions[i].Calls = filtered
-		}
-	}
-}
-
 // buildRelationsParallel builds relations with parallel processing for large datasets
 func buildRelationsParallel(functions []analyzer.FunctionInfo, includeExternal bool) []analyzer.OutRelation {
 	// For small datasets, use the original sequential method
@@ -473,134 +379,12 @@ func buildRelationsParallel(functions []analyzer.FunctionInfo, includeExternal b
 	return allRelations
 }
 
-// enhanceProjectFunctionsWithInterfaceDetection enhances project functions with interface implementation detection
-func enhanceProjectFunctionsWithInterfaceDetection(functions []analyzer.FunctionInfo, projectPath string) []analyzer.FunctionInfo {
-	// Parse type information for the project
-	typeInfo, err := analyzer.ParseTypeInformation(projectPath, make(map[string]analyzer.ExternalModuleInfo))
-	if err != nil {
-		log.Printf("Warning: failed to parse project type information: %v", err)
-		return functions
-	}
-
-	// Parse comprehensive file information
-	fileInfoMap := make(map[string]analyzer.FileTypeInfo)
-	err = filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
-			relPath, _ := filepath.Rel(projectPath, path)
-			fileInfo, err := analyzer.ParseGoFileForTypesAndImports(path, projectPath)
-			if err != nil {
-				return nil // Skip files that can't be parsed
-			}
-			fileInfoMap[relPath] = fileInfo
-		}
-		return nil
-	})
-
-	if err != nil {
-		log.Printf("Warning: failed to parse comprehensive file information: %v", err)
-		return functions
-	}
-
-	// Find interface implementations
-	implementations, err := analyzer.FindInterfaceImplementations(projectPath)
-	if err != nil {
-		log.Printf("Warning: failed to find interface implementations: %v", err)
-		implementations = make(map[string][]analyzer.InterfaceImplementation)
-	}
-
-	if len(implementations) > 0 {
-		log.Printf("Found %d interface implementations", len(implementations))
-	}
-
-	// Process each function to resolve its method calls and add implementation calls
-	var enhancedFunctions []analyzer.FunctionInfo
-	for _, fn := range functions {
-		enhancedCalls := make([]string, 0, len(fn.Calls))
-
-		for _, call := range fn.Calls {
-			// Try to resolve the call using comprehensive type information
-			resolvedCall := analyzer.ResolveMethodCall(call, fileInfoMap, typeInfo, implementations)
-			enhancedCalls = append(enhancedCalls, resolvedCall)
-
-			// If this is an interface method call, add the implementation calls
-			implementationFunctions := analyzer.GetImplementationCalls(call, implementations)
-			for _, implFunc := range implementationFunctions {
-				// Add the implementation function to our function list
-				enhancedFunctions = append(enhancedFunctions, implFunc)
-
-				// Also add a call relationship from the current function to the implementation
-				enhancedCalls = append(enhancedCalls, implFunc.Name)
-			}
-		}
-
-		fn.Calls = enhancedCalls
-		enhancedFunctions = append(enhancedFunctions, fn)
-	}
-
-	return enhancedFunctions
-}
+// Local interface-detection helper removed; server uses analyzer.EnhanceProjectFunctionsWithTypeInfo.
 
 // limitExternalFunctions reduces the number of external functions to improve performance
-func limitExternalFunctions(externalFunctions []analyzer.FunctionInfo, localFunctions []analyzer.FunctionInfo, maxCount int) []analyzer.FunctionInfo {
-	if len(externalFunctions) <= maxCount {
-		return externalFunctions
-	}
+// Unused external function limiter removed.
 
-	// Create a map of packages that are directly called by local functions
-	calledPackages := make(map[string]int)
-	for _, fn := range localFunctions {
-		for _, call := range fn.Calls {
-			if strings.Contains(call, ".") {
-				pkg := strings.Split(call, ".")[0]
-				calledPackages[pkg]++
-			}
-		}
-	}
-
-	// Score external functions based on relevance
-	type scoredFunction struct {
-		function analyzer.FunctionInfo
-		score    int
-	}
-
-	var scored []scoredFunction
-	for _, fn := range externalFunctions {
-		score := 0
-		if strings.Contains(fn.Name, ".") {
-			pkg := strings.Split(fn.Name, ".")[0]
-			score = calledPackages[pkg]
-		}
-		// Prioritize exported functions (capitalized)
-		if len(fn.Name) > 0 {
-			parts := strings.Split(fn.Name, ".")
-			if len(parts) > 1 && len(parts[1]) > 0 && parts[1][0] >= 'A' && parts[1][0] <= 'Z' {
-				score += 10
-			}
-		}
-		scored = append(scored, scoredFunction{function: fn, score: score})
-	}
-
-	// Sort by score descending
-	sort.Slice(scored, func(i, j int) bool {
-		return scored[i].score > scored[j].score
-	})
-
-	// Take top functions
-	result := make([]analyzer.FunctionInfo, 0, maxCount)
-	for i := 0; i < maxCount && i < len(scored); i++ {
-		result = append(result, scored[i].function)
-	}
-
-	return result
-}
-
-// Legacy function for backward compatibility
-func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
-	filterCallsParallel(functions, includeExternal)
-}
+// Legacy call filtering removed; server uses same behavior as CLI.
 
 // handleRelations returns paginated root relations with full dependency closure for each root on the page.
 // Query params: page (1-based), pageSize
@@ -608,8 +392,8 @@ func filterCalls(functions []analyzer.FunctionInfo, includeExternal bool) {
 func handleRelations(c *gin.Context) {
 	global.mu.RLock()
 	defer global.mu.RUnlock()
-	page := parseInt(c.Query("page"), 1)
-	pageSize := parseInt(c.Query("pageSize"), 10)
+	page := utils.ParseInt(c.Query("page"), 1)
+	pageSize := utils.ParseInt(c.Query("pageSize"), 10)
 	includeInternals := strings.EqualFold(c.Query("includeInternals"), "true")
 	if page < 1 {
 		page = 1
@@ -693,8 +477,8 @@ func handleSearch(c *gin.Context) {
 	}
 
 	// Parse pagination parameters
-	page := parseInt(c.Query("page"), 1)
-	pageSize := parseInt(c.Query("pageSize"), 10)
+	page := utils.ParseInt(c.Query("page"), 1)
+	pageSize := utils.ParseInt(c.Query("pageSize"), 10)
 	if page < 1 {
 		page = 1
 	}
@@ -802,277 +586,8 @@ func handleSearch(c *gin.Context) {
 
 // Helpers --------------------------------------------------------------------------------
 
-func parseInt(s string, def int) int {
-	if s == "" {
-		return def
-	}
-	var v int
-	_, err := fmt.Sscanf(s, "%d", &v)
-	if err != nil {
-		return def
-	}
-	return v
-}
-
 // Simplified duplicate of CLI findFunctions (cannot import from main package) ----------------------------------------
-func findFunctions(filePath, absPath, module string) ([]analyzer.FunctionInfo, error) {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-	lines := strings.Split(string(content), "\n")
-	var funcs []analyzer.FunctionInfo
-	// Updated regex to match both regular functions and methods
-	// Regular function: func functionName(...)
-	// Method: func (receiver Type) methodName(...)
-	reFunc := regexp.MustCompile(`^\s*func\s+(\w+)`)
-	reMethod := regexp.MustCompile(`^\s*func\s+\([^)]+\)\s+(\w+)`)
-	relPath, err := filepath.Rel(absPath, filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find package name
-	var packageName string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "package ") {
-			packageName = strings.TrimSpace(strings.TrimPrefix(line, "package "))
-			break
-		}
-	}
-
-	// Collect all function names in this file for reference resolution
-	var localFunctions []string
-	for _, line := range lines {
-		// Check for regular functions
-		if matches := reFunc.FindStringSubmatch(line); matches != nil {
-			localFunctions = append(localFunctions, matches[1])
-		} else if matches := reMethod.FindStringSubmatch(line); matches != nil {
-			// Check for methods
-			localFunctions = append(localFunctions, matches[1])
-		}
-	}
-
-	for i, line := range lines {
-		var functionName string
-		// Check for regular functions first
-		if matches := reFunc.FindStringSubmatch(line); matches != nil {
-			functionName = matches[1]
-		} else if matches := reMethod.FindStringSubmatch(line); matches != nil {
-			// Check for methods
-			functionName = matches[1]
-		}
-
-		if functionName != "" {
-			fi := analyzer.FunctionInfo{
-				Name:     packageName + "." + functionName,
-				Line:     i + 1,
-				FilePath: relPath,
-			}
-			// Find function body
-			start, end := analyzer.FindFunctionBody(lines, i)
-			if start != -1 && end != -1 && start+1 < end && end < len(lines) {
-				calls := analyzer.FindCalls(lines[start+1 : end])
-
-				// Resolve local function references by adding package prefix
-				var resolvedCalls []string
-				for _, call := range calls {
-					if !strings.Contains(call, ".") {
-						// Check if it's a local function reference
-						for _, localFunc := range localFunctions {
-							if call == localFunc {
-								resolvedCalls = append(resolvedCalls, packageName+"."+call)
-								break
-							}
-						}
-					} else {
-						resolvedCalls = append(resolvedCalls, call)
-					}
-				}
-				fi.Calls = resolvedCalls
-			}
-			funcs = append(funcs, fi)
-		}
-	}
-	return funcs, nil
-}
-
-// scanExternalModules scans external modules when include-external is enabled (optimized version)
-// This function now recursively finds all go.mod files in the repository and scans their dependencies
-func scanExternalModules(projectPath string, functions []analyzer.FunctionInfo, skipPatterns []string) ([]analyzer.FunctionInfo, error) {
-	// Find all go.mod files recursively in the repository
-	var goModPaths []string
-	err := filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && info.Name() == "go.mod" {
-			goModPaths = append(goModPaths, filepath.Dir(path))
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to find go.mod files: %v", err)
-	}
-
-	log.Printf("Found %d go.mod files in repository", len(goModPaths))
-
-	// Collect all external modules from all go.mod files
-	allModules := make(map[string]analyzer.ExternalModuleInfo)
-	for _, modPath := range goModPaths {
-		modules, err := analyzer.GetExternalModules(modPath)
-		if err != nil {
-			log.Printf("Warning: failed to get external modules from %s: %v", modPath, err)
-			continue
-		}
-		log.Printf("Found %d modules in %s", len(modules), modPath)
-
-		// Merge modules, avoiding duplicates
-		for modName, modInfo := range modules {
-			if _, exists := allModules[modName]; !exists {
-				allModules[modName] = modInfo
-			}
-		}
-	}
-
-	log.Printf("Total unique external modules found: %d", len(allModules))
-
-	// Filter out modules matching skip patterns
-	if len(skipPatterns) > 0 {
-		allModules = analyzer.FilterModulesBySkipPatterns(allModules, skipPatterns)
-		log.Printf("After filtering skip patterns, scanning %d modules", len(allModules))
-	}
-
-	// Add performance optimization: limit the number of modules to scan
-	if len(allModules) > 10 {
-		log.Printf("Warning: Large number of modules (%d). Consider more restrictive skip patterns for better performance.", len(allModules))
-	}
-
-	// We need to collect external calls from the raw function data before filtering
-	// Let's re-scan the project to get unfiltered calls
-	var allFunctions []analyzer.FunctionInfo
-	err = filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go") {
-			funcs, err := findFunctionsWithAllCalls(path, projectPath)
-			if err != nil {
-				return err
-			}
-			allFunctions = append(allFunctions, funcs...)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to re-scan project for external calls: %v", err)
-	}
-
-	// Filter to only relevant modules (ones that are actually called)
-	relevantModules := analyzer.FilterRelevantExternalModules(allFunctions, allModules, skipPatterns)
-
-	var externalFunctions []analyzer.FunctionInfo
-	scannedModules := make(map[string]bool)
-	totalModules := len(relevantModules)
-	processedModules := 0
-
-	// Process modules with progress reporting
-	for modulePath, moduleInfo := range relevantModules {
-		processedModules++
-		log.Printf("Scanning module %d/%d: %s@%s", processedModules, totalModules, modulePath, moduleInfo.Version)
-
-		// Find module in GOPATH
-		localPath, err := analyzer.FindModuleInGoPath(moduleInfo)
-		if err != nil {
-			log.Printf("Warning: %v", err)
-			continue
-		}
-
-		// Scan the module with timeout protection
-		done := make(chan bool, 1)
-		var moduleFunctions []analyzer.FunctionInfo
-		var scanErr error
-
-		go func() {
-			moduleFunctions, scanErr = analyzer.ScanExternalModuleRecursively(localPath, moduleInfo, scannedModules, allModules)
-			done <- true
-		}()
-
-		// Wait for completion with timeout
-		select {
-		case <-done:
-			if scanErr != nil {
-				log.Printf("Warning: failed to scan module %s: %v", modulePath, scanErr)
-				continue
-			}
-			log.Printf("Found %d functions in module %s", len(moduleFunctions), modulePath)
-			externalFunctions = append(externalFunctions, moduleFunctions...)
-		case <-time.After(30 * time.Second):
-			log.Printf("Warning: timeout scanning module %s, skipping", modulePath)
-			continue
-		}
-
-		// Memory check for large accumulations
-		if len(externalFunctions) > 0 && len(externalFunctions)%10000 == 0 {
-			var m runtime.MemStats
-			runtime.ReadMemStats(&m)
-			log.Printf("Progress: %d external functions collected, Memory: %.2f MB", len(externalFunctions), float64(m.Alloc)/1024/1024)
-		}
-	}
-
-	return externalFunctions, nil
-}
-
-// findFunctionsWithAllCalls is similar to findFunctions but doesn't filter calls (duplicated from CLI)
-func findFunctionsWithAllCalls(filePath, absPath string) ([]analyzer.FunctionInfo, error) {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.Split(string(content), "\n")
-	var funcs []analyzer.FunctionInfo
-	reFunc := regexp.MustCompile(`^\s*func\s+(\w+)`)
-	reMethod := regexp.MustCompile(`^\s*func\s+\([^)]+\)\s+(\w+)`)
-	relPath, err := filepath.Rel(absPath, filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find package name
-	var packageName string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "package ") {
-			packageName = strings.TrimSpace(strings.TrimPrefix(line, "package "))
-			break
-		}
-	}
-
-	for i, line := range lines {
-		var functionName string
-		if matches := reFunc.FindStringSubmatch(line); matches != nil {
-			functionName = matches[1]
-		} else if matches := reMethod.FindStringSubmatch(line); matches != nil {
-			functionName = matches[1]
-		}
-
-		if functionName != "" {
-			funcInfo := analyzer.FunctionInfo{
-				Name:     packageName + "." + functionName,
-				Line:     i + 1,
-				FilePath: relPath,
-			}
-			// Find function body - get ALL calls without filtering
-			start, end := analyzer.FindFunctionBody(lines, i)
-			if start != -1 && end != -1 && start+1 < end && end < len(lines) {
-				calls := analyzer.FindCalls(lines[start+1 : end])
-				funcInfo.Calls = calls // Keep all calls
-			}
-			funcs = append(funcs, funcInfo)
-		}
-	}
-	return funcs, nil
-}
+// Duplicated helper functions removed in favor of shared analyzer helpers.
 
 // Basic CORS middleware for Gin
 func corsMiddleware() gin.HandlerFunc {

@@ -84,11 +84,16 @@ func main() {
 		return functions[i].Name < functions[j].Name
 	})
 
-	// Persist raw filtered functions (existing behaviour)
-	analyzer.CreateJsonFile(functions, includeExternal)
-
-	// Build relations and write functionmap.json (replaces buildFunctionMap)
+	// Build relations using the same logic as the server, then sort and write pretty JSON
 	relations := analyzer.BuildRelations(functions, includeExternal)
+	// Sort relations by name then filePath for consistency with server
+	sort.Slice(relations, func(i, j int) bool {
+		if relations[i].Name == relations[j].Name {
+			return relations[i].FilePath < relations[j].FilePath
+		}
+		return relations[i].Name < relations[j].Name
+	})
+
 	data, err := json.MarshalIndent(relations, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling relations:", err)
@@ -98,7 +103,6 @@ func main() {
 		fmt.Println("Error writing functionmap.json:", err)
 		return
 	}
-	fmt.Println("functionmap.json created successfully")
 }
 
 // legacy buildFunctionMap removed: functionality now in analyzer.BuildRelations

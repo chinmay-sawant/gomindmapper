@@ -6,11 +6,11 @@ const ComparisonTable = () => {
     {
       name: 'GoMindMapper',
       type: 'Function Relationship Mind Map',
-      output: 'Interactive web-based mind map (React)',
-      interactivity: 'High - pannable, zoomable, expandable nodes, pagination',
-      filtering: 'Filters noise, stdlib, frameworks; focuses on user-to-user calls',
-      analysis: 'Partial AST parsing, call graph extraction',
-      keyFeatures: 'Live server with pagination, offline JSON upload, custom nodes, directory flexibility, drag drop existing json data'
+      output: 'Interactive web-based mind map (React) with REST API',
+      interactivity: 'High - pannable, zoomable, expandable nodes, pagination, search, drag & drop',
+      filtering: 'Advanced: noise reduction, stdlib, frameworks, external modules, custom patterns',
+      analysis: 'AST-based with interface implementation detection, type resolution, external scanning',
+      keyFeatures: 'Live server with hot reload, offline JSON upload, custom NotebookLLM-inspired nodes, directory flexibility, theme management, responsive design'
     },
     {
       name: 'go-callvis',

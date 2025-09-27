@@ -33,6 +33,7 @@ Interactive function relationship visualization for Go codebases with intelligen
 
 ---
 
+<a id="quick-start"></a>
 ## 🚀 Quick Start
 
 Get started with GoMindMapper in under 2 minutes:
@@ -67,6 +68,7 @@ make run        # Run CLI analyzer
 
 ---
 
+<a id="features-overview"></a>
 ## ✨ Features Overview
 
 GoMindMapper goes beyond simple function visualization with advanced Go code analysis capabilities:
@@ -101,6 +103,7 @@ GoMindMapper goes beyond simple function visualization with advanced Go code ana
 
 ---
 
+<a id="architecture"></a>
 ## 🏗️ Architecture
 
 GoMindMapper follows a modern 3-tier architecture with intelligent caching and real-time capabilities:
@@ -132,6 +135,7 @@ GoMindMapper follows a modern 3-tier architecture with intelligent caching and r
 - **📁 `mind-map-react/`** - Vite+React SPA with advanced UI components
 - **📁 `docs/`** - Production build output served by Go server
 
+<a id="installation--setup"></a>
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
@@ -178,6 +182,7 @@ go build -o gomindmapper cmd/server/main.go
 
 ---
 
+<a id="development"></a>
 ## 🔧 Development
 
 ### Development Environment Setup
@@ -231,6 +236,7 @@ gomindmapper/
 
 ---
 
+<a id="usage-guide"></a>
 ## 📖 Usage Guide
 
 ### CLI Analyzer Mode
@@ -283,6 +289,7 @@ go run cmd/server/main.go -path /path/to/project -addr :8080
 
 ---
 
+<a id="advanced-features"></a>
 ## 🎯 Advanced Features
 
 GoMindMapper includes several advanced features that set it apart from other Go visualization tools:
@@ -348,6 +355,7 @@ go run cmd/server/main.go --include-external=true --skip-folders="golang.org,goo
 
 ---
 
+<a id="api-reference"></a>
 ## 🔍 API Reference
 
 Complete REST API documentation for integration and automation:
@@ -425,6 +433,7 @@ Download complete function relations as JSON.
 
 ---
 
+<a id="data-models"></a>
 ## 📊 Data Models
 
 Understand the internal data structures for integration and customization:
@@ -519,6 +528,7 @@ type InterfaceImplementation struct {
 
 ---
 
+<a id="customization"></a>
 ## 🎨 Customization
 
 ### Filtering & Analysis Customization
@@ -629,6 +639,7 @@ Create configuration files for advanced customization:
 
 ---
 
+<a id="roadmap"></a>
 ## 🗺️ Roadmap
 
 ### ✅ Advanced Features Completed:
@@ -679,13 +690,15 @@ Create configuration files for advanced customization:
 - [ ] **Template Gallery** - Pre-configured analysis templates
 - [ ] **Community Plugins** - Marketplace for custom analyzers
 
-## 11. Contributing
+<a id="contributing"></a>
+## 🤝 Contributing
 PRs + issues welcome. Please:
 1. Run `go fmt ./...` & `go vet ./...`
 2. Keep analyzer + server filtering logic in sync
 3. For UI changes include screenshot or short GIF
 
-## 12. License
+<a id="license"></a>
+## 📄 License
 MIT (add a `LICENSE` file if distributing publicly).
 
 ---

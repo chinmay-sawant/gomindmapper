@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import ScreenshotSlideshow from './ScreenshotSlideshow';
 import ComparisonTable from './ComparisonTable';
@@ -18,7 +19,7 @@ const Overview = () => {
           Switch between offline JSON snapshots or a live API with pagination across entrypoint roots.
         </p>
         <div className="button-row">
-          <a href="/gomindmapper/view" className="btn primary">Launch Mind Map →</a>
+          <Link to="/view" className="btn primary">Launch Mind Map →</Link>
           <a href="https://github.com/chinmay-sawant/gomindmapper" target="_blank" rel="noreferrer" className="btn">GitHub</a>
         </div>
       </header>

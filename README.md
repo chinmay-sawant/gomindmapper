@@ -17,19 +17,19 @@ Interactive function relationship visualization for Go codebases with intelligen
 </div>
 
 ## 📋 Table of Contents
-1. [🚀 Quick Start](#-quick-start)
-2. [✨ Features Overview](#-features-overview)
-3. [🏗️ Architecture](#️-architecture)
-4. [⚙️ Installation & Setup](#️-installation--setup)
-5. [🔧 Development](#-development)
-6. [📖 Usage Guide](#-usage-guide)
-7. [🎯 Advanced Features](#-advanced-features)
-8. [🔍 API Reference](#-api-reference)
-9. [📊 Data Models](#-data-models)
-10. [🎨 Customization](#-customization)
-11. [🗺️ Roadmap](#️-roadmap)
-12. [🤝 Contributing](#-contributing)
-13. [📄 License](#-license)
+1. [🚀 Quick Start](#quick-start)
+2. [✨ Features Overview](#features-overview)
+3. [🏗️ Architecture](#architecture)
+4. [⚙️ Installation & Setup](#installation--setup)
+5. [🔧 Development](#development)
+6. [📖 Usage Guide](#usage-guide)
+7. [🎯 Advanced Features](#advanced-features)
+8. [🔍 API Reference](#api-reference)
+9. [📊 Data Models](#data-models)
+10. [🎨 Customization](#customization)
+11. [🗺️ Roadmap](#roadmap)
+12. [🤝 Contributing](#contributing)
+13. [📄 License](#license)
 
 ---
 
@@ -645,7 +645,7 @@ Create configuration files for advanced customization:
 - [x] **Drag & Drop Upload** - Offline JSON analysis capability
 - [x] **Multi-format Export** - JSON download with planned GraphML/DOT/SVG support
 
-### � Next Major Features:
+### 🔜 Next Major Features:
 - [ ] **Real-time Code Analysis** - FS watcher for automatic updates as code changes
 - [ ] **Function Metrics Dashboard** - Complexity, fan-in/fan-out, LOC, cyclomatic complexity
 - [ ] **Call Path Analysis** - Trace execution paths between functions

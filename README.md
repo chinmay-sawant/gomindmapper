@@ -2,391 +2,682 @@
 
 # GoMindMapper
 
-Interactive function relationship visualization for Go codebases. Scan a repository, build a filtered call graph, and explore it as an expandable, pannable, zoomable mind map in the browser.
+🚀 **Advanced Go Function Relationship Visualizer** 🚀
 
-`Go (Analyzer + HTTP API)` + `React (Mind Map UI)` + `Notion‑style Overview`.
+Interactive function relationship visualization for Go codebases with intelligent type resolution, interface implementation detection, and external module analysis. Scan any Go repository and explore it through an expandable, pannable, zoomable mind map.
+
+`Go (AST Analyzer + HTTP API)` + `React (Interactive Mind Map)` + `Notion‑style UI`
+
+[![GitHub Stars](https://img.shields.io/github/stars/chinmay-sawant/gomindmapper?style=social)](https://github.com/chinmay-sawant/gomindmapper) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/chinmay-sawant/gomindmapper)](https://golang.org/)
 
 ---
-
-[Overview (/) Screenshot Placeholder]
 
 </div>
 
-## Table of Contents
-1. [Overview & Motivation](#1-overview--motivation)
-2. [Complete Feature List](#2-complete-feature-list)
-3. [Architecture](#3-architecture)  
-4. [Analyzer (CLI)](#4-analyzer-cli)  
-5. [HTTP Server & API](#5-http-server--api)  
-6. [React Mind Map UI](#6-react-mind-map-ui-view)  
-7. [Building & Running](#7-building--running-end-to-end)  
-8. [Data Model](#8-data-model-simplified)  
-9. [Customization & Filtering](#9-customization--filtering)  
-10. [Roadmap](#10-roadmap)  
-11. [Contributing](#11-contributing)  
-12. [License](#12-license)
+## 📋 Table of Contents
+1. [🚀 Quick Start](#-quick-start)
+2. [✨ Features Overview](#-features-overview)
+3. [🏗️ Architecture](#️-architecture)
+4. [⚙️ Installation & Setup](#️-installation--setup)
+5. [🔧 Development](#-development)
+6. [📖 Usage Guide](#-usage-guide)
+7. [🎯 Advanced Features](#-advanced-features)
+8. [🔍 API Reference](#-api-reference)
+9. [📊 Data Models](#-data-models)
+10. [🎨 Customization](#-customization)
+11. [🗺️ Roadmap](#️-roadmap)
+12. [🤝 Contributing](#-contributing)
+13. [📄 License](#-license)
 
 ---
 
-## 1. Overview & Motivation
-Large Go services quickly accumulate implicit structure: entrypoints, routers, middleware, domain handlers, config loaders. Reading raw source to understand call surfaces is slow. GoMindMapper parses the repository, extracts functions and user‑to‑user call edges, filters noise (stdlib/framework), and produces a navigable map so you can:
+## 🚀 Quick Start
 
-### Core Features
-* **Interactive Function Visualization** - Navigate through Go codebases using an expandable, pannable, zoomable mind map interface
-* **Smart Root Detection** - Automatically identify top‑level entry points (functions not called by any other user function)
-* **Dual Data Modes** - Switch between offline JSON snapshots or live server API with real-time updates
-* **Advanced Filtering** - Filter out stdlib, external libraries, and framework noise to focus on user-defined relationships
-* **Fast Dependency Inspection** - Instantly explore function call closures and relationships
-* **Pagination Support** - Handle large codebases efficiently with server-side pagination across function roots
-* **External Library Toggle** - Choose to include or exclude external library calls in analysis using `--include-external` flag
+Get started with GoMindMapper in under 2 minutes:
 
-### UI & User Experience Features
-* **Custom Node Design** - Google NotebookLLM-inspired function nodes with color-coded types (main, handler, middleware, config, router)
-* **Interactive Controls** - Pan (drag background), zoom (mouse wheel), expand/collapse nodes individually
-* **Dark/Light Theme Support** - Toggle between themes with system preference detection and localStorage persistence
-* **Drag & Drop JSON Upload** - Drop JSON files directly onto the interface for offline analysis
-* **Real-time Search** - Search functions by name with debounced input and paginated results
-* **Function Details Panel** - Click any node to view detailed information (file path, line numbers, called functions)
-* **Responsive Design** - Works seamlessly across different screen sizes and devices
-
-### Data Management Features
-* **Live Server Integration** - Connect to running Go server for real-time function mapping
-* **Hot Reload Capability** - Refresh data from repository without restarting (`POST /api/reload`)
-* **Export Functionality** - Download function relations data as JSON for offline use
-* **Multi-format Output** - Generate `functions.json`, `functionmap.json`, and `removed_calls.json` for analysis
-* **Smart Call Resolution** - Resolve local function references and handle complex call patterns
-
----
-
-## 2. Complete Feature List
-
-### 🔍 Analysis & Parsing
-• **AST-based Go Analysis** - Uses Go's built-in AST parsing for accurate function extraction  
-• **Smart Module Detection** - Automatically detects Go module structure and package relationships  
-• **Local Function Resolution** - Resolves function references within packages  
-• **External Library Control** - Toggle inclusion/exclusion of external library calls with `--include-external` flag  
-• **Test File Exclusion** - Automatically excludes `_test.go` files from analysis  
-• **Call Pattern Recognition** - Identifies and categorizes different types of function calls  
-
-### 🌐 Server & API
-• **RESTful API** - Complete REST API with pagination, search, and data management  
-• **Real-time Search** - `/api/search` endpoint with function name matching and pagination  
-• **Hot Reload** - `/api/reload` endpoint for refreshing data without server restart  
-• **Data Export** - `/api/download` endpoint for exporting function relations as JSON  
-• **CORS Support** - Built-in CORS middleware for frontend integration  
-• **Concurrent Safety** - Thread-safe operations with proper mutex handling  
-• **Static File Serving** - Serves React frontend with SPA routing support  
-
-### 🎨 Interactive UI & Visualization  
-• **Interactive Mind Map** - Pannable, zoomable, expandable function relationship visualization  
-• **Custom Node Design** - Google NotebookLLM-inspired nodes with color-coded function types  
-• **Drag & Drop Upload** - Drop JSON files directly onto interface for offline analysis  
-• **Dark/Light Theme Toggle** - Switch themes with system preference detection and persistence  
-• **Real-time Search** - Debounced search with instant results across function names  
-• **Function Details Panel** - Comprehensive information display on node selection  
-• **Responsive Design** - Works seamlessly across different screen sizes  
-
-### 🔧 User Experience
-• **Dual Data Modes** - Switch between live server API and offline JSON file analysis  
-• **Pagination Controls** - Handle large codebases efficiently with server-side pagination  
-• **Keyboard Shortcuts** - Navigate and control the interface using keyboard  
-• **Loading States** - Proper loading indicators for all async operations  
-• **Error Handling** - User-friendly error messages and recovery options  
-• **Auto-save Preferences** - Theme and settings persistence using localStorage  
-
-### 📊 Data Management
-• **Multiple Output Formats** - Generate `functions.json`, `functionmap.json`, and `removed_calls.json`  
-• **Smart Filtering** - Filter out stdlib, external libraries, and framework noise  
-• **Root Function Detection** - Automatically identify entry points and top-level functions  
-• **Dependency Closure** - Complete dependency trees for selected function roots  
-• **Call Relationship Mapping** - Detailed function-to-function call relationships  
-• **Diagnostic Information** - Track and report filtered calls for analysis  
-
-### 🚀 Performance & Scalability
-• **In-Memory Caching** - Fast access to parsed function relationships  
-• **Efficient Re-renders** - Optimized React components with proper memoization  
-• **Lazy Loading** - Load function details on-demand  
-• **Debounced Search** - Prevent excessive API calls during search typing  
-• **Pagination Support** - Handle large codebases without performance issues  
-• **Background Processing** - Non-blocking analysis and data processing  
-
-### 🛠️ Developer Experience
-• **CLI & Server Modes** - Flexible usage as CLI tool or web service  
-• **Development Hot Reload** - Vite-powered frontend development with instant updates  
-• **Comprehensive Documentation** - Detailed setup and usage instructions  
-• **Cross-platform Support** - Works on Windows, macOS, and Linux  
-• **Easy Setup** - Simple installation and configuration process  
-• **Extensible Architecture** - Clean separation of concerns for easy modification  
-
----
-
-## 3. Architecture
-```
-┌────────────────────────────┐        build (JSON)        ┌──────────────────────────┐
-│ Go Analyzer (cmd/main.go)  │ ─────────────────────────▶ │ functionmap.json         │
-│ + filtering (analyzer/*)   │                            │ functions.json           │
-└──────────┬─────────────────┘                            │ removed_calls.json       │
-           │                                               └─────────┬────────────────┘
-           │ in‑process reuse (server)                               │ consumed
-           ▼                                                         ▼
-┌────────────────────────────┐   /api/relations,pagination   ┌──────────────────────────┐
-│ Go HTTP Server             │──────────────────────────────▶│ React Mind Map (/view)  │
-│ cmd/server/main.go         │◀────────── optional reload ───│ drag/zoom/paginate       │
-└────────────────────────────┘                                └──────────────────────────┘
-```
-Additionally a static, Notion‑inspired overview page ( `mind-map-react/public/overview.html` ) is served at `/` summarizing the project and linking into `/view`.
-
-## 4. Analyzer (CLI)
-Scans a path (default `.`) collecting:
-* All Go functions (excluding `_test.go`)
-* Raw call names inside each body  
-* Filtered user‑only calls -> `functionmap.json`
-* Optional external library call inclusion
-
-### CLI Features:
-* **Path Specification** - Analyze any Go repository directory with `-path` flag
-* **External Library Control** - Use `--include-external` flag to include/exclude external library calls
-* **Skip Patterns** - Use `--skip-folders` to skip specific dependency folders (e.g., 'golang.org,google.golang.org')
-* **Smart Module Detection** - Automatically detects Go module and package structure
-* **AST-based Analysis** - Uses Go's AST parsing for accurate function extraction
-* **Local Function Resolution** - Resolves local function references within packages
-
-Run:
-```cmd
-cd /d "D:\GoMindMapper"
-# Basic analysis without external dependencies
-go run cmd/main.go -path . --include-external=false
-
-# Include external dependencies but skip standard library modules
-go run cmd/main.go -path . --include-external=true --skip-folders="golang.org,google.golang.org"
-```
-
-Key outputs:
-| File | Purpose | When Generated |
-|------|---------|----------------|
-| `functions.json` | All discovered functions + raw (unfiltered) calls | Always |
-| `functionmap.json` | Reduced relationships (only user→user edges) | Always |
-| `removed_calls.json` | Diagnostics: which calls were filtered out | Only when `--include-external=false` |
-
-## 5. HTTP Server & API
-`cmd/server/main.go` embeds the scan + an in‑memory cache with pagination across root functions.
-
-### API Endpoints:
-* **`GET /api/relations?page=1&pageSize=10`** – Returns paginated roots slice & full dependency closure
-* **`GET /api/search?q=functionName&page=1&pageSize=10`** – Search functions by name with pagination
-* **`POST /api/reload`** – Rescans repository (hot reload data without restart)
-* **`GET /api/download`** – Download current function relations data as JSON
-
-### Server Features:
-* **In-Memory Caching** - Fast access to parsed function relationships
-* **CORS Support** - Built-in CORS middleware for frontend integration
-* **Concurrent Safety** - Thread-safe operations with proper mutex handling
-* **External Library Toggle** - `--include-external` flag support for server mode
-* **Skip Patterns** - `--skip-folders` flag to skip specific dependency folders during external scanning
-* **Static File Serving** - Serves built React frontend assets
-* **Fallback Routing** - SPA routing support with proper fallbacks
-
-### Static Routes:
-* **`/`** – Overview site (dark, Notion‑style landing page)
-* **`/view`** – React SPA (built mind map interface)
-* **`/view/*`** – SPA fallback routing for React Router
-
-Start server (after building frontend if you want the UI):
-```cmd
-cd /d "D:\GoMindMapper"
-# Basic server without external dependencies
-go run cmd/server/main.go -path . -addr :8080 --include-external=false
-
-# Server with external dependencies, skipping standard library modules
+### Single Command Deployment
+```bash
+# Clone and run (example analyzing the 'gopdfsuit' subdirectory)
+git clone https://github.com/chinmay-sawant/gomindmapper.git
+cd gomindmapper
 go run cmd/server/main.go -path gopdfsuit -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic,bytedance,ugorji,go-playground"
 ```
 
-Browse:  
-* **Overview:** http://localhost:8080/gomindmapper/
-* **Mind Map:** http://localhost:8080/gomindmapper/view/
+**Command Flags:**
+- `-path <dir>`: Repository/subfolder to analyze (e.g., `gopdfsuit`)
+- `-addr <addr>`: HTTP server address (default `:8080`)
+- `--include-external`: Include external module functions in analysis
+- `--skip-folders`: Comma-separated dependency prefixes to skip during external scanning
 
-### Pagination & Search Semantics
-* **Root Function** = user function not referenced by any other user function
-* **Page Selection** - Returns root subset AND full closure of descendants for local expansion
-* **Search Results** - Function name matching with dependency closure included
-* **Real-time Updates** - Reload endpoint allows data refresh without server restart
+**Access Points:**
+- 🌐 **Overview**: http://localhost:8080/gomindmapper/
+- 🗺️ **Mind Map**: http://localhost:8080/gomindmapper/view/
 
-## 6. React Mind Map UI (`/view`)
-Location: `mind-map-react/` (Vite + React). Mounted under `/view` using `BrowserRouter` with `basename="/view"`.
+> **Note**: Production React assets are automatically served by the Go server — no separate frontend setup required!
 
-### Interactive Features:
-* **Pan & Zoom** - Drag background to pan, mouse wheel zoom (cursor‑centric)
-* **Node Expansion** - Expand/collapse individual function nodes with smooth animations
-* **Global Controls** - "Collapse All" and "Reset View" buttons for quick navigation
-* **Dual Data Modes** - Toggle between live server API and offline JSON file upload
-* **Drag & Drop Upload** - Drop JSON files directly onto the interface
-* **Real-time Search** - Debounced search with instant results and pagination
-
-### Visual Features:
-* **Custom Node Design** - Google NotebookLLM-inspired function nodes
-* **Color-coded Types** - Visual distinction for main, handler, middleware, config, router functions
-* **Dynamic Sizing** - Responsive node sizing based on content
-* **Curved Edges** - Smooth connecting lines between function calls
-* **Glow Effects** - Visual highlights for selected nodes
-* **Level-based Coloring** - Different colors for different call depth levels
-
-### User Interface:
-* **Dark/Light Theme Toggle** - Switch themes with system preference detection
-* **Function Details Panel** - Detailed information on node click (name, file path, line numbers, called functions)
-* **Navigation Controls** - Pagination controls for large codebases
-* **Loading States** - Proper loading indicators for all async operations
-* **Error Handling** - User-friendly error messages and recovery options
-
-### Data Management:
-* **Live Server Integration** - Real-time connection to Go server API
-* **Offline Mode** - Upload and analyze JSON files without server
-* **Hot Reload** - Refresh server data without page reload
-* **Export Options** - Download current dataset as JSON
-* **Search & Filter** - Find specific functions across large codebases
-
-### Technical Features:
-* **React Router** - SPA routing with proper navigation
-* **Context API** - Theme management with localStorage persistence  
-* **Ref Management** - Optimized DOM interactions and focus handling
-* **Event Handling** - Keyboard shortcuts and mouse interactions
-* **Performance** - Efficient re-renders and memoization
-
-### Development:
-Dev (hot reload):
-```cmd
-cd /d "D:\GoMindMapper\mind-map-react"
-npm install
-npm run dev
+### Makefile Shortcuts
+```bash
+make ui-build   # Build React frontend
+make server     # Start Go server
+make ui         # Start React dev server
+make run        # Run CLI analyzer
 ```
-Then open: `http://localhost:5173/view` (Vite default port with `basename="/view"`).
 
-For production build:
-```cmd
-npm run build
+---
+
+## ✨ Features Overview
+
+GoMindMapper goes beyond simple function visualization with advanced Go code analysis capabilities:
+
+### 🎯 Core Analysis Engine
+* **🧠 AST-based Go Analysis** - Uses Go's built-in AST parsing for accurate function extraction
+* **🔍 Smart Root Detection** - Automatically identify top-level entry points (functions not called by any other user function)
+* **🏗️ Interface Implementation Detection** - Discover concrete implementations of interfaces and add them to call graphs
+* **🔗 Type Resolution Engine** - Resolve method calls through comprehensive type analysis
+* **📦 External Module Scanning** - Recursively scan external dependencies with intelligent filtering
+* **🎛️ Advanced Filtering** - Multi-layer filtering: stdlib, external libraries, framework noise, custom patterns
+* **⚡ Performance Optimization** - Parallel processing, in-memory caching, and efficient data structures
+
+### 🎨 Interactive UI & Visualization
+* **🗺️ Google NotebookLLM-inspired Nodes** - Custom-designed function nodes with color-coded types (main, handler, middleware, config, router)
+* **🖱️ Intuitive Controls** - Pan (drag background), zoom (mouse wheel), expand/collapse nodes individually
+* **🌓 Advanced Theming** - Dark/light theme with system preference detection and localStorage persistence
+* **📤 Drag & Drop Upload** - Drop JSON files directly onto interface for offline analysis
+* **🔎 Real-time Search** - Debounced search with instant results and pagination
+* **📋 Function Details Panel** - Comprehensive information display on node selection (file path, line numbers, calls)
+* **📱 Responsive Design** - Works seamlessly across desktop, tablet, and mobile devices
+* **🎞️ Screenshot Slideshow** - Interactive feature showcase with auto-play and navigation
+* **📊 Comparison Table** - Built-in comparison with other Go visualization tools
+
+### 🔧 Data Management & Integration
+* **🔄 Dual Data Modes** - Switch between offline JSON snapshots or live server API
+* **🔥 Hot Reload Capability** - Refresh data from repository without restarting (`POST /api/reload`)
+* **💾 Multi-format Export** - Download as JSON, with planned support for GraphML/DOT/SVG
+* **📊 Multiple Output Formats** - Generate `functions.json`, `functionmap.json`, and `removed_calls.json`
+* **🌐 Live Server Integration** - RESTful API with pagination, search, and real-time updates
+* **🔒 Concurrent Safety** - Thread-safe operations with proper mutex handling
+
+---
+
+## 🏗️ Architecture
+
+GoMindMapper follows a modern 3-tier architecture with intelligent caching and real-time capabilities:
+
 ```
-Server will serve the built output at `/view`.
+┌────────────────────────────┐    JSON Artifacts    ┌──────────────────────────────┐
+│ 🔍 Go Analyzer (CLI)        │ ──────────────────▶ │ 📄 functionmap.json         │
+│ • AST Parsing               │                      │ 📄 functions.json           │
+│ • Type Resolution           │                      │ 📄 removed_calls.json       │
+│ • Interface Detection       │                      └─────────┬────────────────────┘
+│ • External Module Scanning  │                                │
+└──────────┬─────────────────┘                                │ Consumed by
+           │ In-process Reuse                                   ▼
+           ▼                                   ┌──────────────────────────────┐
+┌────────────────────────────┐   REST API + WebSockets   │ ⚛️ React Mind Map UI         │
+│ 🌐 Go HTTP Server           │ ◀────────────────────────▶ │ • Interactive Visualization  │
+│ • RESTful API               │                             │ • Theme Management          │
+│ • Real-time Updates         │                             │ • Search & Filter           │
+│ • Pagination Engine         │                             │ • Drag & Drop               │
+│ • Concurrent Safety         │                             │ • Responsive Design         │
+│ • Static Asset Serving      │                             └──────────────────────────────┘
+└────────────────────────────┘                             
+```
 
-## 7. Building & Running (End‑to‑End)
+### Key Components:
+- **📁 `cmd/main.go`** - CLI analyzer with interface detection and type resolution
+- **📁 `cmd/server/main.go`** - HTTP server with in-memory caching and parallel processing
+- **📁 `cmd/analyzer/*`** - Core analysis engine (types, relations, utils, external modules)
+- **📁 `mind-map-react/`** - Vite+React SPA with advanced UI components
+- **📁 `docs/`** - Production build output served by Go server
 
-### Quick Start (Server with UI):
-```cmd
-:: 1. Build React frontend for /view
+## ⚙️ Installation & Setup
+
+### Prerequisites
+- **Go 1.23** - [Download Go](https://golang.org/dl/)
+- **Node.js 16+** & **npm** - [Download Node.js](https://nodejs.org/) (only for development)
+- **Git** - [Download Git](https://git-scm.com/)
+
+### Installation Options
+
+#### Option 1: Direct Git Clone (Recommended)
+```bash
+# Clone the repository
+git clone https://github.com/chinmay-sawant/gomindmapper.git
+cd gomindmapper
+
+# Run immediately (production-ready)
+go run cmd/server/main.go -path . -addr :8080
+```
+
+#### Option 2: Go Install (Coming Soon)
+```bash
+# Future release
+go install github.com/chinmay-sawant/gomindmapper@latest
+gomindmapper --help
+```
+
+### Build from Source
+```bash
+# Clone and build
+git clone https://github.com/chinmay-sawant/gomindmapper.git
+cd gomindmapper
+
+# Build frontend (optional - for latest UI changes)
 cd mind-map-react
-npm install
-npm run build
-
-:: 2. Start Go server with external library filtering (from repo root)
+npm install && npm run build
 cd ..
-go run cmd/server/main.go -path . -addr :8080 --include-external=true
 
-:: 3. Open browser
-start http://localhost:8080/
+# Build Go binary
+go build -o gomindmapper cmd/server/main.go
+
+# Run
+./gomindmapper -path /path/to/your/go/project -addr :8080
 ```
 
-### CLI-only Analysis:
-```cmd
-:: Generate JSON artifacts for offline analysis
-go run cmd/main.go -path . --include-external=true
+---
 
-:: This creates:
-:: - functions.json (all functions with raw calls)
-:: - functionmap.json (filtered user-to-user relationships)  
-:: - removed_calls.json (diagnostic info about filtered calls)
-```
+## 🔧 Development
 
-### Development Mode:
-```cmd
-:: 1. Start Go server
+### Development Environment Setup
+```bash
+# 1. Clone repository
+git clone https://github.com/chinmay-sawant/gomindmapper.git
+cd gomindmapper
+
+# 2. Start backend server
 go run cmd/server/main.go -path . -addr :8080
 
-:: 2. In another terminal, start React dev server
+# 3. In another terminal, start frontend dev server
 cd mind-map-react
+npm install
 npm run dev
 
-:: 3. Open development UI
-start http://localhost:5173/view
+# 4. Access development UI
+# Frontend dev server: http://localhost:5173/gomindmapper/view
+# Backend API: http://localhost:8080/api/relations
 ```
 
-### Quick: Run the application directly
+### Development Workflow
+- **Backend changes**: Restart `go run cmd/server/main.go`
+- **Frontend changes**: Auto-reload via Vite dev server
+- **Build for production**: `make ui-build` then `make server`
 
-Copy or download the repository and run the following command (example uses the `gopdfsuit` subdirectory):
-
-```cmd
-go run cmd/server/main.go -path gopdfsuit -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic,bytedance,ugorji,go-playground"
+### Project Structure
+```
+gomindmapper/
+├── 📁 cmd/                    # Go applications
+│   ├── 📄 main.go             # CLI analyzer
+│   ├── 📁 analyzer/           # Core analysis engine
+│   │   ├── 📄 types.go        # Data structures
+│   │   ├── 📄 relations.go    # Relationship building
+│   │   ├── 📄 utils.go        # Function call extraction
+│   │   ├── 📄 types_resolver.go # Type resolution & interface detection
+│   │   └── 📄 external.go     # External module scanning
+│   └── 📁 server/
+│       └── 📄 main.go          # HTTP server
+├── 📁 mind-map-react/         # React frontend
+│   ├── 📄 vite.config.js      # Build config (outputs to ../docs)
+│   ├── 📄 package.json        # Dependencies
+│   └── 📁 src/
+│       ├── 📄 App.jsx          # Main app component
+│       ├── 📁 components/      # UI components
+│       └── 📁 contexts/        # Theme management
+├── 📁 docs/                   # Production build output
+├── 📄 makefile               # Development shortcuts
+└── 📄 README.md              # This file
 ```
 
-Flags explained:
-- `-path <dir>`: path to the repository or submodule to analyze (e.g., `gopdfsuit`).
-- `-addr <addr>`: listen address for the HTTP server (default `:8080`).
-- `--include-external`: include external module calls in the generated graph.
-- `--skip-folders`: comma-separated dependency prefixes to ignore when scanning external modules.
+---
 
-Note: the production React build is emitted to `../docs` by Vite (see `mind-map-react/vite.config.js`) and served by the Go server under `/gomindmapper/` — you do not need to run the React dev server for production usage.
+## 📖 Usage Guide
 
-Developer shortcuts (Makefile):
-- `make ui-build` — builds the React app into `docs/`.
-- `make server` — starts the Go server (equivalent to running `go run cmd/server/main.go`).
+### CLI Analyzer Mode
+Generate JSON artifacts for offline analysis:
 
-### Available Command-line Options:
+```bash
+# Basic analysis (user functions only)
+go run cmd/main.go -path . --include-external=false
 
-**Analyzer CLI:**
-- `-path <directory>` - Repository path to analyze (default: current directory)
-- `--include-external` - Include external library calls in output (default: false)
-- `--skip-folders <patterns>` - Comma-separated list of folder patterns to skip during external scanning (e.g., 'golang.org,google.golang.org')
+# Advanced analysis (includes external dependencies)
+go run cmd/main.go -path . --include-external=true --skip-folders="golang.org,google.golang.org"
 
-**Server:**
-- `-path <directory>` - Repository path to analyze (default: current directory)
-- `-addr <address>` - Server listen address (default: :8080)
-- `--include-external` - Include external library calls in relations (default: false)
-- `--skip-folders <patterns>` - Comma-separated list of folder patterns to skip during external scanning
+# Analyze specific project
+go run cmd/main.go -path /path/to/your/go/project --include-external=true
+```
 
-## 8. Data Model (Simplified)
+**Generated Files:**
+| File | Purpose | Content |
+|------|---------|--------|
+| `functions.json` | Raw function data | All discovered functions + unfiltered calls |
+| `functionmap.json` | Filtered relationships | User→user function relationships only |
+| `removed_calls.json` | Diagnostics | Calls filtered out during analysis |
+
+### Server Mode (Recommended)
+Start the HTTP server with live analysis and web UI:
+
+```bash
+# Basic server
+go run cmd/server/main.go -path . -addr :8080
+
+# Advanced with external libraries
+go run cmd/server/main.go -path . -addr :8080 --include-external=true --skip-folders="golang.org,gin-gonic"
+
+# Analyze external project
+go run cmd/server/main.go -path /path/to/project -addr :8080
+```
+
+**Access Points:**
+- 🌐 **Overview**: http://localhost:8080/gomindmapper/ 
+- 🗺️ **Mind Map**: http://localhost:8080/gomindmapper/view/
+- 📡 **API Docs**: http://localhost:8080/api/relations
+
+### Command Line Options
+| Flag | Description | Default | Example |
+|------|-------------|---------|--------|
+| `-path <dir>` | Repository to analyze | `.` (current) | `-path ./myproject` |
+| `-addr <address>` | Server listen address | `:8080` | `-addr :3000` |
+| `--include-external` | Include external modules | `false` | `--include-external=true` |
+| `--skip-folders <patterns>` | Skip dependency patterns | `""` | `--skip-folders="golang.org,gin-gonic"` |
+
+---
+
+## 🎯 Advanced Features
+
+GoMindMapper includes several advanced features that set it apart from other Go visualization tools:
+
+### 🧠 Interface Implementation Detection
+Automatically discovers concrete implementations of interfaces and includes them in the call graph:
+
 ```go
-type FunctionInfo struct {
-  Name    string   // package.func
-  Line    int
-  FilePath string
-  Calls   []string // raw call names extracted (unfiltered)
+// Example: Interface definition
+type UserService interface {
+    CreateUser(user User) error
+    GetUser(id string) (*User, error)
 }
 
-type OutRelation struct {
-  Name    string
-  Line    int
-  FilePath string
-  Called  []struct { Name string; Line int; FilePath string }
+// Implementation detection finds:
+type DatabaseUserService struct { /* ... */ }
+func (d *DatabaseUserService) CreateUser(user User) error { /* ... */ }
+func (d *DatabaseUserService) GetUser(id string) (*User, error) { /* ... */ }
+```
+
+**Benefits:**
+- 🎯 **Precise Call Resolution**: Method calls resolve to actual implementations
+- 🔗 **Complete Dependency Trees**: See full call chains through interface boundaries
+- 📊 **Better Visualization**: Understand polymorphic relationships in your code
+
+### 🔍 Advanced Type Resolution Engine
+Intelligent type resolution handles complex Go patterns:
+
+- **Struct Field Method Calls**: `svc.UserService.CreateUser()` → `DatabaseUserService.CreateUser`
+- **Import Alias Resolution**: Resolves through import aliases and package names
+- **External Type Mapping**: Maps external types to their actual implementations
+- **Recursive Method Discovery**: Finds methods called within implementations
+
+### 📦 External Module Intelligence
+Comprehensive external dependency analysis:
+
+```bash
+# Scans all go.mod files recursively
+# Filters by relevance (only modules actually called)
+# Applies intelligent skip patterns
+go run cmd/server/main.go --include-external=true --skip-folders="golang.org,google.golang.org"
+```
+
+**Features:**
+- 🔄 **Recursive go.mod Discovery**: Finds all modules in monorepos
+- 🎛️ **Smart Filtering**: Only scans modules actually used by your code
+- ⚡ **Performance Optimized**: Parallel processing with timeout protection
+- 🎯 **Relevance Scoring**: Prioritizes frequently-used external functions
+
+### ⚡ Performance Optimizations
+- **Parallel Processing**: Multi-core function analysis and relation building
+- **In-Memory Caching**: Fast access to parsed relationships
+- **Lazy Loading**: Load function details on-demand
+- **Efficient Data Structures**: Optimized for large codebases
+- **Memory Management**: Automatic garbage collection and memory monitoring
+
+### 🎨 Advanced UI Components
+- **Screenshot Slideshow**: Interactive feature showcase
+- **Comparison Table**: Built-in comparison with other Go tools
+- **Theme Context**: System preference detection with localStorage
+- **Responsive Grid**: Adaptive layouts for all screen sizes
+- **GitHub Integration**: Live star count and repository linking
+
+---
+
+## 🔍 API Reference
+
+Complete REST API documentation for integration and automation:
+
+### Core Endpoints
+
+#### `GET /api/relations`
+Retrieve paginated function relationships with full dependency closure.
+
+**Parameters:**
+- `page` (int): Page number (1-based, default: 1)
+- `pageSize` (int): Items per page (max: 200, default: 10)
+- `includeInternals` (bool): Include internal analyzer functions
+
+**Response:**
+```json
+{
+  "page": 1,
+  "pageSize": 10,
+  "totalRoots": 45,
+  "roots": [/* root function objects */],
+  "data": [/* complete dependency closure */],
+  "loadedAt": "2024-01-15T10:30:00Z"
 }
 ```
-`functionmap.json` = slice of `OutRelation` where `Called` only contains user‑scoped edges.
 
-## 9. Customization & Filtering
-* Edit `analyzer/utils.go` (`FindCalls`) to tweak exclusion heuristics (stdlib, sync helpers, etc.).
-* Edit `analyzer/fileops.go` / server's `filterCalls` for user prefix logic (implement whitelists for frameworks if needed).
-* Add flags (future) to include/exclude leaf functions, or to whitelist external packages.
+#### `GET /api/search`
+Search functions by name with pagination.
 
-## 10. Roadmap
+**Parameters:**
+- `q` (string): Search query (required)
+- `page` (int): Page number (default: 1)
+- `pageSize` (int): Results per page (default: 10)
 
-### ✅ Completed Features:
-- [x] Search endpoint (`/api/search?name=`) with pagination
-- [x] Theming & light mode support with system preference detection
-- [x] External library inclusion control with `--include-external` flag
-- [x] Drag & drop JSON file upload functionality
-- [x] Real-time search with debouncing
-- [x] Custom node design inspired by Google NotebookLLM
-- [x] Hot reload capability (`POST /api/reload`)
-- [x] Function details panel with comprehensive information
-- [x] Data export functionality (`GET /api/download`)
+**Response:**
+```json
+{
+  "query": "CreateUser",
+  "page": 1,
+  "totalResults": 3,
+  "matchingFunctions": [/* matching functions */],
+  "data": [/* dependency closure for matches */]
+}
+```
 
-### 🚧 Planned Features:
-- [ ] Incremental FS watcher to update cache automatically
-- [ ] Graph export formats (GraphML / DOT / SVG)
-- [ ] Configuration file support for whitelist/blacklist patterns
-- [ ] Function metrics overlay (fan‑in / fan‑out counts, complexity metrics)
-- [ ] Deploy container (multi‑stage: build React, embed assets)
-- [ ] Code metrics integration (cyclomatic complexity, lines of code)
-- [ ] Interactive filtering controls in UI
-- [ ] Bookmarking and saved views
-- [ ] Export to common graph formats
-- [ ] Plugin system for custom analyzers
+#### `POST /api/reload`
+Trigger repository rescan without server restart.
+
+**Response:**
+```json
+{
+  "status": "reloaded",
+  "loadedAt": "2024-01-15T10:35:00Z"
+}
+```
+
+#### `GET /api/download`
+Download complete function relations as JSON.
+
+**Headers:**
+- `Content-Type: application/json`
+- `Content-Disposition: attachment; filename=function_relations.json`
+
+### Static Routes
+- **`/`** - Overview page (Notion-style landing)
+- **`/gomindmapper/`** - Base application route
+- **`/gomindmapper/view`** - Mind map interface
+- **`/gomindmapper/view/*`** - SPA routing fallbacks
+- **`/docs/*`** - Static assets (CSS, JS, images)
+
+### Authentication & CORS
+- **CORS**: Enabled for all origins (`*`)
+- **Authentication**: Currently none (designed for local/internal use)
+- **Rate Limiting**: None (add reverse proxy for production)
+
+---
+
+## 📊 Data Models
+
+Understand the internal data structures for integration and customization:
+
+### Core Types
+
+```go
+// FunctionInfo - Raw function data from AST parsing
+type FunctionInfo struct {
+    Name     string   // Fully qualified name (package.function)
+    Line     int      // Line number in source file
+    FilePath string   // Relative file path
+    Calls    []string // Function calls made within this function
+}
+
+// OutRelation - Processed relationship for JSON output
+type OutRelation struct {
+    Name     string      `json:"name"`
+    Line     int         `json:"line"`
+    FilePath string      `json:"filePath"`
+    Called   []OutCalled `json:"called,omitempty"`
+}
+
+// OutCalled - Called function reference
+type OutCalled struct {
+    Name     string `json:"name"`
+    Line     int    `json:"line"`
+    FilePath string `json:"filePath"`
+}
+```
+
+### Advanced Types (Type Resolution)
+
+```go
+// TypeInfo - Comprehensive type information
+type TypeInfo struct {
+    Name        string
+    Package     string
+    IsInterface bool
+    IsStruct    bool
+    Fields      map[string]string // field name → type
+    Methods     []string
+    ImportPath  string // for external types
+}
+
+// InterfaceImplementation - Concrete interface implementation
+type InterfaceImplementation struct {
+    InterfaceName string
+    StructName    string
+    PackageName   string
+    FilePath      string
+    Methods       map[string]MethodImplementation
+}
+```
+
+### File Formats
+
+#### `functionmap.json` Structure
+```json
+[
+  {
+    "name": "main.main",
+    "line": 10,
+    "filePath": "main.go",
+    "called": [
+      {
+        "name": "config.LoadConfig",
+        "line": 25,
+        "filePath": "internal/config/config.go"
+      },
+      {
+        "name": "server.StartServer",
+        "line": 45,
+        "filePath": "internal/server/server.go"
+      }
+    ]
+  }
+]
+```
+
+#### `functions.json` Structure
+```json
+[
+  {
+    "name": "main.main",
+    "line": 10,
+    "filePath": "main.go",
+    "calls": ["config.LoadConfig", "server.StartServer", "log.Println"]
+  }
+]
+```
+
+---
+
+## 🎨 Customization
+
+### Filtering & Analysis Customization
+
+Modify analysis behavior by editing key files:
+
+#### `cmd/analyzer/utils.go` - Call Extraction Rules
+```go
+// Add custom exclusion patterns in FindCalls()
+standardPackages := map[string]bool{
+    "fmt":     true,
+    "os":      true,
+    // Add your exclusions here
+    "mycorp.internal": true,
+}
+
+// Add custom regex exclusions
+regexFunctions := map[string]bool{
+    "FindAllSubmatch": true,
+    // Add patterns to ignore
+    "MyCustomPattern": true,
+}
+```
+
+#### `cmd/analyzer/relations.go` - Relationship Building
+```go
+// Modify BuildRelations() to change output format
+// Add custom matching logic for external functions
+// Implement whitelist/blacklist patterns
+```
+
+### UI Theming & Styling
+
+#### Theme Variables (`mind-map-react/src/App.css`)
+```css
+:root {
+  /* Customize color scheme */
+  --bg-primary: #0f0f0f;
+  --text-primary: #ffffff;
+  --accent-color: #3b82f6;
+  
+  /* Add custom variables */
+  --node-primary: #1e40af;
+  --node-secondary: #059669;
+}
+```
+
+#### Component Customization
+- **Node Styles**: Modify `mind-map-react/src/components/Node.jsx`
+- **Theme Logic**: Edit `mind-map-react/src/contexts/ThemeContext.jsx`
+- **Layout**: Update `mind-map-react/src/components/Overview.css`
+
+### Adding New Features
+
+#### 1. New API Endpoint
+```go
+// In cmd/server/main.go
+router.GET("/api/metrics", handleMetrics)
+
+func handleMetrics(c *gin.Context) {
+    // Your custom endpoint logic
+}
+```
+
+#### 2. New UI Component
+```jsx
+// In mind-map-react/src/components/
+import React from 'react';
+
+const MyComponent = () => {
+    return (
+        <div className="my-component">
+            {/* Your component JSX */}
+        </div>
+    );
+};
+
+export default MyComponent;
+```
+
+### Configuration Files
+
+Create configuration files for advanced customization:
+
+#### `gomindmapper.json` (Future)
+```json
+{
+  "analysis": {
+    "excludePatterns": ["*_test.go", "vendor/*"],
+    "includeExternalByDefault": false,
+    "maxExternalDepth": 3
+  },
+  "server": {
+    "defaultPort": 8080,
+    "enableCORS": true,
+    "maxPageSize": 200
+  },
+  "ui": {
+    "defaultTheme": "dark",
+    "enableAnimations": true,
+    "nodeColors": {
+      "main": "#3b82f6",
+      "handler": "#059669"
+    }
+  }
+}
+```
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Advanced Features Completed:
+- [x] **Interface Implementation Detection** - Automatic discovery of concrete interface implementations
+- [x] **Advanced Type Resolution Engine** - Complex type resolution with import alias handling
+- [x] **External Module Intelligence** - Recursive go.mod scanning with relevance filtering
+- [x] **Performance Optimization** - Parallel processing, in-memory caching, lazy loading
+- [x] **Search API** (`/api/search`) with pagination and dependency closure
+- [x] **Advanced Theming** - System preference detection with localStorage persistence
+- [x] **Custom Node Design** - Google NotebookLLM-inspired UI components
+- [x] **Screenshot Slideshow** - Interactive feature showcase with auto-navigation
+- [x] **Comparison Table** - Built-in comparison with other Go visualization tools
+- [x] **Hot Reload** (`POST /api/reload`) - Live repository rescanning
+- [x] **Drag & Drop Upload** - Offline JSON analysis capability
+- [x] **Multi-format Export** - JSON download with planned GraphML/DOT/SVG support
+
+### � Next Major Features:
+- [ ] **Real-time Code Analysis** - FS watcher for automatic updates as code changes
+- [ ] **Function Metrics Dashboard** - Complexity, fan-in/fan-out, LOC, cyclomatic complexity
+- [ ] **Call Path Analysis** - Trace execution paths between functions
+- [ ] **Performance Profiling Integration** - Overlay runtime performance data
+- [ ] **Collaborative Features** - Share and bookmark specific views
+- [ ] **VS Code Extension** - Inline function relationship viewer
+
+### 🔮 Advanced Roadmap:
+- [ ] **AI-Powered Analysis** - Semantic understanding of function purposes
+- [ ] **Architecture Pattern Detection** - Identify common patterns (MVC, hexagonal, etc.)
+- [ ] **Microservices Visualization** - Cross-service dependency mapping
+- [ ] **Security Analysis** - Data flow analysis for security vulnerabilities
+- [ ] **Configuration Management** - Project-specific analysis profiles
+- [ ] **Plugin System** - Custom analyzers and visualizers
+- [ ] **Graph Database Integration** - Neo4j backend for complex queries
+- [ ] **Export Formats** - Mermaid, PlantUML, GraphML, GEXF support
+
+### 🐳 Infrastructure & Distribution:
+- [ ] **Docker Images** - Multi-stage containerized builds
+- [ ] **Kubernetes Helm Charts** - Enterprise deployment support  
+- [ ] **Go Install Support** - Direct installation via `go install`
+- [ ] **GitHub Actions Integration** - CI/CD pipeline integration
+- [ ] **Documentation Site** - Comprehensive docs with interactive examples
+- [ ] **Performance Benchmarks** - Automated performance regression testing
+
+### 🎯 Community & Integration:
+- [ ] **Language Server Protocol** - IDE integration support
+- [ ] **GitHub App** - Repository analysis bot
+- [ ] **Slack/Teams Integration** - Team collaboration features
+- [ ] **API Client Libraries** - Go, Python, JavaScript clients
+- [ ] **Template Gallery** - Pre-configured analysis templates
+- [ ] **Community Plugins** - Marketplace for custom analyzers
 
 ## 11. Contributing
 PRs + issues welcome. Please:

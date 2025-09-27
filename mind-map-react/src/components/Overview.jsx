@@ -28,6 +28,48 @@ const Overview = () => {
       <ComparisonTable />
 
       <main className="main-content">
+        <section className="features-section">
+          <h2>Features Overview</h2>
+          <div className="two-col">
+            <div className="border-block">
+              <h3>Core Analysis Engine</h3>
+              <ul className="feat-list">
+                <li><strong>AST-based Go Analysis</strong> for accurate function extraction</li>
+                <li><strong>Smart Root Detection</strong> to identify entry points</li>
+                <li><strong>Interface Implementation Detection</strong> adds concrete implementations to graphs</li>
+                <li><strong>Type Resolution Engine</strong> resolves methods across structs, fields, and aliases</li>
+                <li><strong>External Module Scanning</strong> with intelligent filtering</li>
+                <li><strong>Advanced Filtering</strong> for stdlib, frameworks, and custom patterns</li>
+                <li><strong>Performance Optimized</strong> with parallel processing and caching</li>
+              </ul>
+            </div>
+            <div className="border-block">
+              <h3>Interactive UI & Visualization</h3>
+              <ul className="feat-list">
+                <li><strong>NotebookLLM‑inspired nodes</strong> with clear, custom visuals</li>
+                <li><strong>Intuitive controls</strong>: pan, zoom, expand/collapse</li>
+                <li><strong>Advanced theming</strong>: dark/light with persistence</li>
+                <li><strong>Drag & Drop upload</strong> for offline JSON analysis</li>
+                <li><strong>Real‑time search</strong> with debouncing and pagination</li>
+                <li><strong>Function details panel</strong> with file, lines, and calls</li>
+                <li><strong>Responsive design</strong> across desktop and mobile</li>
+                <li><strong>Screenshot slideshow</strong> and <strong>comparison table</strong></li>
+              </ul>
+            </div>
+            <div className="border-block">
+              <h3>Data Management & Integration</h3>
+              <ul className="feat-list">
+                <li><strong>Dual data modes</strong>: offline JSON or live API</li>
+                <li><strong>Hot reload</strong>: <code>POST /api/reload</code> to rescan without restart</li>
+                <li><strong>Multi‑format export</strong>: download JSON; more formats planned</li>
+                <li><strong>Multiple outputs</strong>: <code>functions.json</code>, <code>functionmap.json</code>, <code>removed_calls.json</code></li>
+                <li><strong>Live server integration</strong> with pagination and search</li>
+                <li><strong>Concurrent‑safe</strong> operations with proper locking</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         <section className="why-section">
           <h2>Why</h2>
           <div className="two-col">
@@ -78,14 +120,14 @@ const Overview = () => {
             <div className="aux-cards">
               <div className="card">
                 <h4>Build & Run (production)</h4>
-                <pre><code>cd &lt;repo-root&gt;
+                <pre><code>cd &lt;repo-root&gt; <br/>
 go run cmd/server/main.go -path . -addr :8080</code></pre>
                 <p className="muted">Starts the Go server which serves the Overview at <code>/gomindmapper/</code> and the app at <code>/gomindmapper/view/</code>.</p>
               </div>
 
               <div className="card">
                 <h4>Build Frontend (optional)</h4>
-                <pre><code>cd mind-map-react
+                <pre><code>cd mind-map-react <br/>
 npm install
 npm run build</code></pre>
                 <p className="muted">Places production files into <code>../docs</code> for the Go server to serve.</p>
@@ -93,13 +135,13 @@ npm run build</code></pre>
 
               <div className="card">
                 <h4>Development Mode</h4>
-                <pre><code>// Terminal 1
-cd mind-map-react
-npm install
-npm run dev
+                <pre><code>// Terminal 1 <br/>
+cd mind-map-react<br/>
+npm install <br/>
+npm run dev <br/>
 
-// Terminal 2
-cd &lt;repo-root&gt;
+// Terminal 2 <br/>
+cd &lt;repo-root&gt; <br/>
 go run cmd/server/main.go -path . -addr :8080</code></pre>
                 <p className="muted">Use Vite dev server for UI hot-reload while the Go server provides live data. Open <code>http://localhost:5173/gomindmapper/view</code>.</p>
               </div>

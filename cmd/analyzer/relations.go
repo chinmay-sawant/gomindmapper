@@ -24,6 +24,42 @@ type OutRelation struct {
 // If includeExternal is true, all calls are included in the relations, including external module functions.
 // We still defensively exclude relations that have zero called entries to preserve prior semantics unless includeExternal is true.
 func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelation {
+	// Build indices from the full set provided (sequential usage builds on the same set)
+	funcMap, suffixMap := buildGlobalIndices(functions)
+
+	out := make([]OutRelation, 0, len(functions))
+	for _, f := range functions {
+		if len(f.Calls) == 0 && !includeExternal {
+			continue // skip functions with no user-defined calls (previous behaviour)
+		}
+		rel := buildRelationForFunction(f, includeExternal, funcMap, suffixMap)
+		if len(rel.Called) > 0 || includeExternal {
+			// Include the relation if it has calls OR if we're including all functions
+			out = append(out, rel)
+		}
+	}
+	return out
+}
+
+// BuildRelationsIndexed builds relations for a subset of functions using indices built from a full set.
+// Useful for parallel processing where each worker processes a chunk but needs global resolution.
+func BuildRelationsIndexed(subset []FunctionInfo, includeExternal bool, fullIndex []FunctionInfo) []OutRelation {
+	funcMap, suffixMap := buildGlobalIndices(fullIndex)
+	out := make([]OutRelation, 0, len(subset))
+	for _, f := range subset {
+		if len(f.Calls) == 0 && !includeExternal {
+			continue
+		}
+		rel := buildRelationForFunction(f, includeExternal, funcMap, suffixMap)
+		if len(rel.Called) > 0 || includeExternal {
+			out = append(out, rel)
+		}
+	}
+	return out
+}
+
+// buildGlobalIndices creates lookup maps for exact and suffix-based resolution.
+func buildGlobalIndices(functions []FunctionInfo) (map[string]FunctionInfo, map[string]FunctionInfo) {
 	// index by name for quick lookup
 	funcMap := make(map[string]FunctionInfo, len(functions))
 	// Also create an index by suffix for external function matching
@@ -45,60 +81,54 @@ func BuildRelations(functions []FunctionInfo, includeExternal bool) []OutRelatio
 			}
 		}
 	}
+	return funcMap, suffixMap
+}
 
-	out := make([]OutRelation, 0, len(functions))
-	for _, f := range functions {
-		if len(f.Calls) == 0 && !includeExternal {
-			continue // skip functions with no user-defined calls (previous behaviour)
-		}
-		rel := OutRelation{Name: f.Name, Line: f.Line, FilePath: f.FilePath}
-		for _, cname := range f.Calls {
-			if cf, ok := funcMap[cname]; ok {
-				// Function exists in our codebase (including external modules when scanned)
+// buildRelationForFunction builds OutRelation for a single function using provided indices.
+func buildRelationForFunction(f FunctionInfo, includeExternal bool, funcMap, suffixMap map[string]FunctionInfo) OutRelation {
+	rel := OutRelation{Name: f.Name, Line: f.Line, FilePath: f.FilePath}
+	for _, cname := range f.Calls {
+		if cf, ok := funcMap[cname]; ok {
+			// Function exists in our codebase (including external modules when scanned)
+			rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+		} else if includeExternal {
+			// Try to match with external functions by suffix
+			if cf, ok := suffixMap[cname]; ok {
 				rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
-			} else if includeExternal {
-				// Try to match with external functions by suffix
-				if cf, ok := suffixMap[cname]; ok {
-					rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
-				} else {
-					// Try more flexible matching for method calls
-					matched := false
-					var matchedFunction FunctionInfo
+			} else {
+				// Try more flexible matching for method calls
+				matched := false
+				var matchedFunction FunctionInfo
 
-					// First try: exact suffix match with dot notation
+				// First try: exact suffix match with dot notation
+				for fullName, cf := range funcMap {
+					if strings.HasSuffix(fullName, "."+cname) {
+						rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+						matched = true
+						break
+					}
+				}
+
+				// Second try: if not matched, try partial matching
+				if !matched {
 					for fullName, cf := range funcMap {
-						if strings.HasSuffix(fullName, "."+cname) {
-							rel.Called = append(rel.Called, OutCalled{Name: cf.Name, Line: cf.Line, FilePath: cf.FilePath})
+						if strings.Contains(fullName, cname) {
+							matchedFunction = cf
 							matched = true
 							break
 						}
 					}
-
-					// Second try: if not matched, try partial matching
-					if !matched {
-						for fullName, cf := range funcMap {
-							if strings.Contains(fullName, cname) {
-								matchedFunction = cf
-								matched = true
-								break
-							}
-						}
-						if matched {
-							rel.Called = append(rel.Called, OutCalled{Name: matchedFunction.Name, Line: matchedFunction.Line, FilePath: matchedFunction.FilePath})
-						}
+					if matched {
+						rel.Called = append(rel.Called, OutCalled{Name: matchedFunction.Name, Line: matchedFunction.Line, FilePath: matchedFunction.FilePath})
 					}
+				}
 
-					if !matched {
-						// External function call not found in scanned modules - include with placeholder info
-						rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
-					}
+				if !matched {
+					// External function call not found in scanned modules - include with placeholder info
+					rel.Called = append(rel.Called, OutCalled{Name: cname, Line: 0, FilePath: "external"})
 				}
 			}
 		}
-		if len(rel.Called) > 0 || includeExternal {
-			// Include the relation if it has calls OR if we're including all functions
-			out = append(out, rel)
-		}
 	}
-	return out
+	return rel
 }

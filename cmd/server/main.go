@@ -359,7 +359,8 @@ func buildRelationsParallel(functions []analyzer.FunctionInfo, includeExternal b
 		go func(start, end, workerIndex int) {
 			defer wg.Done()
 			chunkFunctions := functions[start:end]
-			chunkRelations := analyzer.BuildRelations(chunkFunctions, includeExternal)
+			// Use indexed variant so each chunk can resolve calls against the full set
+			chunkRelations := analyzer.BuildRelationsIndexed(chunkFunctions, includeExternal, functions)
 			resultChan <- relationChunk{relations: chunkRelations, index: workerIndex}
 		}(start, end, i)
 	}

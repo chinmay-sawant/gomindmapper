@@ -626,7 +626,7 @@ function MindMapApp() {
                       }
                     }}
                   >
-                    {[5,10,15,20,50].map(n => <option key={n} value={n}>{n}/page</option>)}
+                    {[5,10,15,20,50,100].map(n => <option key={n} value={n}>{n}/page</option>)}
                   </select>
                   <button 
                     className="pg-refresh" 
